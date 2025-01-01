@@ -65,10 +65,10 @@ export function ProfileContributePage({ username }: { username: string }) {
     if (!userData) return <div className="min-h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">User not found</div>
 
     return (
-        <div className="relative min-h-screen  text-white sm:px-4 sm:py-8" >
+        <div className="relative min-h-screen  text-white px-4 py-4 sm:py-8" >
             <Image src={bgUrl || `https://www.bing.com/th?id=OHR.Rivendell_ZH-CN6669549862_1920x1080.jpg`} alt="Background" fill className='absolute inset-0 object-cover w-full h-full' />
 
-            <div className={`relative z-10 w-content max-w-[100%] mx-auto ${isDownloading ? 'bg-gray-900/70' : 'bg-gray-900/20'} backdrop-blur-lg sm:rounded-lg p-4 pt-8`}>
+            <div className={`relative z-10 w-content max-w-[100%] mx-auto ${isDownloading ? 'bg-gray-900/70' : 'bg-gray-900/20'} backdrop-blur-lg rounded-lg p-4 pt-8`}>
                 {/* Settings button */}
                 {!isDownloading && <BlurFade delay={100}>
                     <div className="flex justify-end mb-4 gap-2">
