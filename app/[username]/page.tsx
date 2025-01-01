@@ -20,9 +20,14 @@ export async function generateMetadata(
         description: `Create beautiful cards showcasing your GitHub stats and contributions`,
         openGraph: {
             title: `${username}s Github Card`,
-            description: `${username}s Github Card`,
+            description: `Create beautiful cards showcasing your GitHub stats and contributions`,
             images: ['/og.png', ...previousImages],
-        }
+        },
+        twitter: {
+            title: `${username}s Github Card`,
+            description: `Create beautiful cards showcasing your GitHub stats and contributions`,
+            images: ['/og.png', ...previousImages],
+        },
     }
 }
 
