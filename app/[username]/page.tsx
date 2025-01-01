@@ -1,5 +1,5 @@
-import { ProfileContribute } from '@/components/profile-contribute'
-import type { Metadata, ResolvingMetadata } from 'next'
+import { ProfileContributePage } from '@/components/profile-contribute-page'
+import type { Metadata } from 'next'
 
 type Props = {
     params: Promise<{ username: string }>,
@@ -8,12 +8,10 @@ type Props = {
 
 export async function generateMetadata(
     { params }: Props,
-    parent: ResolvingMetadata
 ): Promise<Metadata> {
     const username = (await params).username
 
     // optionally access and extend (rather than replace) parent metadata
-    const previousImages = (await parent).openGraph?.images || []
 
     return {
         title: `${username}s Github Card`,
@@ -21,12 +19,12 @@ export async function generateMetadata(
         openGraph: {
             title: `${username}s Github Card`,
             description: `Create beautiful cards showcasing your GitHub stats and contributions`,
-            images: ['/og.png', ...previousImages],
+            images: [`/og.png`],
         },
         twitter: {
             title: `${username}s Github Card`,
             description: `Create beautiful cards showcasing your GitHub stats and contributions`,
-            images: ['/og.png', ...previousImages],
+            images: [`/og.png`],
         },
     }
 }
@@ -34,5 +32,5 @@ export async function generateMetadata(
 export default async function ProfilePage({ params }: Props) {
     const username = (await params).username
 
-    return <ProfileContribute username={username} />
+    return <ProfileContributePage username={username} />
 }

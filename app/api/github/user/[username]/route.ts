@@ -80,7 +80,10 @@ export async function GET(
 
     const userResponse = await fetch(
       `https://api.github.com/users/${username}`,
-      { headers }
+      {
+        headers,
+        next: { revalidate: 3600 },
+      }
     );
 
     if (!userResponse.ok) {
@@ -93,7 +96,10 @@ export async function GET(
 
     const reposResponse = await fetch(
       `https://api.github.com/users/${username}/repos?per_page=100`,
-      { headers }
+      {
+        headers,
+        next: { revalidate: 3600 },
+      }
     );
 
     if (!reposResponse.ok) {
@@ -108,26 +114,38 @@ export async function GET(
       `https://api.github.com/search/commits?q=author:${username}+author-date:>=${new Date(
         Date.now() - 365 * 24 * 60 * 60 * 1000
       ).toISOString()}`,
-      { headers }
+      {
+        headers,
+        next: { revalidate: 3600 },
+      }
     );
     const commitsData: GitHubContributionsResponse =
       await commitsResponse.json();
 
     const prsResponse = await fetch(
       `https://api.github.com/search/issues?q=author:${username}+type:pr`,
-      { headers }
+      {
+        headers,
+        next: { revalidate: 3600 },
+      }
     );
     const prsData: GitHubContributionsResponse = await prsResponse.json();
 
     const issuesResponse = await fetch(
       `https://api.github.com/search/issues?q=author:${username}+type:issue`,
-      { headers }
+      {
+        headers,
+        next: { revalidate: 3600 },
+      }
     );
     const issuesData: GitHubContributionsResponse = await issuesResponse.json();
 
     const reviewsResponse = await fetch(
       `https://api.github.com/search/issues?q=reviewed-by:${username}+type:pr`,
-      { headers }
+      {
+        headers,
+        next: { revalidate: 3600 },
+      }
     );
     const reviewsData: GitHubContributionsResponse =
       await reviewsResponse.json();

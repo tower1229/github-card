@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || ''),
   title: {
     default: 'Github Card',
     template: '%s | Github Card'
@@ -15,7 +16,6 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon/favicon.ico',
     apple: '/favicon/apple-touch-icon.png',
-
   },
   openGraph: {
     title: 'Github Card',
@@ -25,14 +25,21 @@ export const metadata: Metadata = {
     images: [
       {
         url: `${process.env.NEXT_PUBLIC_APP_URL}/og.png`,
-        width: 1200,
-        height: 630,
+        width: 1400,
+        height: 735,
         alt: 'Github Card Preview',
       }
     ],
     locale: 'zh_CN',
     type: 'website',
-
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Github Card',
+    description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
+    creator: '@tower1229',
+    site: '@tower1229',
+    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og.png`],
   },
   robots: {
     index: true,
@@ -45,14 +52,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Github Card',
-    description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
-    creator: '@tower1229',
-    site: '@tower1229',
-    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og.png`],
-  },
+
 }
 
 export default function RootLayout({
