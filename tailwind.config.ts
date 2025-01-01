@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { ContentWidth } from "./lib/constant";
 
 export default {
   darkMode: ["class"],
@@ -9,6 +10,9 @@ export default {
   ],
   theme: {
     extend: {
+      width: {
+        content: ContentWidth + "px",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

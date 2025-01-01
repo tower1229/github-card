@@ -1,4 +1,4 @@
-import { ProfileClient } from '@/components/profile-client'
+import { ProfileContribute } from '@/components/profile-contribute'
 
 type Props = {
     params: {
@@ -26,5 +26,5 @@ export async function generateMetadata({ params }: Props) {
 
 export default function ProfilePage({ params }: Props) {
     const { username } = params
-    return <ProfileClient username={username} />
+    return <ProfileContribute username={username} />
 }
