@@ -66,7 +66,6 @@ export function ProfileClient({ username }: { username: string }) {
     const handleSaveImage = () => {
         setIsDownloading(true)
         const node = document.body;
-        console.log(111, node)
         if (node) {
             // toPng(node, { cacheBust: true, })
             //     .then(function (dataUrl: string) {
@@ -98,7 +97,7 @@ export function ProfileClient({ username }: { username: string }) {
         <div className="relative min-h-screen  text-white sm:px-4 sm:py-8" >
             <Image src={bgUrl || `https://www.bing.com/th?id=OHR.Rivendell_ZH-CN6669549862_1920x1080.jpg`} alt="Background" fill className='absolute inset-0 object-cover w-full h-full' />
 
-            <div className={`relative z-10 w-[${ContentWidth}px] mx-auto bg-gray-500/20 backdrop-blur-lg sm:rounded-lg p-4 pt-8`}>
+            <div className={`relative z-10 w-[${ContentWidth}px] mx-auto ${isDownloading ? 'bg-gray-900/60' : 'bg-gray-900/20'} backdrop-blur-lg sm:rounded-lg p-4 pt-8`}>
                 {/* Settings button */}
                 {!isDownloading && <BlurFade delay={100}>
                     <div className="flex justify-end mb-4 gap-2">
