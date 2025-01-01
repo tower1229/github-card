@@ -11,24 +11,48 @@ export function downloadImage(canvas: HTMLCanvasElement) {
   // Create a temporary canvas for scaling
   const tempCanvas = document.createElement("canvas");
   const tempCtx = tempCanvas.getContext("2d");
-  const imageWidth = ContentWidth;
-  // Set dimensions to half of original
-  tempCanvas.width = imageWidth;
-  tempCanvas.height = canvas.height / 2;
+
+  // Add 40px to the width to account for the border
+  const ImageWidth = ContentWidth + 40;
+  const isWide = canvas.width / window.devicePixelRatio > ImageWidth;
+  // Set dimensions based on whether the image is wide
+  tempCanvas.width = isWide
+    ? ImageWidth
+    : canvas.width / window.devicePixelRatio;
+  tempCanvas.height = canvas.height / window.devicePixelRatio;
+
+  console.log("canvas info:", canvas.width, canvas.height);
 
   // Draw scaled image
   if (tempCtx) {
-    tempCtx.drawImage(
-      canvas,
-      (canvas.width - imageWidth * 2) / 2,
-      0,
-      imageWidth * 2,
-      canvas.height,
-      0,
-      0,
-      tempCanvas.width,
-      tempCanvas.height
-    );
+    if (isWide) {
+      // For wide images, center the content horizontally
+      const sourceX = (canvas.width - ImageWidth * window.devicePixelRatio) / 2;
+      tempCtx.drawImage(
+        canvas,
+        sourceX,
+        0,
+        ImageWidth * window.devicePixelRatio,
+        canvas.height,
+        0,
+        0,
+        ImageWidth,
+        tempCanvas.height + 36
+      );
+    } else {
+      // For normal width images, scale normally
+      tempCtx.drawImage(
+        canvas,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+        0,
+        0,
+        tempCanvas.width,
+        tempCanvas.height + 36
+      );
+    }
 
     // Convert scaled canvas to data URL
     const url = tempCanvas.toDataURL("image/png");
@@ -36,7 +60,7 @@ export function downloadImage(canvas: HTMLCanvasElement) {
     // Create and trigger download link
     const link = document.createElement("a");
     link.href = url;
-    link.download = "image.png";
+    link.download = `github-card-${new Date().getTime()}.png`;
     link.click();
   }
 }
