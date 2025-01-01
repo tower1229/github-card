@@ -10,9 +10,6 @@ export default {
   ],
   theme: {
     extend: {
-      width: {
-        content: ContentWidth + "px",
-      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -71,6 +68,9 @@ export default {
         shine: "shine var(--duration) infinite linear",
         "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
         rainbow: "rainbow var(--speed, 2s) infinite linear",
+        marquee: "marquee var(--duration) infinite linear",
+        "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
+        pulse: "pulse var(--duration) ease-out infinite",
       },
       keyframes: {
         gradient: {
@@ -110,6 +110,33 @@ export default {
             "background-position": "200%",
           },
         },
+        marquee: {
+          from: {
+            transform: "translateX(0)",
+          },
+          to: {
+            transform: "translateX(calc(-100% - var(--gap)))",
+          },
+        },
+        "marquee-vertical": {
+          from: {
+            transform: "translateY(0)",
+          },
+          to: {
+            transform: "translateY(calc(-100% - var(--gap)))",
+          },
+        },
+        pulse: {
+          "0%, 100%": {
+            boxShadow: "0 0 0 0 var(--pulse-color)",
+          },
+          "50%": {
+            boxShadow: "0 0 0 8px var(--pulse-color)",
+          },
+        },
+      },
+      width: {
+        content: `${ContentWidth}px`,
       },
     },
   },

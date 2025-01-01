@@ -4,6 +4,7 @@ import Qrcode from "qrcode"
 import { cn } from "@/lib/utils";
 import AnimatedGradientText from "@/components/ui/animated-gradient-text";
 import { useEffect } from 'react';
+import Link from 'next/link'
 
 export function Footer({ showQrcode = false }: { showQrcode?: boolean }) {
 
@@ -19,7 +20,7 @@ export function Footer({ showQrcode = false }: { showQrcode?: boolean }) {
     return (
         <div className="z-10 flex min-h-40 flex-col items-center justify-center gap-4 p-4 mt-10">
             {showQrcode && <canvas id="canvas"></canvas>}
-            <a href={process.env.NEXT_PUBLIC_APP_URL} >
+            <Link href='/' >
                 <AnimatedGradientText className='bg-black/40'>
                     <GithubLogo size={20} />
                     <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
@@ -29,7 +30,7 @@ export function Footer({ showQrcode = false }: { showQrcode?: boolean }) {
                         )}
                     >Github Card</span>
                 </AnimatedGradientText>
-            </a>
+            </Link>
         </div >
     );
 }
