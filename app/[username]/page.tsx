@@ -1,4 +1,4 @@
-import { ProfileContributePage } from '@/components/profile-contribute-page'
+import { ProfileContributePage } from './profile-contribute-page'
 import type { Metadata } from 'next'
 
 type Props = {
