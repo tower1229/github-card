@@ -1,16 +1,20 @@
+"use client"
 import { GithubLogo, } from '@phosphor-icons/react/dist/ssr'
 import Qrcode from "qrcode"
 import { cn } from "@/lib/utils";
 import AnimatedGradientText from "@/components/ui/animated-gradient-text";
+import { useEffect } from 'react';
 
 export function Footer({ showQrcode = false }: { showQrcode?: boolean }) {
 
-    if (showQrcode) {
-        Qrcode.toCanvas(document.getElementById("canvas"), window.location.href, {
-            margin: 2,
-            width: 100,
-        })
-    }
+    useEffect(() => {
+        if (showQrcode) {
+            Qrcode.toCanvas(document.getElementById("canvas"), window.location.href, {
+                margin: 2,
+                width: 100,
+            })
+        }
+    }, [showQrcode])
 
     return (
         <div className="z-10 flex min-h-40 flex-col items-center justify-center gap-4 p-4 mt-10">
