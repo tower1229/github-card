@@ -34,6 +34,10 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    appDir: true,
+    dynamicIO: true,
+  },
 };
 
 module.exports = nextConfig;
