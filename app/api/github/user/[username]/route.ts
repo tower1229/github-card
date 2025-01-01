@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 type GitHubUserResponse = {
   login: string;
@@ -60,12 +60,19 @@ function getContributionGrade(score: number): string {
   return "E";
 }
 
+type RouteParams = {
+  params: Promise<{
+    username: string;
+  }>;
+};
+
 export async function GET(
-  request: Request,
-  { params }: { params: { username: string } }
-) {
+  _request: NextRequest,
+  context: RouteParams
+): Promise<NextResponse> {
+  const { username } = await context.params;
+
   try {
-    const { username } = params;
     const headers = {
       Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
       Accept: "application/vnd.github.v3+json",

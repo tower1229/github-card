@@ -10,16 +10,21 @@ export const metadata: Metadata = {
     default: 'Github Card',
     template: '%s | Github Card'
   },
-  description: 'Github Card',
+  description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
   keywords: ['Github Card'],
+  icons: {
+    icon: '/favicon/favicon.ico',
+    apple: '/favicon/apple-touch-icon.png',
+
+  },
   openGraph: {
     title: 'Github Card',
     description: 'Github Card',
-    url: 'https://github-card.vercel.app',
+    url: process.env.NEXT_PUBLIC_APP_URL,
     siteName: 'Github Card',
     images: [
       {
-        url: 'https://github-card.vercel.app/og.png',
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/og.png`,
       }
     ],
     locale: 'zh_CN',

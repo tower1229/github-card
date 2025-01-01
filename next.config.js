@@ -34,11 +34,6 @@ const nextConfig = {
       },
     ],
   },
-  metadata: {
-    title: "Github Card",
-    description: "Github Card",
-    keywords: "Github Card",
-  },
 };
 
 module.exports = nextConfig;
