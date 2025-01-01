@@ -15,7 +15,7 @@ export function InputUsername() {
                 if (username) {
                     router.push(`/${username}`);
                 }
-            }}>✨Get Your Own </ShinyButton>
+            }}>✨Get Mine </ShinyButton>
         </>
     )
 }

@@ -9,7 +9,7 @@ import { InputUsername } from "@/components/InputUsername"
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen py-24 sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col ">
+    <div className="min-h-screen py-24 sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col gap-8">
 
       <div className="flex flex-col items-center gap-8 justify-center flex-1 text-center">
         {/* Profile section */}
@@ -22,7 +22,7 @@ export default function Dashboard() {
         </BlurFade>
 
         <BlurFade delay={500}>
-          <div className="flex items-center mb-12 gap-4">
+          <div className="flex items-center gap-4">
             <Image
               src={Logo}
               alt="Logo"
@@ -37,7 +37,7 @@ export default function Dashboard() {
 
         </BlurFade>
 
-        <BlurFade delay={1500} className="flex w-full max-w-sm items-center gap-2 bg-white shadow-md rounded-lg p-2">
+        <BlurFade delay={1500} className="flex w-[90%] max-w-sm items-center gap-2 bg-white shadow-md rounded-lg p-2">
           <InputUsername />
         </BlurFade>
 
