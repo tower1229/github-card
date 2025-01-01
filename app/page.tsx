@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { DotsThree, GithubLogo } from '@phosphor-icons/react/dist/ssr'
 import { BlurFade } from '@/components/blur-fade'
-import { GitHubCalendarWrapper } from '@/components/github-calendar'
 import avatar from "@/images/avatar.jpg"
 
 export default function ProfilePage() {
@@ -33,15 +32,23 @@ export default function ProfilePage() {
         </div>
       </BlurFade>
 
-
-      {/* GitHub Calendar */}
-      <GitHubCalendarWrapper username="tower1229" year="2024" />
-
-      {/* GitHub Calendar */}
-      <GitHubCalendarWrapper username="tower1229" year="2023" />
-
-      {/* GitHub Calendar */}
-      <GitHubCalendarWrapper username="tower1229" year="2022" />
+      {/* Navigation buttons - updated with real data */}
+      <div className="space-y-4 max-w-md mx-auto mb-12">
+        {[
+          { label: 'Public Repos', value: 100, delay: 500 },
+          { label: 'Followers', value: 100, delay: 600 },
+          { label: 'Total Stars', value: 100, delay: 700 },
+        ].map((item) => (
+          <BlurFade key={item.label} delay={item.delay}>
+            <button
+              className="w-full bg-white text-black rounded-full py-4 px-6 flex justify-between items-center hover:bg-gray-100 transition-colors"
+            >
+              <span className="text-lg font-medium">{item.label}</span>
+              <span className="text-lg font-medium">{item.value}</span>
+            </button>
+          </BlurFade>
+        ))}
+      </div>
 
 
       {/* Footer */}

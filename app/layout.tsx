@@ -5,8 +5,36 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Tatiana Reine - Music Artist',
-  description: 'Music is mindfulness',
+  title: {
+    default: 'Github Card',
+    template: '%s | Github Card'
+  },
+  description: 'Github Card',
+  keywords: ['Github Card'],
+  openGraph: {
+    title: 'Github Card',
+    description: 'Github Card',
+    url: 'https://github-card.vercel.app',
+    siteName: 'Github Card',
+    images: [
+      {
+        url: 'https://github-card.vercel.app/og.png',
+      }
+    ],
+    locale: 'zh_CN',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({
