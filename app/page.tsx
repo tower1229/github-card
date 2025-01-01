@@ -1,58 +1,61 @@
 import Image from 'next/image'
 import { BlurFade } from '@/components/blur-fade'
-import avatar from "@/public/avatar.jpg"
-import { Footer } from '@/components/footer'
+import Logo from "@/public/logo.png"
+import Preview from "@/public/preview.png"
+import Preview2 from "@/public/preview2.png"
+import Preview3 from "@/public/preview3.png"
+import { InputUsername } from "@/components/InputUsername"
 
-export const metadata = {
-  title: 'Dashboard',
-  description: 'Personal dashboard showing github stats',
-}
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white px-4 py-8">
+    <div className="min-h-screen py-24 sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col ">
 
+      <div className="flex flex-col items-center gap-8 justify-center flex-1 text-center">
+        {/* Profile section */}
+        <BlurFade delay={200}>
+          <h1 className='text-4xl font-bold'>Github Card</h1>
+        </BlurFade>
 
-      {/* Profile section */}
-      <BlurFade delay={300}>
-        <div className="flex flex-col items-center mb-12">
-          <div className="w-32 h-32 rounded-full overflow-hidden mb-6 relative">
+        <BlurFade delay={400}>
+          <h2 className='text-xl font-medium'>Create beautiful cards showcasing your GitHub stats and contributions</h2>
+        </BlurFade>
+
+        <BlurFade delay={500}>
+          <div className="flex items-center mb-12 gap-4">
             <Image
-              src={avatar}
-              alt="Profile"
-              width={128}
-              height={128}
-              className="object-cover"
+              src={Logo}
+              alt="Logo"
+              width={40}
+              height={40}
+              className="object-cover rounded-full"
             />
+            <a href={process.env.NEXT_PUBLIC_APP_URL} className="text-white">
+              {process.env.NEXT_PUBLIC_APP_URL}
+            </a>
           </div>
-          <h1 className="text-2xl font-bold mb-2">tower1229</h1>
-          <p className="text-gray-200">Be water my friend</p>
-        </div>
-      </BlurFade>
 
-      {/* Navigation buttons - updated with real data */}
-      <div className="space-y-4 max-w-md mx-auto mb-12">
-        {[
-          { label: 'Public Repos', value: 100, delay: 500 },
-          { label: 'Followers', value: 100, delay: 600 },
-          { label: 'Total Stars', value: 100, delay: 700 },
-        ].map((item) => (
-          <BlurFade key={item.label} delay={item.delay}>
-            <button
-              className="w-full bg-white text-black rounded-full py-4 px-6 flex justify-between items-center hover:bg-gray-100 transition-colors"
-            >
-              <span className="text-lg font-medium">{item.label}</span>
-              <span className="text-lg font-medium">{item.value}</span>
-            </button>
-          </BlurFade>
-        ))}
+        </BlurFade>
+
+        <BlurFade delay={1500} className="flex w-full max-w-sm items-center gap-2 bg-white shadow-md rounded-lg p-2">
+          <InputUsername />
+        </BlurFade>
+
+
       </div>
 
+      <div className='flex flex-col sm:flex-row items-center gap-8 justify-center'>
+        <BlurFade delay={600} className='w-[335px] h-[360px] overflow-hidden rounded-t-lg shadow-xl'>
+          <Image src={Preview} alt="Preview" width={335} height={504} />
+        </BlurFade>
+        <BlurFade delay={800} className='w-[335px] h-[360px] overflow-hidden rounded-t-lg shadow-xl'>
+          <Image src={Preview2} alt="Preview" width={335} height={504} />
+        </BlurFade>
+        <BlurFade delay={1000} className='w-[335px] h-[360px] overflow-hidden rounded-t-lg shadow-xl'>
+          <Image src={Preview3} alt="Preview" width={335} height={504} />
+        </BlurFade>
+      </div>
 
-      {/* Footer */}
-      <BlurFade delay={1300}>
-        <Footer />
-      </BlurFade>
     </div>
   )
 }
