@@ -36,7 +36,6 @@ const nextConfig = {
   },
   experimental: {
     appDir: true,
-    dynamicIO: true,
   },
 };
 
