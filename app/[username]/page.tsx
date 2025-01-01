@@ -16,11 +16,11 @@ export async function generateMetadata(
     const previousImages = (await parent).openGraph?.images || []
 
     return {
-        title: `${username} `,
-        description: username,
+        title: `${username}s Github Card`,
+        description: `Create beautiful cards showcasing your GitHub stats and contributions`,
         openGraph: {
-            title: `${username} `,
-            description: username,
+            title: `${username}s Github Card`,
+            description: `${username}s Github Card`,
             images: ['/og.png', ...previousImages],
         }
     }

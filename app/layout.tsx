@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: '%s | Github Card'
   },
   description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
-  keywords: ['Github Card'],
+  keywords: ['Github Card', 'Github Stats', 'Github Contributions'],
   icons: {
     icon: '/favicon/favicon.ico',
     apple: '/favicon/apple-touch-icon.png',
@@ -19,16 +19,20 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Github Card',
-    description: 'Github Card',
+    description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
     url: process.env.NEXT_PUBLIC_APP_URL,
     siteName: 'Github Card',
     images: [
       {
         url: `${process.env.NEXT_PUBLIC_APP_URL}/og.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Github Card Preview',
       }
     ],
     locale: 'zh_CN',
     type: 'website',
+
   },
   robots: {
     index: true,
@@ -40,6 +44,14 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Github Card',
+    description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
+    creator: '@tower1229',
+    site: '@tower1229',
+    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og.png`],
   },
 }
 
