@@ -3,12 +3,7 @@ import { BlurFade } from '@/components/blur-fade'
 import avatar from "@/public/avatar.jpg"
 import { Footer } from '@/components/footer'
 
-export const metadata = {
-  title: 'Dashboard',
-  description: 'Personal dashboard showing github stats',
-}
-
-export default function Dashboard() {
+export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white px-4 py-8">
 

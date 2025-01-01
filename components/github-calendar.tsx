@@ -18,7 +18,7 @@ export function GitHubCalendarWrapper({ username, year }: GitHubCalendarProps) {
           colorScheme='dark'
           fontSize={12}
           blockSize={8}
-          blockMargin={4}
+          blockMargin={3}
           year={year ? parseInt(year) : undefined}
         />
       </div>
