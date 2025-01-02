@@ -1,44 +1,48 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { Toaster } from 'react-hot-toast';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/react";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || ''),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || ""),
   title: {
-    default: 'Github Card',
-    template: '%s | Github Card'
+    default: "Github Card",
+    template: "%s | Github Card",
   },
-  description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
-  keywords: ['Github Card', 'Github Stats', 'Github Contributions'],
+  description:
+    "Create beautiful cards showcasing your GitHub stats and contributions.",
+  keywords: ["Github Card", "Github Stats", "Github Contributions"],
   icons: {
-    icon: '/favicon/favicon.ico',
-    apple: '/favicon/apple-touch-icon.png',
+    icon: "/favicon/favicon.ico",
+    apple: "/favicon/apple-touch-icon.png",
   },
   openGraph: {
-    title: 'Github Card',
-    description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
+    title: "Github Card",
+    description:
+      "Create beautiful cards showcasing your GitHub stats and contributions.",
     url: process.env.NEXT_PUBLIC_APP_URL,
-    siteName: 'Github Card',
+    siteName: "Github Card",
     images: [
       {
         url: `${process.env.NEXT_PUBLIC_APP_URL}/og.png`,
         width: 1400,
         height: 735,
-        alt: 'Github Card Preview',
-      }
+        alt: "Github Card Preview",
+      },
     ],
-    locale: 'zh_CN',
-    type: 'website',
+    locale: "zh_CN",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Github Card',
-    description: 'Create beautiful cards showcasing your GitHub stats and contributions.',
-    creator: '@tower1229',
-    site: '@tower1229',
+    card: "summary_large_image",
+    title: "Github Card",
+    description:
+      "Create beautiful cards showcasing your GitHub stats and contributions.",
+    creator: "@tower1229",
+    site: "@tower1229",
     images: [`${process.env.NEXT_PUBLIC_APP_URL}/og.png`],
   },
   robots: {
@@ -47,18 +51,17 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
-
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -67,6 +70,5 @@ export default function RootLayout({
         <Toaster />
       </body>
     </html>
-  )
+  );
 }
-
