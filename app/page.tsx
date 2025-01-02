@@ -4,7 +4,7 @@ import Logo from "@/public/logo.png"
 import Preview from "@/public/preview.png"
 import Preview2 from "@/public/preview2.png"
 import Preview3 from "@/public/preview3.png"
-import { InputUsername } from "@/components/InputUsername"
+import { InputUsername } from "@/components/input-username"
 
 
 export default function Dashboard() {
@@ -37,10 +37,9 @@ export default function Dashboard() {
 
         </BlurFade>
 
-        <BlurFade delay={1500} className="flex w-[90%] max-w-sm items-center gap-2 bg-white shadow-md rounded-lg p-2">
+        <BlurFade delay={800}>
           <InputUsername />
         </BlurFade>
-
 
       </div>
 

@@ -3,16 +3,7 @@
 import { ContributionGrade } from '@/components/contribution-grade'
 
 
-interface GitHubData {
-    login: string
-    name: string
-    avatar_url: string
-    bio: string
-    public_repos: number
-    followers: number
-    total_stars: number
-    contribution_grade: string
-}
+import { GitHubData } from '@/lib/types'
 
 export function ProfileTotal({ userData }: { userData: GitHubData }) {
 

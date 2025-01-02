@@ -1,18 +1,8 @@
 import { ImageResponse } from 'next/og'
 import { ProfileTotal } from '@/components/profile-total'
+import { GitHubData } from '@/lib/types'
 
 export const runtime = 'edge'
-
-interface GitHubData {
-    login: string
-    name: string
-    avatar_url: string
-    bio: string
-    public_repos: number
-    followers: number
-    total_stars: number
-    contribution_grade: string
-}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)

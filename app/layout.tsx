@@ -68,7 +68,7 @@ export default function RootLayout({
       <body className={inter.className}>
         {children}
         <Toaster />
-        <Analytics />
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   );
