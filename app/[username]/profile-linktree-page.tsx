@@ -89,7 +89,7 @@ export function ProfileLinktreePage({ username }: { username: string }) {
             },
           ].map((item) => (
             <BlurFade key={item.label} delay={item.delay}>
-              <button className="w-full bg-white text-black rounded-full py-4 px-6 flex justify-between items-center hover:bg-gray-100 transition-colors">
+              <button className="w-full bg-white/90 text-black rounded-full py-4 px-6 flex justify-between items-center hover:bg-gray-100 transition-colors">
                 <HyperText className="text-sm">{item.label}</HyperText>
                 <span className="text-lg">
                   {typeof item.value === "number" ? (
