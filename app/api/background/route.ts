@@ -1,32 +1,30 @@
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function GET() {
   try {
+    // 添加缓存控制头
+    const headers = new Headers({
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
+    });
+
     const response = await fetch(
       "https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN",
       {
-        redirect: "manual", // 不自动跟随重定向
+        next: { revalidate: 3600 },
+        headers: {
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
+        },
       }
     );
 
-    // 从响应头中获取重定向 URL
-    const redirectUrl = response.headers.get("location");
+    const data = await response.json();
 
-    if (!redirectUrl) {
-      throw new Error("No redirect URL found");
-    }
-
-    return NextResponse.json({
-      success: true,
-      url: redirectUrl,
-    });
-  } catch (error) {
-    console.error("Error fetching background:", error);
+    return NextResponse.json({ success: true, url: data.url }, { headers });
+  } catch {
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch background image",
-      },
+      { success: false, error: "Failed to fetch background" },
       { status: 500 }
     );
   }
