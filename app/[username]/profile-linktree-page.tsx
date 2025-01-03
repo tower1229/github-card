@@ -8,6 +8,7 @@ import NumberTicker from "@/components/ui/number-ticker";
 import HyperText from "@/components/ui/hyper-text";
 import { ProfileTotal } from "@/components/profile-total";
 import { ShareButton } from "@/components/share-button";
+import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
 
 export function ProfileLinktreePage({ username }: { username: string }) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
@@ -79,25 +80,27 @@ export function ProfileLinktreePage({ username }: { username: string }) {
         {/* Navigation buttons - updated with real data */}
         <div className="space-y-4 max-w-md mx-auto my-10">
           {[
-            { label: "Public Repos", value: userData.public_repos, delay: 500 },
-            { label: "Followers", value: userData.followers, delay: 600 },
-            { label: "Total Stars", value: userData.total_stars, delay: 700 },
+            { label: "Public Repos", value: userData.public_repos, delay: 500, icon: BookBookmark },
+            { label: "Followers", value: userData.followers, delay: 600, icon: Users },
+            { label: "Total Stars", value: userData.total_stars, delay: 700, icon: Star },
             {
               label: "Total Commits",
               value: userData.commits,
               delay: 800,
+              icon: GitCommit,
             },
           ].map((item) => (
             <BlurFade key={item.label} delay={item.delay}>
-              <button className="w-full bg-white/90 text-black rounded-full py-4 px-6 flex justify-between items-center hover:bg-gray-100 transition-colors">
-                <HyperText className="text-sm">{item.label}</HyperText>
-                <span className="text-lg">
+              <button className="w-full bg-white/90 text-black rounded-full py-4 px-6 gap-3 flex items-center">
+                <HyperText className="text-sm font-normal flex-1 text-left ">{item.label}</HyperText>
+                <span className="text-sm ">
                   {typeof item.value === "number" ? (
                     <NumberTicker value={item.value} />
                   ) : (
                     item.value
                   )}
                 </span>
+                <item.icon size={22} />
               </button>
             </BlurFade>
           ))}
