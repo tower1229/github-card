@@ -69,22 +69,3 @@ export function downloadImage(canvas: HTMLCanvasElement) {
     link.click();
   }
 }
-
-export async function loadImageWithCORS(
-  url: string
-): Promise<HTMLImageElement> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // 启用 CORS
-    img.onload = () => resolve(img);
-    img.onerror = () => {
-      // 如果直接加载失败，尝试通过代理加载
-      img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    };
-
-    img.src = url;
-  });
-}
-
-// 使用示例:
-// const img = await loadImageWithCORS('https://cdn.bimg.cc/bing/2016/OHR.HubeiSinkhole_ZH-CN8831229647_1920x1080.jpg');
