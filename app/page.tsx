@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { BlurFade } from "@/components/blur-fade";
 import Logo from "@/public/logo.png";
-
+import Meteors from "@/components/ui/meteors";
 import { TemplatePreview } from "@/components/template-preview";
 
-export default function Dashboard() {
+export default function HomePage() {
   return (
-    <div className="min-h-screen text-center sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col gap-8 items-center justify-center">
+    <div className="relative min-h-screen overflow-hidden text-center sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col gap-8 items-center justify-center">
+      <Meteors number={30} />
+
       {/* Profile section */}
       <BlurFade delay={200}>
         <h1 className="text-6xl font-bold pt-24">Github Card</h1>

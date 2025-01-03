@@ -71,6 +71,7 @@ export default {
         marquee: "marquee var(--duration) infinite linear",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
         pulse: "pulse var(--duration) ease-out infinite",
+        meteor: "meteor 5s linear infinite",
       },
       keyframes: {
         gradient: {
@@ -132,6 +133,19 @@ export default {
           },
           "50%": {
             boxShadow: "0 0 0 8px var(--pulse-color)",
+          },
+        },
+        meteor: {
+          "0%": {
+            transform: "rotate(215deg) translateX(0)",
+            opacity: "1",
+          },
+          "70%": {
+            opacity: "1",
+          },
+          "100%": {
+            transform: "rotate(215deg) translateX(-500px)",
+            opacity: "0",
           },
         },
       },
