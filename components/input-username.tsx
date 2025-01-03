@@ -30,7 +30,7 @@ export function InputUsername({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[320px] bg-white p-6 text-gray-800 relative mx-auto"
+      className="sm:w-[320px] bg-white p-6 text-gray-800 relative mx-auto"
     >
       <div className="space-y-4">
         <div className="text-center mb-6">
