@@ -7,7 +7,9 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || ""),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://github-card.refined-x.com"
+  ),
   title: {
     default: "Github Card",
     template: "%s | Github Card",
@@ -68,7 +70,7 @@ export default function RootLayout({
       <body className={inter.className}>
         {children}
         <Toaster />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
   );
