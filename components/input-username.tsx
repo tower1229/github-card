@@ -25,7 +25,7 @@ export function InputUsername({
 
   useEffect(() => {
     onTemplateChange?.(template);
-  }, [template]);
+  }, [template, onTemplateChange]);
 
   return (
     <form
