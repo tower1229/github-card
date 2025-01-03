@@ -6,16 +6,17 @@ import { TemplatePreview } from "@/components/template-preview";
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen overflow-hidden text-center sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col gap-8 items-center justify-center">
+    <div className="relative min-h-screen overflow-hidden text-center sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white
+    flex flex-col gap-8 items-center justify-center">
       <Meteors number={30} />
 
       {/* Profile section */}
       <BlurFade delay={200}>
-        <h1 className="text-6xl font-bold pt-24">Github Card</h1>
+        <h1 className="text-4xl sm:text-6xl font-bold pt-24">Github Card</h1>
       </BlurFade>
 
       <BlurFade delay={400}>
-        <h2 className="text-2xl font-medium">
+        <h2 className="text-2xl font-medium px-4">
           Create beautiful cards showcasing your GitHub stats and contributions
         </h2>
       </BlurFade>
@@ -29,13 +30,13 @@ export default function HomePage() {
             height={40}
             className="object-cover rounded-full"
           />
-          <a href={process.env.NEXT_PUBLIC_APP_URL} className="text-white">
+          <a href={process.env.NEXT_PUBLIC_APP_URL} className="text-gray-100">
             {process.env.NEXT_PUBLIC_APP_URL}
           </a>
         </div>
       </BlurFade>
 
-      <BlurFade
+      <BlurFade className="px-4"
         delay={600}
       >
         <TemplatePreview />

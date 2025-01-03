@@ -16,7 +16,7 @@ export function TemplatePreview() {
     <div className="shadow-xl relative bg-white/40 p-4 rounded-2xl ">
       <div className="flex flex-col sm:flex-row  overflow-hidden rounded-lg">
         <InputUsername onTemplateChange={setTemplate} />
-        <div className="w-[320px] sm:w-[335px] h-[504px] relative">
+        <div className="w-full sm:w-[335px] h-[504px] relative">
           <Image src={preview} alt="Preview" className="w-full" />
         </div>
       </div>
