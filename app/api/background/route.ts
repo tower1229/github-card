@@ -6,15 +6,15 @@ export async function GET() {
   try {
     // 添加缓存控制头
     const headers = new Headers({
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
     });
 
     const response = await fetch(
       "https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN",
       {
-        next: { revalidate: 3600 },
+        next: { revalidate: 60 },
         headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=60",
         },
         redirect: "follow",
       }
