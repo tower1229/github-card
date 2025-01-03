@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { loadImageWithCORS } from "@/lib/utils";
 import { useState, useEffect } from "react";
 
 export function BingImg({ className = "" }: { className?: string }) {
@@ -14,10 +13,9 @@ export function BingImg({ className = "" }: { className?: string }) {
         const response = await fetch("/api/background", {
           signal: controller.signal,
         });
-        const data = await response.json();
-        if (data.success) {
-          setBgUrl(data.url);
-        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setBgUrl(url);
       } catch (error: unknown) {
         if (error instanceof Error && error.name === "AbortError") return;
         console.error("Error fetching background URL:", error);
@@ -31,20 +29,10 @@ export function BingImg({ className = "" }: { className?: string }) {
     };
   }, []);
 
-  const [img, setImg] = useState<HTMLImageElement | null>(null);
 
-  useEffect(() => {
-    if (!bgUrl) return;
-    const loadImage = async () => {
-      const img = await loadImageWithCORS(bgUrl);
-      setImg(img);
-    };
-    loadImage();
-  }, [bgUrl]);
-
-  return img ? (
+  return bgUrl ? (
     <img
-      src={img.src}
+      src={bgUrl}
       className={className}
       alt="Bing daily background"
     />
