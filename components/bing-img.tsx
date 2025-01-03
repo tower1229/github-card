@@ -1,5 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
-import Image from "next/image";
+import { loadImageWithCORS } from "@/lib/utils";
 import { useState, useEffect } from "react";
 
 export function BingImg({ className = "" }: { className?: string }) {
@@ -30,15 +31,22 @@ export function BingImg({ className = "" }: { className?: string }) {
     };
   }, []);
 
-  return bgUrl ? (
-    <Image
-      src={
-        bgUrl ||
-        `https://www.bing.com/th?id=OHR.Rivendell_ZH-CN6669549862_1920x1080.jpg`
-      }
-      alt="Background"
-      fill
+  const [img, setImg] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (!bgUrl) return;
+    const loadImage = async () => {
+      const img = await loadImageWithCORS(bgUrl);
+      setImg(img);
+    };
+    loadImage();
+  }, [bgUrl]);
+
+  return img ? (
+    <img
+      src={img.src}
       className={className}
+      alt="Bing daily background"
     />
   ) : null;
 }
