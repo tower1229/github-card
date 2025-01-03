@@ -33,7 +33,12 @@ export default function Dashboard() {
         </div>
       </BlurFade>
 
-      <TemplatePreview />
+      <BlurFade
+        delay={600}
+        className="flex-1 overflow-hidden flex items-center justify-center"
+      >
+        <TemplatePreview />
+      </BlurFade>
     </div>
   );
 }
