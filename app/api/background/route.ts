@@ -22,7 +22,7 @@ export async function GET() {
     const data = await response.json();
 
     return NextResponse.json({ success: true, url: data.url }, { headers });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: "Failed to fetch background" },
       { status: 500 }
