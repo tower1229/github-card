@@ -16,13 +16,15 @@ export async function GET() {
         headers: {
           "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=3600",
         },
+        redirect: "follow",
       }
     );
 
-    const data = await response.json();
+    const imageUrl = response.url;
 
-    return NextResponse.json({ success: true, url: data.url }, { headers });
-  } catch {
+    return NextResponse.json({ success: true, url: imageUrl }, { headers });
+  } catch (err) {
+    console.error("Error fetching background:", err);
     return NextResponse.json(
       { success: false, error: "Failed to fetch background" },
       { status: 500 }
