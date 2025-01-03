@@ -82,7 +82,7 @@ export async function GET(
       `https://api.github.com/users/${username}`,
       {
         headers,
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400 },
       }
     );
 
@@ -98,7 +98,7 @@ export async function GET(
       `https://api.github.com/users/${username}/repos?per_page=100`,
       {
         headers,
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400 },
       }
     );
 
@@ -116,7 +116,7 @@ export async function GET(
       ).toISOString()}`,
       {
         headers,
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400 },
       }
     );
     const commitsData: GitHubContributionsResponse =
@@ -126,7 +126,7 @@ export async function GET(
       `https://api.github.com/search/issues?q=author:${username}+type:pr`,
       {
         headers,
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400 },
       }
     );
     const prsData: GitHubContributionsResponse = await prsResponse.json();
@@ -135,7 +135,7 @@ export async function GET(
       `https://api.github.com/search/issues?q=author:${username}+type:issue`,
       {
         headers,
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400 },
       }
     );
     const issuesData: GitHubContributionsResponse = await issuesResponse.json();
@@ -144,7 +144,7 @@ export async function GET(
       `https://api.github.com/search/issues?q=reviewed-by:${username}+type:pr`,
       {
         headers,
-        next: { revalidate: 3600 },
+        next: { revalidate: 86400 },
       }
     );
     const reviewsData: GitHubContributionsResponse =
