@@ -6,14 +6,14 @@ import { TemplatePreview } from "@/components/template-preview";
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen text-center sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col gap-8 items-center">
+    <div className="min-h-screen text-center sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex flex-col gap-8 items-center justify-center">
       {/* Profile section */}
       <BlurFade delay={200}>
-        <h1 className="text-4xl font-bold pt-24">Github Card</h1>
+        <h1 className="text-6xl font-bold pt-24">Github Card</h1>
       </BlurFade>
 
       <BlurFade delay={400}>
-        <h2 className="text-xl font-medium">
+        <h2 className="text-2xl font-medium">
           Create beautiful cards showcasing your GitHub stats and contributions
         </h2>
       </BlurFade>
@@ -35,7 +35,6 @@ export default function Dashboard() {
 
       <BlurFade
         delay={600}
-        className="flex-1 overflow-hidden flex items-center justify-center"
       >
         <TemplatePreview />
       </BlurFade>

@@ -1,11 +1,11 @@
 "use client";
-import ShinyButton from "@/components/ui/shiny-button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Templates } from "@/lib/constant";
+import PulsatingButton from "@/components/ui/pulsating-button";
 
 export function InputUsername({
   onTemplateChange,
@@ -40,15 +40,15 @@ export function InputUsername({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Input
             type="text"
             placeholder="Input Username"
-            className="flex-1 text-gray-800"
+            className="flex-1 text-gray-800 h-10"
             value={username}
             onChange={(e) => setUsername(e.target.value.trim())}
           />
-          <ShinyButton type="submit">✨ Go</ShinyButton>
+          <PulsatingButton type="submit" pulseColor="#FFBE7B" className="bg-orange-600 text-white">✨ Generate</PulsatingButton>
         </div>
 
         <div className="mt-6">
@@ -65,8 +65,8 @@ export function InputUsername({
                 <Label
                   htmlFor={item.value}
                   className={`text-sm cursor-pointer flex-1 ${item.value === template
-                      ? "text-orange-600"
-                      : "text-gray-600"
+                    ? "text-orange-600"
+                    : "text-gray-600"
                     }`}
                 >
                   {item.label}
