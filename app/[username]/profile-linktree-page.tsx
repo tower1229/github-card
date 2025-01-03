@@ -77,7 +77,7 @@ export function ProfileLinktreePage({ username }: { username: string }) {
           <ProfileTotal userData={userData} />
         </BlurFade>
         {/* Navigation buttons - updated with real data */}
-        <div className="space-y-4 max-w-md mx-auto my-12">
+        <div className="space-y-4 max-w-md mx-auto my-10">
           {[
             { label: "Public Repos", value: userData.public_repos, delay: 500 },
             { label: "Followers", value: userData.followers, delay: 600 },
@@ -90,7 +90,7 @@ export function ProfileLinktreePage({ username }: { username: string }) {
           ].map((item) => (
             <BlurFade key={item.label} delay={item.delay}>
               <button className="w-full bg-white text-black rounded-full py-4 px-6 flex justify-between items-center hover:bg-gray-100 transition-colors">
-                <HyperText className="text-base">{item.label}</HyperText>
+                <HyperText className="text-sm">{item.label}</HyperText>
                 <span className="text-lg">
                   {typeof item.value === "number" ? (
                     <NumberTicker value={item.value} />

@@ -10,14 +10,12 @@ export function ProfileTotal({ userData }: { userData: GitHubData }) {
       <a
         href={`https://github.com/${userData.login}`}
         target="_blank"
-        className="w-32 h-32 rounded-full mb-6 relative"
+        className="w-28 sm:w-32 h-28 sm:h-32 rounded-full mb-6 relative"
       >
         <img
           src={userData.avatar_url}
           alt="Profile"
-          width={128}
-          height={128}
-          className="object-cover rounded-full"
+          className="object-cover rounded-full w-full h-full"
         />
         <div className="absolute bottom-0 right-0">
           <ContributionGrade grade={userData.contribution_grade} />
