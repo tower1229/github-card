@@ -1,4 +1,5 @@
 import { ProfileContributePage } from './profile-contribute-page'
+import { ProfileLinktreePage } from './profile-linktree-page'
 import type { Metadata } from 'next'
 
 type Props = {
@@ -7,9 +8,13 @@ type Props = {
 }
 
 export async function generateMetadata(
-    { params }: Props,
+    { params, searchParams }: Props,
 ): Promise<Metadata> {
     const username = (await params).username
+    const template = (await searchParams).template
+
+
+    console.log(template)
 
     // optionally access and extend (rather than replace) parent metadata
 
@@ -29,8 +34,16 @@ export async function generateMetadata(
     }
 }
 
-export default async function ProfilePage({ params }: Props) {
-    const username = (await params).username
+const templates = {
+    contribute: ProfileContributePage,
+    linktree: ProfileLinktreePage,
+}
 
-    return <ProfileContributePage username={username} />
+
+export default async function ProfilePage({ params, searchParams }: Props) {
+    const username = (await params).username
+    const template = (await searchParams).template as keyof typeof templates || 'contribute'
+
+    const Component = templates[template] || templates.contribute
+    return <Component username={username} />
 }

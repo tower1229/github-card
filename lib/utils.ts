@@ -37,7 +37,7 @@ export function downloadImage(canvas: HTMLCanvasElement) {
         0,
         0,
         ImageWidth,
-        tempCanvas.height + 36
+        tempCanvas.height
       );
     } else {
       // For normal width images, scale normally
@@ -50,7 +50,7 @@ export function downloadImage(canvas: HTMLCanvasElement) {
         0,
         0,
         tempCanvas.width,
-        tempCanvas.height + 36
+        tempCanvas.height
       );
     }
 
