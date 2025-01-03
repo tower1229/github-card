@@ -30,7 +30,7 @@ export function InputUsername({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-[320px] bg-white shadow-lg rounded-lg p-6 text-gray-800 relative mx-auto"
+      className="w-[320px] bg-white p-6 text-gray-800 relative mx-auto"
     >
       <div className="space-y-4">
         <div className="text-center mb-6">
@@ -58,18 +58,16 @@ export function InputUsername({
           <RadioGroup value={template} onValueChange={setTemplate}>
             {Templates.map((item) => (
               <div
-                className={`flex items-center space-x-3 hover:bg-gray-100 p-2 rounded-md transition-colors ${
-                  item.value === template ? "bg-gray-200" : ""
-                }`}
+                className={`flex items-center space-x-3 hover:bg-gray-100 p-2 rounded-md transition-colors ${item.value === template ? "bg-gray-200" : ""
+                  }`}
                 key={item.value}
               >
                 <Label
                   htmlFor={item.value}
-                  className={`text-sm cursor-pointer flex-1 ${
-                    item.value === template
+                  className={`text-sm cursor-pointer flex-1 ${item.value === template
                       ? "text-orange-600"
                       : "text-gray-600"
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </Label>
