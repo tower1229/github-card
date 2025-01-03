@@ -24,7 +24,10 @@ export function ShareButton({
         const node = document.body;
         if (node) {
 
-            toCanvas(node)
+            toCanvas(node, {
+                canvasHeight: node.clientHeight * window.devicePixelRatio,
+                canvasWidth: node.clientWidth * window.devicePixelRatio,
+            })
                 .then(function (canvas: HTMLCanvasElement) {
                     downloadImage(canvas);
                 })
