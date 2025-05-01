@@ -1,7 +1,39 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { users, userBehaviors } from "@/lib/db/schema";
+
+// Define GitHub profile interface
+interface GitHubProfile {
+  id: string;
+  login?: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+}
+
+// Log user behavior function
+async function logUserBehavior(
+  userId: string,
+  actionType: string,
+  actionData?: Record<string, unknown>
+) {
+  try {
+    await db.insert(userBehaviors).values({
+      userId,
+      actionType,
+      actionData: actionData ? actionData : undefined,
+      performedAt: new Date(),
+    });
+  } catch (error) {
+    console.error("Failed to log user behavior:", error);
+  }
+}
 
 const handler = NextAuth({
+  adapter: DrizzleAdapter(db),
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID as string,
@@ -27,6 +59,55 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (!user || !profile) return false;
+
+      try {
+        const githubProfile = profile as GitHubProfile;
+
+        // Check if user exists in our custom table
+        const existingUser = await db.query.users.findFirst({
+          where: eq(users.githubId, githubProfile.id),
+        });
+
+        if (existingUser) {
+          // Update existing user
+          await db
+            .update(users)
+            .set({
+              username: githubProfile.login || githubProfile.name || "",
+              avatarUrl: githubProfile.avatar_url || "",
+              email: githubProfile.email,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.githubId, githubProfile.id));
+
+          // Log login behavior
+          await logUserBehavior(existingUser.id, "login");
+        } else {
+          // Create new user in our custom table
+          const newUser = await db
+            .insert(users)
+            .values({
+              githubId: githubProfile.id,
+              username: githubProfile.login || githubProfile.name || "",
+              avatarUrl: githubProfile.avatar_url || "",
+              email: githubProfile.email || "",
+            })
+            .returning();
+
+          if (newUser && newUser[0]) {
+            // Log first login behavior
+            await logUserBehavior(newUser[0].id, "signup");
+          }
+        }
+
+        return true;
+      } catch (error) {
+        console.error("Error in signIn callback:", error);
+        return true; // Still allow sign in even if our custom logic fails
+      }
+    },
     async jwt({ token, user, account, profile }) {
       if (account && user && profile) {
         const githubProfile = profile as {
@@ -88,6 +169,9 @@ const handler = NextAuth({
     error: "/",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+  },
 });
 
 export { handler as GET, handler as POST };
