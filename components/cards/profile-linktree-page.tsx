@@ -69,7 +69,10 @@ export function ProfileLinktreePage({ username }: { username: string }) {
         <BlurFade delay={100}>
           <div className="relative h-10 overflow-hidden flex justify-end">
             {!isDownloading && (
-              <ShareButton setIsDownloading={setIsDownloading} />
+              <ShareButton
+                setIsDownloading={setIsDownloading}
+                userData={userData!}
+              />
             )}
           </div>
         </BlurFade>

@@ -7,12 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:generate": "drizzle-kit generate:pg",
+    "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx lib/db/migrate.ts",
-    "db:push": "drizzle-kit push:pg",
+    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx lib/db/seed.ts",
-    "postinstall": "drizzle-kit generate:pg"
+    "db:fix": "tsx scripts/fix-all-columns.ts",
+    "db:reset": "tsx scripts/reset-db.ts",
+    "check:auth": "node scripts/check-auth-config.js",
+    "postinstall": "drizzle-kit generate"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.9.0",

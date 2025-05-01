@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/lib/db";
@@ -32,7 +32,8 @@ async function logUserBehavior(
   }
 }
 
-const handler = NextAuth({
+// 创建NextAuth配置
+const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db),
   providers: [
     GithubProvider({
@@ -40,7 +41,7 @@ const handler = NextAuth({
       clientSecret: process.env.GITHUB_SECRET as string,
       authorization: {
         params: {
-          scope: "read:user user user:email",
+          scope: "read:user",
         },
       },
       profile(profile) {
@@ -60,52 +61,63 @@ const handler = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      console.log("SignIn callback triggered", { user, account, profile });
+
       if (!user || !profile) return false;
 
       try {
         const githubProfile = profile as GitHubProfile;
 
-        // Check if user exists in our custom table
+        // 简化逻辑：只通过GitHub ID查找用户
         const existingUser = await db.query.users.findFirst({
           where: eq(users.githubId, githubProfile.id),
         });
 
         if (existingUser) {
-          // Update existing user
+          // 更新现有用户信息
           await db
             .update(users)
             .set({
-              username: githubProfile.login || githubProfile.name || "",
+              username: githubProfile.login || "",
+              displayName: githubProfile.name || "",
               avatarUrl: githubProfile.avatar_url || "",
               email: githubProfile.email,
+              name: githubProfile.name || githubProfile.login || "",
+              image: githubProfile.avatar_url || "",
               updatedAt: new Date(),
             })
             .where(eq(users.githubId, githubProfile.id));
 
-          // Log login behavior
+          // 记录登录行为
           await logUserBehavior(existingUser.id, "login");
+          console.log("用户登录:", existingUser.id);
         } else {
-          // Create new user in our custom table
+          // 创建新用户
           const newUser = await db
             .insert(users)
             .values({
               githubId: githubProfile.id,
-              username: githubProfile.login || githubProfile.name || "",
+              username: githubProfile.login || "",
+              displayName: githubProfile.name || "",
               avatarUrl: githubProfile.avatar_url || "",
               email: githubProfile.email || "",
+              name: githubProfile.name || githubProfile.login || "",
+              image: githubProfile.avatar_url || "",
             })
             .returning();
 
           if (newUser && newUser[0]) {
-            // Log first login behavior
+            // 记录首次登录
             await logUserBehavior(newUser[0].id, "signup");
+            console.log("创建了新用户:", newUser[0].id);
           }
         }
 
+        // 始终允许登录
         return true;
       } catch (error) {
         console.error("Error in signIn callback:", error);
-        return true; // Still allow sign in even if our custom logic fails
+        return true; // 即使自定义逻辑失败也允许登录
       }
     },
     async jwt({ token, user, account, profile }) {
@@ -166,12 +178,17 @@ const handler = NextAuth({
   },
   pages: {
     signIn: "/",
-    error: "/",
+    error: "/auth/error",
   },
+  debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
   },
-});
+};
+
+// 创建handler
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

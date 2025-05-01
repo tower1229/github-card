@@ -14,7 +14,7 @@ export function GithubButton({ className = "" }: GithubButtonProps) {
   const isLoading = status === "loading";
 
   const handleSignIn = () => {
-    signIn("github", { callbackUrl: "/#templates" });
+    signIn("github", { callbackUrl: `${window.location.origin}/#templates` });
   };
 
   const handleSignOut = () => {
