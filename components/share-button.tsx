@@ -25,9 +25,11 @@ import { GitHubData } from "@/lib/types";
 export function ShareButton({
   setIsDownloading,
   userData,
+  templateType = "contribute",
 }: {
   setIsDownloading: (isDownloading: boolean) => void;
   userData: GitHubData;
+  templateType?: string;
 }) {
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
 
@@ -67,6 +69,7 @@ export function ShareButton({
         },
         body: JSON.stringify({
           cardData: userData,
+          templateType: templateType,
         }),
       });
 
@@ -79,7 +82,11 @@ export function ShareButton({
 
       // 复制生成的分享链接到剪贴板
       navigator.clipboard.writeText(data.shareUrl);
-      toast.success("Share link copied to clipboard");
+
+      const toastMessage = data.isExisting
+        ? "Existing share link copied to clipboard"
+        : "Share link copied to clipboard";
+      toast.success(toastMessage);
     } catch (error) {
       console.error("Error generating share link:", error);
       toast.error(

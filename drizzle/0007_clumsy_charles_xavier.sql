@@ -1,0 +1,1 @@
+ALTER TABLE "share_links" ADD COLUMN "template_type" varchar(50) DEFAULT 'contribute' NOT NULL;

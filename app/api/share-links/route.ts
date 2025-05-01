@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db";
 import { shareLinks, userBehaviors, users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 import { getExpirationDate } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
@@ -26,6 +26,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get template type
+    const templateType = body.templateType || "contribute"; // Default to 'contribute' if not specified
+
     // Get the user from our database
     const userEmail = session.user.email;
     const user = await db.query.users.findFirst({
@@ -38,6 +41,40 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Check if user already has an active share link for this template
+    const now = new Date();
+    const existingShareLink = await db.query.shareLinks.findFirst({
+      where: and(
+        eq(shareLinks.userId, user.id),
+        eq(shareLinks.isActive, true),
+        gte(shareLinks.expiresAt, now),
+        eq(shareLinks.templateType, templateType)
+      ),
+      orderBy: (shareLinks, { desc }) => [desc(shareLinks.createdAt)],
+    });
+
+    // If an active link exists, return it
+    if (existingShareLink) {
+      return NextResponse.json({
+        linkToken: existingShareLink.linkToken,
+        expiresAt: existingShareLink.expiresAt,
+        shareUrl: `${process.env.NEXTAUTH_URL}/shared/${existingShareLink.linkToken}`,
+        isExisting: true,
+      });
+    }
+
+    // No active link exists, create a new one
+    // Deactivate all existing links for this user and this template
+    await db
+      .update(shareLinks)
+      .set({ isActive: false })
+      .where(
+        and(
+          eq(shareLinks.userId, user.id),
+          eq(shareLinks.templateType, templateType)
+        )
+      );
 
     // Generate a unique token for the share link
     const linkToken = uuidv4();
@@ -52,6 +89,7 @@ export async function POST(request: NextRequest) {
         cardData: body.cardData,
         expiresAt,
         isActive: true,
+        templateType,
       })
       .returning();
 
@@ -59,7 +97,7 @@ export async function POST(request: NextRequest) {
     await db.insert(userBehaviors).values({
       userId: user.id,
       actionType: "generate_link",
-      actionData: { linkId: newShareLink[0].id },
+      actionData: { linkId: newShareLink[0].id, templateType },
       performedAt: new Date(),
     });
 
@@ -68,6 +106,7 @@ export async function POST(request: NextRequest) {
       linkToken,
       expiresAt,
       shareUrl: `${process.env.NEXTAUTH_URL}/shared/${linkToken}`,
+      isNew: true,
     });
   } catch (error) {
     console.error("Error creating share link:", error);
@@ -116,6 +155,7 @@ export async function GET() {
         createdAt: link.createdAt,
         expiresAt: link.expiresAt,
         isActive: link.isActive,
+        templateType: link.templateType,
         shareUrl: `${process.env.NEXTAUTH_URL}/shared/${link.linkToken}`,
       }))
     );

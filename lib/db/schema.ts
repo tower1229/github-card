@@ -129,6 +129,9 @@ export const shareLinks = pgTable("share_links", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  templateType: varchar("template_type", { length: 50 })
+    .default("contribute")
+    .notNull(),
 });
 
 export const shareLinkRelations = relations(shareLinks, ({ one }) => ({

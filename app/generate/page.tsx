@@ -100,7 +100,7 @@ function GenerateContent() {
     <div className="min-h-screen bg-[#0d1117] text-white">
       <Navbar />
 
-      <Component username={username} />
+      <Component username={username} templateType={templateType} />
     </div>
   );
 }

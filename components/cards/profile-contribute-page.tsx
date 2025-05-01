@@ -9,11 +9,30 @@ import { BingImg } from "@/components/bing-img";
 
 import { GitHubData } from "@/lib/types";
 
-export function ProfileContributePage({ username }: { username: string }) {
+interface ProfileContributePageProps {
+  username: string;
+  hideMenu?: boolean;
+  sharedData?: GitHubData;
+  templateType?: string;
+}
+
+export function ProfileContributePage({
+  username,
+  hideMenu = false,
+  sharedData,
+  templateType = "contribute",
+}: ProfileContributePageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!sharedData);
 
   useEffect(() => {
+    // If sharedData is provided, use it directly
+    if (sharedData) {
+      setUserData(sharedData);
+      setLoading(false);
+      return;
+    }
+
     if (!username) return;
     const fetchUserData = async () => {
       try {
@@ -30,7 +49,7 @@ export function ProfileContributePage({ username }: { username: string }) {
     };
 
     fetchUserData();
-  }, [username]);
+  }, [username, sharedData]);
 
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -48,7 +67,7 @@ export function ProfileContributePage({ username }: { username: string }) {
     );
 
   return (
-    <div className="relative min-h-screen  text-white px-4 py-4 sm:py-8 bg-linear-to-b from-orange-600 via-orange-800 to-gray-900">
+    <div className="relative min-h-screen text-white px-4 py-4 sm:py-8 bg-linear-to-b from-orange-600 via-orange-800 to-gray-900">
       <BingImg className="absolute left-0 top-0 w-full h-full object-cover" />
 
       <div
@@ -56,17 +75,20 @@ export function ProfileContributePage({ username }: { username: string }) {
           isDownloading ? "bg-gray-900/70" : "bg-gray-900/20"
         } backdrop-blur-lg rounded-lg p-4 pt-8`}
       >
-        {/* Settings button */}
-        <BlurFade delay={100}>
-          <div className="relative h-10 overflow-hidden flex justify-end">
-            {!isDownloading && (
-              <ShareButton
-                setIsDownloading={setIsDownloading}
-                userData={userData!}
-              />
-            )}
-          </div>
-        </BlurFade>
+        {/* Settings button - only shown if hideMenu is false */}
+        {!hideMenu && (
+          <BlurFade delay={100}>
+            <div className="relative h-10 overflow-hidden flex justify-end">
+              {!isDownloading && (
+                <ShareButton
+                  setIsDownloading={setIsDownloading}
+                  userData={userData!}
+                  templateType={templateType}
+                />
+              )}
+            </div>
+          </BlurFade>
+        )}
 
         <BlurFade delay={200}>
           <ProfileTotal userData={userData} />

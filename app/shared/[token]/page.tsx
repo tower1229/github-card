@@ -3,32 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-
-// Define a more specific type for the card data
-interface GitHubCardData {
-  username: string;
-  stats?: {
-    followers?: number;
-    following?: number;
-    repositories?: number;
-    stars?: number;
-  };
-  contributions?: {
-    total?: number;
-    lastYear?: number;
-  };
-  languages?: Record<string, number>;
-  repositories?: Array<{
-    name: string;
-    description?: string;
-    stars?: number;
-    forks?: number;
-  }>;
-  [key: string]: unknown; // Using unknown instead of any
-}
+import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
+import { GitHubData } from "@/lib/types";
 
 interface ShareLinkData {
-  cardData: GitHubCardData;
+  cardData: GitHubData;
   expiresAt: string;
 }
 
@@ -90,14 +69,9 @@ export default function SharedCardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-          <h1 className="text-2xl font-bold text-center mb-4">
-            Loading shared GitHub card...
-          </h1>
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
-          </div>
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0d1117] text-white">
+        <div className="animate-pulse text-xl">
+          Loading shared GitHub card...
         </div>
       </div>
     );
@@ -105,8 +79,8 @@ export default function SharedCardPage() {
 
   if (error || isExpired) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0d1117] text-white">
+        <div className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-center mb-4">
             {isExpired ? "This share link has expired" : "Error"}
           </h1>
@@ -118,7 +92,7 @@ export default function SharedCardPage() {
           <div className="flex justify-center">
             <Link
               href="/"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-[#fa7b19] hover:bg-[#e76b0a] text-white rounded-md transition-colors"
             >
               Return to Home
             </Link>
@@ -130,8 +104,8 @@ export default function SharedCardPage() {
 
   if (!data || !data.cardData) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0d1117] text-white">
+        <div className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-center mb-4">
             No Data Available
           </h1>
@@ -141,7 +115,7 @@ export default function SharedCardPage() {
           <div className="flex justify-center">
             <Link
               href="/"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-[#fa7b19] hover:bg-[#e76b0a] text-white rounded-md transition-colors"
             >
               Return to Home
             </Link>
@@ -151,33 +125,28 @@ export default function SharedCardPage() {
     );
   }
 
+  // Use the same component as in generate page, but pass hideShareButton prop
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-3xl p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-        <h1 className="text-2xl font-bold text-center mb-4">
-          Shared GitHub Card
-        </h1>
+    <div className="min-h-screen bg-[#0d1117]">
+      <div className="absolute top-4 right-4 z-20">
+        <Link
+          href="/"
+          className="px-4 py-2 bg-[#fa7b19] hover:bg-[#e76b0a] text-white rounded-md transition-colors"
+        >
+          Create Your Own
+        </Link>
+      </div>
 
-        {/* Display the GitHub card using data.cardData */}
-        <div className="mb-6">
-          {/* Here you would implement the GitHub card component using data.cardData */}
-          <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-md overflow-auto">
-            {JSON.stringify(data.cardData, null, 2)}
-          </pre>
-        </div>
+      {data.cardData.login && (
+        <ProfileContributePage
+          username={data.cardData.login}
+          hideMenu={true}
+          sharedData={data.cardData}
+        />
+      )}
 
-        <div className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
-          This shared link will expire on {formatExpirationDate()}
-        </div>
-
-        <div className="flex justify-center">
-          <Link
-            href="/"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Create Your Own Card
-          </Link>
-        </div>
+      <div className="fixed bottom-4 right-4 text-sm text-gray-400 bg-gray-800/80 backdrop-blur-sm p-2 rounded">
+        Expires: {formatExpirationDate()}
       </div>
     </div>
   );
