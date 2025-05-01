@@ -51,19 +51,6 @@ export default function SharedCardPage() {
     }
   }, [token]);
 
-  // Format the expiration date
-  const formatExpirationDate = () => {
-    if (!expirationDate) return "";
-
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(expirationDate);
-  };
-
   // Check if link is expired
   const isExpired = expirationDate ? new Date() > expirationDate : false;
 
@@ -128,15 +115,6 @@ export default function SharedCardPage() {
   // Use the same component as in generate page, but pass hideShareButton prop
   return (
     <div className="min-h-screen bg-[#0d1117]">
-      <div className="absolute top-4 right-4 z-20">
-        <Link
-          href="/"
-          className="px-4 py-2 bg-[#fa7b19] hover:bg-[#e76b0a] text-white rounded-md transition-colors"
-        >
-          Create Your Own
-        </Link>
-      </div>
-
       {data.cardData.login && (
         <ProfileContributePage
           username={data.cardData.login}
@@ -145,8 +123,13 @@ export default function SharedCardPage() {
         />
       )}
 
-      <div className="fixed bottom-4 right-4 text-sm text-gray-400 bg-gray-800/80 backdrop-blur-sm p-2 rounded">
-        Expires: {formatExpirationDate()}
+      <div className="fixed bottom-2 opacity-80 left-0 right-0 flex justify-center z-50">
+        <Link
+          href="/"
+          className="px-3 py-1.5 bg-[#fa7b19] hover:bg-[#e76b0a] text-white text-sm rounded-3xl transition-colors shadow-lg"
+        >
+          Create Your Own
+        </Link>
       </div>
     </div>
   );
