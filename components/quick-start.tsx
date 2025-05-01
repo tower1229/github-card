@@ -1,23 +1,36 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { BlurFade } from "./blur-fade";
+import { CheckCheck } from "lucide-react";
 
 export function QuickStart() {
+  const { data: session } = useSession();
+
   const steps = [
     {
       number: 1,
       title: "Sign in with GitHub",
       description: "Connect your GitHub account to get started",
+      link: "/",
+      isCompleted: !!session,
     },
     {
       number: 2,
       title: "Choose a Template",
       description: "Select from our beautiful template collection",
+      link: "#templates",
+      isCompleted: false,
     },
     {
       number: 3,
       title: "Share & Export",
       description: "Make it yours and publish to your profile",
+      link: session?.user?.username
+        ? `/${session.user.username}?template=contribute`
+        : "#templates",
+      isCompleted: false,
     },
   ];
 
@@ -30,13 +43,23 @@ export function QuickStart() {
         <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
           {steps.map((step, index) => (
             <BlurFade key={index} delay={200 * (index + 1)}>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-[#fa7b19] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold">{step.number}</span>
+              <Link href={step.link} className="block">
+                <div className="text-center group">
+                  <div
+                    className={`w-16 h-16 ${
+                      step.isCompleted ? "bg-green-600" : "bg-[#fa7b19]"
+                    } rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform`}
+                  >
+                    {step.isCompleted ? (
+                      <CheckCheck className="text-white w-8 h-8" />
+                    ) : (
+                      <span className="text-2xl font-bold">{step.number}</span>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                  <p className="text-[#8b949e]">{step.description}</p>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-[#8b949e]">{step.description}</p>
-              </div>
+              </Link>
             </BlurFade>
           ))}
         </div>

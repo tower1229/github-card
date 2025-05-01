@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/react";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -68,9 +69,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
-        <Toaster />
-        {process.env.NODE_ENV === "production" && <Analytics />}
+        <AuthProvider>
+          {children}
+          <Toaster />
+          {process.env.NODE_ENV === "production" && <Analytics />}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { BlurFade } from "./blur-fade";
 import { Button } from "./ui/button";
 import Image from "next/image";
@@ -7,6 +9,17 @@ import PreviewLinktree from "@/public/preview/linktree.png";
 import PreviewContribute from "@/public/preview/contribute.png";
 
 export function TemplateShowcase() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleTemplateAction = (templateValue: string) => {
+    if (session?.user?.username) {
+      router.push(`/${session.user.username}?template=${templateValue}`);
+    } else {
+      // TODO: preview template
+    }
+  };
+
   const templates = [
     {
       name: "Linktree",
@@ -46,10 +59,18 @@ export function TemplateShowcase() {
               <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
               <p className="text-gray-400 mb-4">{template.description}</p>
               <div className="flex space-x-3">
-                <Button className="bg-orange-600 hover:bg-orange-700">
+                <Button
+                  className="bg-orange-600 hover:bg-orange-700"
+                  onClick={() => handleTemplateAction(template.value)}
+                >
                   Use Template
                 </Button>
-                <Button variant="outline">Preview</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleTemplateAction(template.value)}
+                >
+                  Preview
+                </Button>
               </div>
             </div>
           </div>

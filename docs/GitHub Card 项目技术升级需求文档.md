@@ -90,8 +90,6 @@ yarn add next-auth
     /auth
       /[...nextauth]
         route.ts      # NextAuth 路由处理
-  /templates
-    page.tsx         # 模板选择页面
   /[username]
     page.tsx         # 用户卡片页面 (现有)
 /components
