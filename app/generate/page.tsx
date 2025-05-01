@@ -3,8 +3,8 @@
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
-import { ProfileContributePage } from "@/app/[username]/profile-contribute-page";
-import { ProfileLinktreePage } from "@/app/[username]/profile-linktree-page";
+import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
+import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
 import { Navbar } from "@/components/auth/navbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -55,7 +55,15 @@ function GenerateContent() {
   }
 
   // 用户名必须存在
+  console.log("Session object:", JSON.stringify(session, null, 2));
+  console.log("User object:", session.user);
+  console.log("Username from session:", session.user?.username);
+
+  // 获取GitHub登录名 (URL中的用户名)
   const username = session.user?.username;
+  // Not using displayName yet, so commenting it out to avoid linter errors
+  // const displayName = session.user?.name || username;
+
   if (!username) {
     return (
       <div className="min-h-screen bg-[#0d1117] text-white">
