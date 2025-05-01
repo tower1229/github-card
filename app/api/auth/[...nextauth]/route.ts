@@ -45,10 +45,6 @@ const authOptions: NextAuthOptions = {
         },
       },
       profile(profile) {
-        console.log(
-          "Complete GitHub profile:",
-          JSON.stringify(profile, null, 2)
-        );
         return {
           id: profile.id.toString(),
           name: profile.name ?? profile.login,
@@ -61,63 +57,49 @@ const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log("SignIn callback triggered", { user, account, profile });
-
-      if (!user || !profile) return false;
+      if (account?.provider !== "github") return false;
+      if (!profile) return false;
 
       try {
         const githubProfile = profile as GitHubProfile;
+        const userId = user.id;
 
-        // 简化逻辑：只通过GitHub ID查找用户
         const existingUser = await db.query.users.findFirst({
-          where: eq(users.githubId, githubProfile.id),
+          where: eq(users.id, userId),
         });
 
         if (existingUser) {
-          // 更新现有用户信息
           await db
             .update(users)
             .set({
               username: githubProfile.login || "",
               displayName: githubProfile.name || "",
               avatarUrl: githubProfile.avatar_url || "",
-              email: githubProfile.email,
-              name: githubProfile.name || githubProfile.login || "",
-              image: githubProfile.avatar_url || "",
               updatedAt: new Date(),
             })
-            .where(eq(users.githubId, githubProfile.id));
+            .where(eq(users.id, userId));
 
-          // 记录登录行为
-          await logUserBehavior(existingUser.id, "login");
-          console.log("用户登录:", existingUser.id);
+          await logUserBehavior(userId, "login");
+          console.log("用户登录:", userId);
         } else {
-          // 创建新用户
-          const newUser = await db
-            .insert(users)
-            .values({
+          await logUserBehavior(userId, "signup");
+          console.log("新用户首次登录:", userId);
+
+          await db
+            .update(users)
+            .set({
               githubId: githubProfile.id,
               username: githubProfile.login || "",
               displayName: githubProfile.name || "",
               avatarUrl: githubProfile.avatar_url || "",
-              email: githubProfile.email || "",
-              name: githubProfile.name || githubProfile.login || "",
-              image: githubProfile.avatar_url || "",
             })
-            .returning();
-
-          if (newUser && newUser[0]) {
-            // 记录首次登录
-            await logUserBehavior(newUser[0].id, "signup");
-            console.log("创建了新用户:", newUser[0].id);
-          }
+            .where(eq(users.id, userId));
         }
 
-        // 始终允许登录
         return true;
       } catch (error) {
         console.error("Error in signIn callback:", error);
-        return true; // 即使自定义逻辑失败也允许登录
+        return true;
       }
     },
     async jwt({ token, user, account, profile }) {
@@ -128,29 +110,11 @@ const authOptions: NextAuthOptions = {
           email?: string;
         };
 
-        interface GithubUser {
-          id: string;
-          name?: string | null;
-          email?: string | null;
-          image?: string;
-          login?: string;
-        }
-
-        console.log(
-          "GitHub profile in JWT callback:",
-          JSON.stringify(githubProfile, null, 2)
-        );
-        console.log(
-          "User object in JWT callback:",
-          JSON.stringify(user, null, 2)
-        );
-
-        const githubLogin = (user as GithubUser).login || githubProfile.login;
-
         return {
           ...token,
           accessToken: account.access_token,
-          username: githubLogin || user.email?.split("@")[0],
+          username:
+            user.login || githubProfile.login || user.email?.split("@")[0],
           displayName:
             user.name ||
             githubProfile.name ||
@@ -161,17 +125,11 @@ const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // Log token for debugging
-      console.log("Token in session callback:", JSON.stringify(token, null, 2));
-
       if (session.user) {
         session.user.name =
           (token.displayName as string) || session.user.name || "user";
         session.user.accessToken = token.accessToken as string;
         session.user.username = token.username as string;
-
-        // Log what we're setting for username
-        console.log("Setting session.user.username to:", token.username);
       }
       return session;
     },
