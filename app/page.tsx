@@ -6,7 +6,7 @@ import { TemplatePreview } from "@/components/template-preview";
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen overflow-hidden text-center sm:py-0 sm:h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white
+    <div className="relative min-h-screen overflow-hidden text-center sm:py-0 sm:h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white
     flex flex-col gap-8 items-center justify-center">
       <Meteors number={30} />
 

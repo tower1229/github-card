@@ -36,19 +36,19 @@ export function ProfileContributePage({ username }: { username: string }) {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
         Loading...
       </div>
     );
   if (!userData)
     return (
-      <div className="min-h-screen bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
         User not found
       </div>
     );
 
   return (
-    <div className="relative min-h-screen  text-white px-4 py-4 sm:py-8 bg-gradient-to-b from-orange-600 via-orange-800 to-gray-900">
+    <div className="relative min-h-screen  text-white px-4 py-4 sm:py-8 bg-linear-to-b from-orange-600 via-orange-800 to-gray-900">
       <BingImg className="absolute left-0 top-0 w-full h-full object-cover" />
 
       <div

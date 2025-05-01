@@ -26,7 +26,7 @@ export function BlurFade({ children, delay = 0, className }: BlurFadeProps) {
         'transition-all duration-700 ease-out',
         isVisible
           ? 'opacity-100 blur-none translate-y-0'
-          : 'opacity-0 blur-sm translate-y-4',
+          : 'opacity-0 blur-xs translate-y-4',
         className
       )}
     >

@@ -7,7 +7,7 @@ export function ContributionGrade({ grade }: { grade: string }) {
       <AnimatedGradientText className='bg-black rounded-full flex items-center justify-center w-12 h-12'>
         <span
           className={cn(
-            ` animate-gradient text-2xl font-bold bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
+            ` animate-gradient text-2xl font-bold bg-linear-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
           )}
         >{grade}</span>
       </AnimatedGradientText>
