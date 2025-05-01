@@ -72,7 +72,7 @@ export function ProfileContributePage({ username }: { username: string }) {
         {/* Footer */}
         {
           <BlurFade delay={1300}>
-            <Footer showQrcode={isDownloading} />
+            <Footer showQrcode />
           </BlurFade>
         }
       </div>

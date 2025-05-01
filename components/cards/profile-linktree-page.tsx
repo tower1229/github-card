@@ -80,9 +80,24 @@ export function ProfileLinktreePage({ username }: { username: string }) {
         {/* Navigation buttons - updated with real data */}
         <div className="space-y-4 max-w-md mx-auto my-10">
           {[
-            { label: "Public Repos", value: userData.public_repos, delay: 500, icon: BookBookmark },
-            { label: "Followers", value: userData.followers, delay: 600, icon: Users },
-            { label: "Total Stars", value: userData.total_stars, delay: 700, icon: Star },
+            {
+              label: "Public Repos",
+              value: userData.public_repos,
+              delay: 500,
+              icon: BookBookmark,
+            },
+            {
+              label: "Followers",
+              value: userData.followers,
+              delay: 600,
+              icon: Users,
+            },
+            {
+              label: "Total Stars",
+              value: userData.total_stars,
+              delay: 700,
+              icon: Star,
+            },
             {
               label: "Total Commits",
               value: userData.commits,
@@ -92,7 +107,9 @@ export function ProfileLinktreePage({ username }: { username: string }) {
           ].map((item) => (
             <BlurFade key={item.label} delay={item.delay}>
               <button className="w-full bg-white/90 text-black rounded-full py-4 px-6 gap-3 flex items-center">
-                <HyperText className="text-sm font-normal flex-1 text-left ">{item.label}</HyperText>
+                <HyperText className="text-sm font-normal flex-1 text-left ">
+                  {item.label}
+                </HyperText>
                 <span className="text-sm ">
                   {typeof item.value === "number" ? (
                     <NumberTicker value={item.value} />
@@ -107,7 +124,7 @@ export function ProfileLinktreePage({ username }: { username: string }) {
         </div>
         {/* Footer */}
         <BlurFade delay={1300}>
-          <Footer showQrcode={isDownloading} />
+          <Footer showQrcode />
         </BlurFade>
       </div>
     </div>
