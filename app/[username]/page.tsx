@@ -1,6 +1,5 @@
 import { ProfileContributePage } from "./profile-contribute-page";
 import { ProfileLinktreePage } from "./profile-linktree-page";
-import { ClientWrapper } from "./client-wrapper";
 import type { Metadata } from "next";
 
 type Props = {
@@ -39,9 +38,5 @@ export default async function ProfilePage({ params, searchParams }: Props) {
 
   const Component = templates[template] || templates.contribute;
 
-  return (
-    <ClientWrapper username={username}>
-      <Component username={username} />
-    </ClientWrapper>
-  );
+  return <Component username={username} />;
 }

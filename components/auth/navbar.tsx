@@ -15,6 +15,8 @@ export function Navbar({ showLinks = false }: NavbarProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const isGeneratePage =
+    pathname === "/generate" || pathname.startsWith("/generate?");
 
   return (
     <nav className="sticky top-0 w-full bg-[#0d1117]/95 backdrop-blur-sm z-50 border-b border-[#21262d]">
@@ -54,12 +56,20 @@ export function Navbar({ showLinks = false }: NavbarProps) {
           )}
         </div>
         <div className="flex items-center space-x-4">
+          {session && !isHomePage && !isGeneratePage && (
+            <Link
+              href="/generate?template=contribute"
+              className="text-[#c9d1d9] hover:text-white transition"
+            >
+              Generate Card
+            </Link>
+          )}
           {session && !isHomePage && (
             <Link
               href="/#templates"
               className="text-[#c9d1d9] hover:text-white transition"
             >
-              Templates
+              Change Template
             </Link>
           )}
           <GithubButton />

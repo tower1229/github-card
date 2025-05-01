@@ -7,16 +7,18 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import PreviewLinktree from "@/public/preview/linktree.png";
 import PreviewContribute from "@/public/preview/contribute.png";
+import { signIn } from "next-auth/react";
 
 export function TemplateShowcase() {
   const { data: session } = useSession();
   const router = useRouter();
 
   const handleTemplateAction = (templateValue: string) => {
-    if (session?.user?.username) {
-      router.push(`/${session.user.username}?template=${templateValue}`);
+    if (session) {
+      router.push(`/generate?template=${templateValue}`);
     } else {
-      // TODO: preview template
+      // 如果未登录，触发登录流程
+      signIn("github", { callbackUrl: "/#templates" });
     }
   };
 

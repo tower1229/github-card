@@ -27,9 +27,7 @@ export function QuickStart() {
       number: 3,
       title: "Share & Export",
       description: "Make it yours and publish to your profile",
-      link: session?.user?.username
-        ? `/${session.user.username}?template=contribute`
-        : "#templates",
+      link: session ? "/generate?template=contribute" : "#templates",
       isCompleted: false,
     },
   ];

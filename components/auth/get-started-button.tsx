@@ -13,15 +13,15 @@ export function GetStartedButton() {
     if (!session) {
       signIn("github", { callbackUrl: "/#templates" });
     }
-    // 如果已登录，Link 组件会处理导航到 #templates
+    // 如果已登录，Link 组件会处理导航
   };
 
   return (
     <>
       {session ? (
-        <Link href="#templates">
+        <Link href="/#templates">
           <Button className="px-8 py-3 bg-[#fa7b19] hover:bg-[#e76b0a] text-white rounded-lg font-medium transition transform hover:scale-105">
-            Choose Template
+            Create Your Card
           </Button>
         </Link>
       ) : (
