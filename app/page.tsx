@@ -3,8 +3,6 @@ import Meteors from "@/components/ui/meteors";
 import { Button } from "@/components/ui/button";
 import { Eye, Calendar, Star } from "lucide-react";
 import { TemplateShowcase } from "@/components/template-showcase";
-import { Features } from "@/components/features";
-import { QuickStart } from "@/components/quick-start";
 import { SocialProof } from "@/components/social-proof";
 import { Footer } from "@/components/footer";
 import GridPattern from "@/components/ui/grid-pattern";
@@ -69,12 +67,6 @@ export default function HomePage() {
           </BlurFade>
         </div>
       </section>
-
-      {/* Features Section */}
-      <Features />
-
-      {/* Quick Start Section */}
-      <QuickStart />
 
       {/* Templates Section */}
       <section id="templates" className="py-20 bg-[#161b22]">

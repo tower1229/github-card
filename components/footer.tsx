@@ -18,7 +18,6 @@ export function Footer({ showQrcode = false }: FooterProps) {
     {
       title: "Product",
       links: [
-        { name: "Features", href: "#features" },
         { name: "Templates", href: "#templates" },
         { name: "Examples", href: "#examples" },
       ],
