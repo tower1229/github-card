@@ -3,10 +3,8 @@ import { db } from "@/lib/db";
 import { shareLinks, userBehaviors } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { token: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ token: string }> }) {
+  const params = await props.params;
   try {
     const token = params.token;
     if (!token) {

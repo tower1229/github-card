@@ -4,10 +4,8 @@ import { db } from "@/lib/db";
 import { shareLinks, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ userId: string }> }) {
+  const params = await props.params;
   try {
     // Get the authenticated user
     const session = await getServerSession();

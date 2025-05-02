@@ -1,70 +1,85 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { GithubButton } from "@/components/auth/github-button";
+import { Navbar } from "@/components/auth/navbar";
 
-export default function AuthError() {
+function ErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
-  const errorDescription = getErrorMessage(error);
 
-  const handleSignIn = () => {
-    signIn("github", { callbackUrl: `${window.location.origin}/#templates` });
+  useEffect(() => {
+    if (error) {
+      console.error("Authentication error:", error);
+    }
+  }, [error]);
+
+  // Map error codes to user-friendly messages
+  const getErrorMessage = (errorCode: string | null) => {
+    switch (errorCode) {
+      case "Configuration":
+        return "There is a problem with the server configuration.";
+      case "AccessDenied":
+        return "You do not have permission to sign in.";
+      case "Verification":
+        return "The verification link was invalid or has expired.";
+      case "OAuthSignin":
+        return "Error in the OAuth sign-in process.";
+      case "OAuthCallback":
+        return "Error in the OAuth callback process.";
+      case "OAuthCreateAccount":
+        return "Could not create user account with the OAuth provider.";
+      case "EmailCreateAccount":
+        return "Could not create user account with email.";
+      case "Callback":
+        return "Error occurred in the authentication process callback.";
+      case "OAuthAccountNotLinked":
+        return "To confirm your identity, sign in with the same account you used originally.";
+      case "SessionRequired":
+        return "Authentication session is required to access this page.";
+      default:
+        return "An unexpected error occurred during authentication.";
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-slate-900">
-        <h1 className="mb-4 text-2xl font-bold text-center text-gray-800 dark:text-white">
-          认证错误
-        </h1>
-
-        <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-slate-800 dark:text-red-400">
-          <p className="font-medium">登录过程中出现问题</p>
-          <p className="mt-2">{errorDescription}</p>
-        </div>
-
-        <div className="flex flex-col space-y-4">
-          <Button
-            onClick={handleSignIn}
-            className="flex items-center justify-center w-full px-4 py-2 space-x-2 bg-[#fa7b19] hover:bg-[#e76b0a] transition transform hover:scale-105"
-          >
-            <Github className="w-5 h-5" />
-            <span>重试 GitHub 登录</span>
-          </Button>
-
-          <Link href="/" passHref>
-            <Button variant="outline" className="w-full">
-              返回首页
-            </Button>
-          </Link>
+    <div className="max-w-md mx-auto text-center">
+      <h2 className="text-3xl font-bold mb-4">Authentication Error</h2>
+      <p className="text-[#c9d1d9] mb-8">{getErrorMessage(error)}</p>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <Link href="/">
+          <Button className="bg-[#fa7b19] hover:bg-[#e76b0a]">Go home</Button>
+        </Link>
+      </div>
+      <div className="mt-8">
+        <p className="text-[#8b949e] mb-4">Try signing in again:</p>
+        <div className="flex justify-center">
+          <GithubButton />
         </div>
       </div>
     </div>
   );
 }
 
-function getErrorMessage(error: string | null): string {
-  switch (error) {
-    case "Callback":
-      return "GitHub 登录回调处理失败。请确保您的 GitHub 应用程序配置正确，并且回调 URL 已在 GitHub 开发者设置中正确配置。";
-    case "AccessDenied":
-      return "您的登录请求被拒绝。您可能拒绝了授权请求或没有足够的权限。";
-    case "OAuthSignin":
-      return "GitHub OAuth 登录过程初始化失败。";
-    case "OAuthCallback":
-      return "GitHub OAuth 回调处理失败。";
-    case "OAuthCreateAccount":
-      return "无法使用 GitHub 账户创建用户账号。";
-    case "EmailCreateAccount":
-      return "无法使用电子邮件创建用户账号。";
-    case "Verification":
-      return "验证电子邮件链接已过期或已被使用。";
-    case "Default":
-    default:
-      return "登录过程中出现未知错误。请重试或联系支持团队。";
-  }
+export default function AuthError() {
+  return (
+    <div className="min-h-screen bg-[#0d1117] text-white">
+      <Navbar />
+
+      <div className="container mx-auto px-4 py-16">
+        <Suspense
+          fallback={
+            <div className="max-w-md mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-4">Loading...</h2>
+            </div>
+          }
+        >
+          <ErrorContent />
+        </Suspense>
+      </div>
+    </div>
+  );
 }
