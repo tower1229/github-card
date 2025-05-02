@@ -57,47 +57,15 @@ export const accounts = pgTable(
   })
 );
 
-// NextAuth 会话表
-export const sessions = pgTable("session", {
-  sessionToken: varchar("sessionToken", { length: 255 }).primaryKey(),
-  userId: uuid("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: timestamp("expires", { mode: "date" }).notNull(),
-});
-
-// NextAuth 验证令牌表
-export const verificationTokens = pgTable(
-  "verification_token",
-  {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    token: varchar("token", { length: 255 }).notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey({
-      columns: [vt.identifier, vt.token],
-    }),
-  })
-);
-
 export const userRelations = relations(users, ({ many }) => ({
   behaviors: many(userBehaviors),
   shareLinks: many(shareLinks),
   accounts: many(accounts),
-  sessions: many(sessions),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, {
     fields: [accounts.userId],
-    references: [users.id],
-  }),
-}));
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, {
-    fields: [sessions.userId],
     references: [users.id],
   }),
 }));
@@ -153,6 +121,3 @@ export type NewShareLink = typeof shareLinks.$inferInsert;
 
 export type Account = typeof accounts.$inferSelect;
 export type NewAccount = typeof accounts.$inferInsert;
-
-export type Session = typeof sessions.$inferSelect;
-export type NewSession = typeof sessions.$inferInsert;
