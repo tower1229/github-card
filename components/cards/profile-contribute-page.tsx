@@ -6,14 +6,16 @@ import { ShareButton } from "@/components/share-button";
 import { ProfileContribute } from "@/components/profile-contribute";
 import { ProfileTotal } from "@/components/profile-total";
 import { BingImg } from "@/components/bing-img";
-
 import { GitHubData } from "@/lib/types";
+import { ShareContextData } from "@/app/generate/page";
 
 interface ProfileContributePageProps {
   username: string;
   hideMenu?: boolean;
   sharedData?: GitHubData;
   onDownloadStateChange?: (downloading: boolean) => void;
+  shareContext?: ShareContextData;
+  onUserDataLoaded?: (data: GitHubData) => void;
 }
 
 export function ProfileContributePage({
@@ -21,6 +23,8 @@ export function ProfileContributePage({
   hideMenu = false,
   sharedData,
   onDownloadStateChange,
+  shareContext,
+  onUserDataLoaded,
 }: ProfileContributePageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
@@ -40,6 +44,8 @@ export function ProfileContributePage({
         const result = await response.json();
         if (result.success) {
           setUserData(result.data);
+          // 通知父组件数据已加载
+          onUserDataLoaded?.(result.data);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -49,7 +55,7 @@ export function ProfileContributePage({
     };
 
     fetchUserData();
-  }, [username, sharedData]);
+  }, [username, sharedData, onUserDataLoaded]);
 
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -89,6 +95,7 @@ export function ProfileContributePage({
                   setIsDownloading={setIsDownloading}
                   userData={userData!}
                   templateType={"contribute"}
+                  shareContext={shareContext}
                 />
               )}
             </div>
@@ -104,7 +111,7 @@ export function ProfileContributePage({
         {/* Footer */}
         {
           <BlurFade delay={1300}>
-            <Footer showQrcode />
+            <Footer showQrcode shareContext={shareContext} />
           </BlurFade>
         }
       </div>

@@ -8,13 +8,19 @@ import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/public/logo.png";
 import { BlurFade } from "./blur-fade";
+import { ShareContextData } from "@/app/generate/page";
 
 export interface FooterProps {
   showQrcode?: boolean;
   showStyle?: 1 | 2;
+  shareContext?: ShareContextData;
 }
 
-export function Footer({ showQrcode = false, showStyle = 1 }: FooterProps) {
+export function Footer({
+  showQrcode = false,
+  showStyle = 1,
+  shareContext,
+}: FooterProps) {
   const footerLinks = [
     {
       title: "Product",
@@ -49,12 +55,14 @@ export function Footer({ showQrcode = false, showStyle = 1 }: FooterProps) {
 
   useEffect(() => {
     if (showQrcode) {
-      Qrcode.toCanvas(document.getElementById("canvas"), window.location.href, {
+      // 优先使用分享链接，如果没有则使用当前页面URL
+      const qrUrl = shareContext?.shareUrl || window.location.href;
+      Qrcode.toCanvas(document.getElementById("canvas"), qrUrl, {
         margin: 2,
         width: 100,
       });
     }
-  }, [showQrcode]);
+  }, [showQrcode, shareContext?.shareUrl]);
 
   if (showQrcode) {
     // showStyle

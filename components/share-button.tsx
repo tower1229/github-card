@@ -19,15 +19,18 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useState } from "react";
 import { GitHubData } from "@/lib/types";
+import { ShareContextData } from "@/app/generate/page";
 
 export function ShareButton({
   setIsDownloading,
   userData,
   templateType = "contribute",
+  shareContext,
 }: {
   setIsDownloading: (isDownloading: boolean) => void;
   userData: GitHubData;
   templateType?: string;
+  shareContext?: ShareContextData;
 }) {
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
 
@@ -56,6 +59,14 @@ export function ShareButton({
   };
 
   const generateAndCopyLink = async () => {
+    // 如果已有分享链接，直接复制
+    if (shareContext?.shareUrl) {
+      navigator.clipboard.writeText(shareContext.shareUrl);
+      toast.success("Share link copied to clipboard");
+      return;
+    }
+
+    // 否则通过API生成链接
     if (isGeneratingLink) return; // 防止重复点击
 
     try {
@@ -124,14 +135,19 @@ export function ShareButton({
                 Save as Image
               </Button>
             </DrawerClose>
-            <Button
-              variant="secondary"
-              onClick={generateAndCopyLink}
-              className="w-[200px] flex items-center justify-center gap-2 h-10"
-            >
-              <LinkIcon size={16} />
-              {isGeneratingLink ? "Generating..." : "Copy link"}
-            </Button>
+
+            <DrawerClose asChild>
+              <Button
+                variant="secondary"
+                onClick={generateAndCopyLink}
+                className="w-[200px] flex items-center justify-center gap-2 h-10"
+              >
+                <LinkIcon size={16} />
+                {shareContext?.isGenerating || isGeneratingLink
+                  ? "Generating..."
+                  : "Copy link"}
+              </Button>
+            </DrawerClose>
 
             <DrawerClose asChild>
               <Link href="/">

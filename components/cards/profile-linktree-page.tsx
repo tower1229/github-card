@@ -9,12 +9,15 @@ import HyperText from "@/components/ui/hyper-text";
 import { ProfileTotal } from "@/components/profile-total";
 import { ShareButton } from "@/components/share-button";
 import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
+import { ShareContextData } from "@/app/generate/page";
 
 interface ProfileLinktreePageProps {
   username: string;
   hideMenu?: boolean;
   sharedData?: GitHubData;
   onDownloadStateChange?: (downloading: boolean) => void;
+  shareContext?: ShareContextData;
+  onUserDataLoaded?: (data: GitHubData) => void;
 }
 
 export function ProfileLinktreePage({
@@ -22,6 +25,8 @@ export function ProfileLinktreePage({
   hideMenu = false,
   sharedData,
   onDownloadStateChange,
+  shareContext,
+  onUserDataLoaded,
 }: ProfileLinktreePageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
@@ -46,6 +51,8 @@ export function ProfileLinktreePage({
         const result = await response.json();
         if (result.success) {
           setUserData(result.data);
+          // 通知父组件数据已加载
+          onUserDataLoaded?.(result.data);
         }
       } catch (error: unknown) {
         // 忽略已中止的请求错误
@@ -62,7 +69,7 @@ export function ProfileLinktreePage({
     return () => {
       abortController.abort();
     };
-  }, [username, sharedData]);
+  }, [username, sharedData, onUserDataLoaded]);
 
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -98,6 +105,7 @@ export function ProfileLinktreePage({
                   setIsDownloading={setIsDownloading}
                   userData={userData!}
                   templateType={"linktree"}
+                  shareContext={shareContext}
                 />
               )}
             </div>
@@ -154,7 +162,7 @@ export function ProfileLinktreePage({
         </div>
         {/* Footer */}
         <BlurFade delay={1300}>
-          <Footer showQrcode />
+          <Footer showQrcode shareContext={shareContext} />
         </BlurFade>
       </div>
     </div>

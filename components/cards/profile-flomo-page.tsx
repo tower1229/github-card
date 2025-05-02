@@ -10,14 +10,16 @@ import NumberTicker from "@/components/ui/number-ticker";
 import AnimatedGradientText from "@/components/ui/animated-gradient-text";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-
 import { GitHubData } from "@/lib/types";
+import { ShareContextData } from "@/app/generate/page";
 
 interface ProfileFlomoPageProps {
   username: string;
   hideMenu?: boolean;
   sharedData?: GitHubData;
   onDownloadStateChange?: (downloading: boolean) => void;
+  shareContext?: ShareContextData;
+  onUserDataLoaded?: (data: GitHubData) => void;
 }
 
 export function ProfileFlomoPage({
@@ -25,6 +27,8 @@ export function ProfileFlomoPage({
   hideMenu = false,
   sharedData,
   onDownloadStateChange,
+  shareContext,
+  onUserDataLoaded,
 }: ProfileFlomoPageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
@@ -44,6 +48,8 @@ export function ProfileFlomoPage({
         const result = await response.json();
         if (result.success) {
           setUserData(result.data);
+          // 通知父组件数据已加载
+          onUserDataLoaded?.(result.data);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -53,7 +59,7 @@ export function ProfileFlomoPage({
     };
 
     fetchUserData();
-  }, [username, sharedData]);
+  }, [username, sharedData, onUserDataLoaded]);
 
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -93,6 +99,7 @@ export function ProfileFlomoPage({
                   setIsDownloading={setIsDownloading}
                   userData={userData!}
                   templateType={"flomo"}
+                  shareContext={shareContext}
                 />
               )}
             </div>
@@ -182,7 +189,7 @@ export function ProfileFlomoPage({
         {/* Footer */}
         {
           <BlurFade delay={1300}>
-            <Footer showQrcode showStyle={2} />
+            <Footer showQrcode showStyle={2} shareContext={shareContext} />
           </BlurFade>
         }
       </div>
