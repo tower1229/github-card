@@ -7,6 +7,7 @@ import { ProfileContributePage } from "@/components/cards/profile-contribute-pag
 import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
 import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
 import { GitHubData } from "@/lib/types";
+import LoadingSharedCard from "./loading";
 
 interface ShareLinkData {
   cardData: GitHubData;
@@ -58,13 +59,7 @@ export default function SharedCardPage() {
   const isExpired = expirationDate ? new Date() > expirationDate : false;
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0d1117] text-white">
-        <div className="animate-pulse text-xl">
-          Loading shared GitHub card...
-        </div>
-      </div>
-    );
+    return <LoadingSharedCard />;
   }
 
   if (error || isExpired) {
