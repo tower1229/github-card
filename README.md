@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitHub Card Generator
+
+A Next.js application that generates beautiful GitHub profile cards and enables time-limited sharing of these cards.
+
+## Features
+
+- GitHub authentication
+- GitHub profile card generation
+- Time-limited sharing links (3 days)
+- Database storage for users and shared links
+- Tracking of user behaviors for analytics
+
+## Tech Stack
+
+- **Framework**: Next.js 15
+- **Authentication**: NextAuth.js with GitHub provider
+- **Database**: Neon PostgreSQL
+- **ORM**: Drizzle ORM
+- **Styling**: Tailwind CSS
+- **Deployment**: Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18.17 or later
+- Yarn package manager
+- GitHub OAuth application
+- Neon PostgreSQL database
+
+### Setup
+
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/github-card.git
+cd github-card
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+yarn install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Set up environment variables:
 
-## Learn More
+Copy the example environment file and fill in your values:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cp example.env .env.local
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Required environment variables:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `NEXTAUTH_URL`: Your app URL (e.g., http://localhost:3000 for local development)
+- `NEXTAUTH_SECRET`: Secret for NextAuth (generate using `openssl rand -base64 32`)
+- `GITHUB_ID`: GitHub OAuth App Client ID
+- `GITHUB_SECRET`: GitHub OAuth App Client Secret
+- `DATABASE_URL`: Neon PostgreSQL connection string
 
-## Deploy on Vercel
+4. Set up the database:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Generate migrations
+yarn db:generate
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Push schema to database
+yarn db:push
+
+# (Optional) Seed the database with sample data
+yarn db:seed
+```
+
+5. Run the development server:
+
+```bash
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see the application.
+
+## Database Schema
+
+The application uses the following database tables:
+
+- **users**: Stores GitHub user information
+- **user_behaviors**: Tracks user actions (login, card generation, link sharing)
+- **share_links**: Stores generated share links with expiration dates
+
+## API Endpoints
+
+- **Authentication**: `/api/auth/[...nextauth]`
+- **Share Links**:
+  - `POST /api/share-links`: Create a new share link
+  - `GET /api/share-links`: List current user's share links
+  - `GET /api/share-links/:token`: Get a specific share link by token
+  - `GET /api/share-links/user/:userId`: Get all share links for a user
+
+## Deployment
+
+### Deploy on Vercel
+
+1. Create a Neon PostgreSQL database
+2. Set up environment variables in Vercel
+3. Deploy the application
+
+```bash
+vercel
+```
+
+### Environment Variables for Production
+
+Make sure to set these environment variables in your Vercel project:
+
+- `NEXTAUTH_URL`: Your production URL
+- `NEXTAUTH_SECRET`: Secret for NextAuth
+- `GITHUB_ID`: GitHub OAuth App Client ID
+- `GITHUB_SECRET`: GitHub OAuth App Client Secret
+- `DATABASE_URL`: Neon PostgreSQL connection string
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

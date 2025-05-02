@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Card - Create Beautiful Profile Cards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              inter: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .meteor {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: #fff;
+        opacity: 0;
+        transform: rotate(45deg);
+        animation: meteor 5s linear infinite;
+      }
+      @keyframes meteor {
+        0% {
+          transform: translateX(0) translateY(0) rotate(45deg);
+          opacity: 1;
+        }
+        70% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(-100px) translateY(100px) rotate(45deg);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white font-inter">
+    <!-- Navigation -->
+    <nav
+      class="fixed w-full bg-gray-900/95 backdrop-blur-sm z-50 border-b border-gray-800"
+    >
+      <div
+        class="container mx-auto px-4 py-4 flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-8">
+          <a href="/" class="text-xl font-bold">GitHub Card</a>
+          <div class="hidden md:flex space-x-6">
+            <a
+              href="#features"
+              class="text-gray-300 hover:text-white transition"
+              >Features</a
+            >
+            <a
+              href="#templates"
+              class="text-gray-300 hover:text-white transition"
+              >Templates</a
+            >
+            <a
+              href="#examples"
+              class="text-gray-300 hover:text-white transition"
+              >Examples</a
+            >
+          </div>
+        </div>
+        <button
+          class="flex items-center px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition transform hover:scale-105"
+          onclick="window.location.href='/auth/github'"
+        >
+          <svg
+            class="w-5 h-5 mr-2"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          Sign in with GitHub
+        </button>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section
+      class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
+    >
+      <div class="absolute inset-0 overflow-hidden">
+        <div id="meteor-container"></div>
+      </div>
+      <div class="container mx-auto px-4 text-center relative z-10">
+        <h1
+          class="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500"
+        >
+          Create Beautiful GitHub Profile Cards
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          Transform your GitHub profile into an eye-catching card that showcases
+          your achievements and personality.
+        </p>
+        <div
+          class="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <button
+            class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition transform hover:scale-105"
+          >
+            Get Started
+          </button>
+          <button
+            class="px-8 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition transform hover:scale-105"
+          >
+            View Examples
+          </button>
+        </div>
+        <div
+          class="mt-12 flex items-center justify-center space-x-8 text-gray-400"
+        >
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+              <path
+                fill-rule="evenodd"
+                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span>50K+ Users</span>
+          </div>
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span>100K+ Cards Created</span>
+          </div>
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.616a1 1 0 01.894-1.79l1.599.8L9 4.323V3a1 1 0 011-1z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span>4.8/5 Rating</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-800">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+          Core Features
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <div
+              class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Customizable Templates</h3>
+            <p class="text-gray-400">
+              Choose from a variety of professionally designed templates and
+              customize them to match your style.
+            </p>
+          </div>
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <div
+              class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Real-time Preview</h3>
+            <p class="text-gray-400">
+              See your changes instantly with our live preview feature. What you
+              see is what you get.
+            </p>
+          </div>
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <div
+              class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">One-Click Deploy</h3>
+            <p class="text-gray-400">
+              Deploy your profile card directly to your GitHub profile with just
+              one click.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section class="py-20 bg-gray-900">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+          Get Started in 3 Easy Steps
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div class="text-center">
+            <div
+              class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <span class="text-2xl font-bold">1</span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Sign in with GitHub</h3>
+            <p class="text-gray-400">
+              Connect your GitHub account to get started
+            </p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <span class="text-2xl font-bold">2</span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Choose a Template</h3>
+            <p class="text-gray-400">
+              Select from our beautiful template collection
+            </p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <span class="text-2xl font-bold">3</span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Customize & Deploy</h3>
+            <p class="text-gray-400">
+              Make it yours and publish to your profile
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="py-20 bg-gray-800">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+          Trusted by Developers
+        </h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <div class="flex items-center mb-4">
+              <img
+                src="https://github.com/identicons/user1.png"
+                alt="User"
+                class="w-12 h-12 rounded-full mr-4"
+              />
+              <div>
+                <h4 class="font-semibold">Sarah Chen</h4>
+                <p class="text-gray-400">Senior Developer @ Google</p>
+              </div>
+            </div>
+            <p class="text-gray-300">
+              "The best tool I've found for creating an impressive GitHub
+              profile. Simple yet powerful!"
+            </p>
+          </div>
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <div class="flex items-center mb-4">
+              <img
+                src="https://github.com/identicons/user2.png"
+                alt="User"
+                class="w-12 h-12 rounded-full mr-4"
+              />
+              <div>
+                <h4 class="font-semibold">Mark Thompson</h4>
+                <p class="text-gray-400">Tech Lead @ Microsoft</p>
+              </div>
+            </div>
+            <p class="text-gray-300">
+              "Transformed my GitHub profile from boring to professional in
+              minutes!"
+            </p>
+          </div>
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <div class="flex items-center mb-4">
+              <img
+                src="https://github.com/identicons/user3.png"
+                alt="User"
+                class="w-12 h-12 rounded-full mr-4"
+              />
+              <div>
+                <h4 class="font-semibold">Lisa Rodriguez</h4>
+                <p class="text-gray-400">Open Source Contributor</p>
+              </div>
+            </div>
+            <p class="text-gray-300">
+              "The templates are beautiful and the customization options are
+              endless!"
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // Create meteor effect
+      const container = document.getElementById("meteor-container");
+      function createMeteor() {
+        const meteor = document.createElement("div");
+        meteor.className = "meteor";
+        meteor.style.left = Math.random() * window.innerWidth + "px";
+        meteor.style.top = Math.random() * window.innerHeight + "px";
+        container.appendChild(meteor);
+        setTimeout(() => {
+          meteor.remove();
+        }, 5000);
+      }
+      setInterval(createMeteor, 2000);
+    </script>
+  </body>
+</html>

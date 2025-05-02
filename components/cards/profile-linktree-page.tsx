@@ -10,7 +10,17 @@ import { ProfileTotal } from "@/components/profile-total";
 import { ShareButton } from "@/components/share-button";
 import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
 
-export function ProfileLinktreePage({ username }: { username: string }) {
+interface ProfileLinktreePageProps {
+  username: string;
+  hideMenu?: boolean;
+  onDownloadStateChange?: (downloading: boolean) => void;
+}
+
+export function ProfileLinktreePage({
+  username,
+  hideMenu = false,
+  onDownloadStateChange,
+}: ProfileLinktreePageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,6 +57,11 @@ export function ProfileLinktreePage({ username }: { username: string }) {
 
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Forward downloading state to parent component if the prop exists
+  useEffect(() => {
+    onDownloadStateChange?.(isDownloading);
+  }, [isDownloading, onDownloadStateChange]);
+
   if (loading)
     return (
       <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
@@ -66,13 +81,19 @@ export function ProfileLinktreePage({ username }: { username: string }) {
 
       <div className={`relative z-10 w-content max-w-[100%] mx-auto`}>
         {/* Settings button */}
-        <BlurFade delay={100}>
-          <div className="relative h-10 overflow-hidden flex justify-end">
-            {!isDownloading && (
-              <ShareButton setIsDownloading={setIsDownloading} />
-            )}
-          </div>
-        </BlurFade>
+        {!isDownloading && !hideMenu && (
+          <BlurFade delay={100}>
+            <div className="relative h-10 overflow-hidden flex justify-end">
+              {!isDownloading && (
+                <ShareButton
+                  setIsDownloading={setIsDownloading}
+                  userData={userData!}
+                  templateType={"linktree"}
+                />
+              )}
+            </div>
+          </BlurFade>
+        )}
         {/* Profile section */}
         <BlurFade delay={300}>
           <ProfileTotal userData={userData} />
@@ -80,9 +101,24 @@ export function ProfileLinktreePage({ username }: { username: string }) {
         {/* Navigation buttons - updated with real data */}
         <div className="space-y-4 max-w-md mx-auto my-10">
           {[
-            { label: "Public Repos", value: userData.public_repos, delay: 500, icon: BookBookmark },
-            { label: "Followers", value: userData.followers, delay: 600, icon: Users },
-            { label: "Total Stars", value: userData.total_stars, delay: 700, icon: Star },
+            {
+              label: "Public Repos",
+              value: userData.public_repos,
+              delay: 500,
+              icon: BookBookmark,
+            },
+            {
+              label: "Followers",
+              value: userData.followers,
+              delay: 600,
+              icon: Users,
+            },
+            {
+              label: "Total Stars",
+              value: userData.total_stars,
+              delay: 700,
+              icon: Star,
+            },
             {
               label: "Total Commits",
               value: userData.commits,
@@ -92,7 +128,9 @@ export function ProfileLinktreePage({ username }: { username: string }) {
           ].map((item) => (
             <BlurFade key={item.label} delay={item.delay}>
               <button className="w-full bg-white/90 text-black rounded-full py-4 px-6 gap-3 flex items-center">
-                <HyperText className="text-sm font-normal flex-1 text-left ">{item.label}</HyperText>
+                <HyperText className="text-sm font-normal flex-1 text-left ">
+                  {item.label}
+                </HyperText>
                 <span className="text-sm ">
                   {typeof item.value === "number" ? (
                     <NumberTicker value={item.value} />
@@ -107,7 +145,7 @@ export function ProfileLinktreePage({ username }: { username: string }) {
         </div>
         {/* Footer */}
         <BlurFade delay={1300}>
-          <Footer showQrcode={isDownloading} />
+          <Footer showQrcode />
         </BlurFade>
       </div>
     </div>

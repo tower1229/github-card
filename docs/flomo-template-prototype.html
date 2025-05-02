@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flomo Template Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <script src="https://unpkg.com/react-github-calendar@4.0.1/dist/index.umd.js"></script>
+    <style>
+      .bg-linear-to-b {
+        background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
+      }
+
+      /* Custom animation for BlurFade effect */
+      @keyframes fadeInBlur {
+        from {
+          opacity: 0;
+          filter: blur(10px);
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          filter: blur(0);
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in-blur {
+        animation: fadeInBlur 0.8s ease forwards;
+        opacity: 0;
+      }
+
+      .delay-100 {
+        animation-delay: 100ms;
+      }
+      .delay-200 {
+        animation-delay: 200ms;
+      }
+      .delay-300 {
+        animation-delay: 300ms;
+      }
+      .delay-400 {
+        animation-delay: 400ms;
+      }
+      .delay-500 {
+        animation-delay: 500ms;
+      }
+      .delay-600 {
+        animation-delay: 600ms;
+      }
+      .delay-700 {
+        animation-delay: 700ms;
+      }
+      .delay-800 {
+        animation-delay: 800ms;
+      }
+      .delay-900 {
+        animation-delay: 900ms;
+      }
+      .delay-1000 {
+        animation-delay: 1000ms;
+      }
+      .delay-1100 {
+        animation-delay: 1100ms;
+      }
+      .delay-1200 {
+        animation-delay: 1200ms;
+      }
+      .delay-1300 {
+        animation-delay: 1300ms;
+      }
+
+      /* React GitHub Calendar custom styles */
+      .react-github-calendar {
+        width: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+          Arial, sans-serif;
+      }
+
+      .react-github-calendar__legend {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .react-github-calendar__legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.75rem;
+      }
+
+      .react-github-calendar__legend-box {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+      }
+
+      .contribution-grade {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+      }
+
+      .grade-s {
+        background-color: #8957e5;
+      }
+      .grade-a {
+        background-color: #3fb950;
+      }
+      .grade-b {
+        background-color: #9be9a8;
+      }
+      .grade-c {
+        background-color: #39d353;
+      }
+      .grade-d {
+        background-color: #40c463;
+      }
+
+      .calendar-placeholder {
+        height: 120px;
+        border-radius: 0.5rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.5);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 min-h-screen"
+  >
+    <div class="relative min-h-screen text-white px-4 py-4 sm:py-8">
+      <!-- Background image overlay (simulating BingImg) -->
+      <div
+        class="absolute left-0 top-0 w-full h-full object-cover opacity-20 bg-cover bg-center"
+        style="background-image: url('/preview/flomo.jpg')"
+      ></div>
+
+      <div
+        class="relative z-10 w-full max-w-2xl mx-auto bg-gray-900/20 backdrop-blur-lg rounded-lg p-4 pt-8"
+      >
+        <!-- Header with Share Button -->
+        <div
+          class="fade-in-blur delay-100 relative h-10 overflow-hidden flex justify-end"
+        >
+          <button
+            class="bg-white/20 hover:bg-white/30 text-white rounded-full px-4 py-2 text-sm flex items-center gap-2 transition"
+          >
+            <span>Share</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M176,160a39.75,39.75,0,0,0-28.25,11.75L90.51,142.3a39.4,39.4,0,0,0,0-28.6l57.24-29.45A40,40,0,1,0,136,56a41.08,41.08,0,0,0,1.26,9.9L80,95.33a40,40,0,1,0,0,65.34l57.26,29.43A41.08,41.08,0,0,0,136,200a40,40,0,1,0,40-40Zm0-128a24,24,0,1,1-24,24A24,24,0,0,1,176,32ZM64,152a24,24,0,1,1,24-24A24,24,0,0,1,64,152Zm112,72a24,24,0,1,1,24-24A24,24,0,0,1,176,224Z"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="fade-in-blur delay-200 flex flex-col items-center">
+          <a
+            href="https://github.com/octocat"
+            target="_blank"
+            class="w-28 sm:w-32 h-28 sm:h-32 rounded-full mb-6 relative"
+          >
+            <img
+              src="https://github.com/octocat.png"
+              alt="Profile"
+              class="object-cover rounded-full w-full h-full"
+            />
+            <div class="absolute bottom-0 right-0">
+              <div class="contribution-grade grade-a">A</div>
+            </div>
+          </a>
+          <h1 class="text-2xl font-bold mb-2">Octocat</h1>
+          <p class="text-gray-200">GitHub Mascot</p>
+        </div>
+
+        <!-- GitHub Contribution Calendar (Last Year) -->
+        <div
+          class="fade-in-blur delay-300 max-w-2xl mx-auto mt-8 bg-white/10 rounded-lg p-4"
+        >
+          <h3 class="text-lg font-medium mb-2 text-center">
+            Contributions (Last Year)
+          </h3>
+          <div class="calendar-placeholder">
+            GitHub Contribution Calendar Placeholder
+          </div>
+        </div>
+
+        <!-- Linktree Data Section -->
+        <div class="space-y-4 max-w-md mx-auto my-10">
+          <!-- Public Repos -->
+          <div
+            class="fade-in-blur delay-500 w-full bg-white/90 text-black rounded-full py-4 px-6 gap-3 flex items-center"
+          >
+            <span class="text-sm font-normal flex-1 text-left"
+              >Public Repos</span
+            >
+            <span class="text-sm">42</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM96,208H48V160H96Zm0-64H48V96H96Zm112,64H112V160H208Zm0-64H112V96H208Zm0-64H48V48H208Z"
+              ></path>
+            </svg>
+          </div>
+
+          <!-- Followers -->
+          <div
+            class="fade-in-blur delay-600 w-full bg-white/90 text-black rounded-full py-4 px-6 gap-3 flex items-center"
+          >
+            <span class="text-sm font-normal flex-1 text-left">Followers</span>
+            <span class="text-sm">12.5K</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,164a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"
+              ></path>
+            </svg>
+          </div>
+
+          <!-- Total Stars -->
+          <div
+            class="fade-in-blur delay-700 w-full bg-white/90 text-black rounded-full py-4 px-6 gap-3 flex items-center"
+          >
+            <span class="text-sm font-normal flex-1 text-left"
+              >Total Stars</span
+            >
+            <span class="text-sm">1.2K</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M239.2,97.29a16,16,0,0,0-13.81-11L166,81.17,142.72,25.81a15.95,15.95,0,0,0-29.44,0L90.07,81.17,30.61,86.24a16,16,0,0,0-9.11,28.07L71.13,156.6,58.6,215.49a16,16,0,0,0,23.84,17.34l51.56-33,51.56,33a16,16,0,0,0,23.84-17.34L196.87,156.6l49.63-42.29A16,16,0,0,0,239.2,97.29Z"
+              ></path>
+            </svg>
+          </div>
+
+          <!-- Total Commits -->
+          <div
+            class="fade-in-blur delay-800 w-full bg-white/90 text-black rounded-full py-4 px-6 gap-3 flex items-center"
+          >
+            <span class="text-sm font-normal flex-1 text-left"
+              >Total Commits</span
+            >
+            <span class="text-sm">3.7K</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path
+                d="M104,64A32,32,0,1,0,64,72H32a8,8,0,0,0,0,16H64a32.06,32.06,0,0,0,24-11V192a32,32,0,1,0,16,0V77A32.06,32.06,0,0,0,104,64ZM96,208a16,16,0,1,1-16-16A16,16,0,0,1,96,208ZM72,80A16,16,0,1,1,88,64,16,16,0,0,1,72,80Zm152,88a32,32,0,0,0-24-11H184V88a32,32,0,1,0-16,0v69a8,8,0,0,0,8,8h32a16,16,0,0,1,0,32H152a8,8,0,0,0,0,16h56a32,32,0,0,0,16-59ZM168,64a16,16,0,1,1,16,16A16,16,0,0,1,168,64Z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div
+          class="fade-in-blur delay-1300 text-center mt-10 pt-6 border-t border-white/20"
+        >
+          <p class="mb-2">
+            Powered by
+            <a
+              href="https://github.com/tower1229/github-card"
+              target="_blank"
+              class="text-blue-300 hover:underline"
+              >GitHub Card</a
+            >
+          </p>
+          <div class="flex justify-center mt-4">
+            <div class="w-24 h-24 bg-white p-1 rounded">
+              <div
+                class="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500"
+              >
+                QR Code
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

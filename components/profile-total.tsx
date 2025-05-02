@@ -6,7 +6,7 @@ import { GitHubData } from "@/lib/types";
 
 export function ProfileTotal({ userData }: { userData: GitHubData }) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center pt-6">
       <a
         href={`https://github.com/${userData.login}`}
         target="_blank"
