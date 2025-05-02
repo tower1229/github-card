@@ -11,9 +11,10 @@ import { BlurFade } from "./blur-fade";
 
 export interface FooterProps {
   showQrcode?: boolean;
+  showStyle?: 1 | 2;
 }
 
-export function Footer({ showQrcode = false }: FooterProps) {
+export function Footer({ showQrcode = false, showStyle = 1 }: FooterProps) {
   const footerLinks = [
     {
       title: "Product",
@@ -50,11 +51,18 @@ export function Footer({ showQrcode = false }: FooterProps) {
   }, [showQrcode]);
 
   if (showQrcode) {
+    // showStyle
+    const showStyles = {
+      1: "z-10 flex min-h-40 flex-col items-center justify-center gap-4 p-4 mt-10",
+      2: "z-10 flex items-center gap-4 p-4 mt-10 flex-row-reverse",
+    };
+
     return (
-      <div className="z-10 flex min-h-40 flex-col items-center justify-center gap-4 p-4 mt-10">
+      <div className={showStyles[showStyle]}>
         <canvas id="canvas"></canvas>
+        {showStyle === 2 && <div className="flex-1"></div>}
         <Link href="/">
-          <AnimatedGradientText className="bg-black/40">
+          <AnimatedGradientText className="bg-black/40 mx-0">
             <GithubLogo size={20} />
             <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
             <span
@@ -65,6 +73,11 @@ export function Footer({ showQrcode = false }: FooterProps) {
               Github Card
             </span>
           </AnimatedGradientText>
+          {showStyle === 2 && (
+            <div className="mt-2 text-sm">
+              Let passion guide your code, and purpose drive your impact
+            </div>
+          )}
         </Link>
       </div>
     );

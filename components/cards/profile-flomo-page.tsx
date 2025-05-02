@@ -95,7 +95,7 @@ export function ProfileFlomoPage({
         )}
         {/* header */}
         <BlurFade delay={200}>
-          <div className="flex gap-2 items-center py-4">
+          <div className="flex gap-2 items-center py-4 mb-8">
             <a
               href={`https://github.com/${userData.login}`}
               target="_blank"
@@ -150,7 +150,7 @@ export function ProfileFlomoPage({
               value: userData.contribution_grade,
             },
           ].map((item) => (
-            <div key={item.label}>
+            <div key={item.label} className="pl-2">
               {typeof item.value === "number" ? (
                 <NumberTicker
                   value={item.value}
@@ -177,7 +177,7 @@ export function ProfileFlomoPage({
         {/* Footer */}
         {
           <BlurFade delay={1300}>
-            <Footer showQrcode />
+            <Footer showQrcode showStyle={2} />
           </BlurFade>
         }
       </div>
