@@ -93,7 +93,7 @@ export function ProfileContributePage({
         <BlurFade delay={200}>
           <ProfileTotal userData={userData} />
         </BlurFade>
-        <ProfileContribute username={username} />
+        <ProfileContribute username={username} years={3} />
         {/* Footer */}
         {
           <BlurFade delay={1300}>

@@ -63,7 +63,7 @@ export function Navbar({ showLinks = false }: NavbarProps) {
               href="/#templates"
               className="text-[#c9d1d9] hover:text-white transition"
             >
-              Change Template
+              Back
             </Link>
           )}
           <GithubButton />

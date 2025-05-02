@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
 import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
 import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
+import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
 import { Navbar } from "@/components/auth/navbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -90,6 +91,7 @@ function GenerateContent() {
   const templates = {
     contribute: ProfileContributePage,
     linktree: ProfileLinktreePage,
+    flomo: ProfileFlomoPage,
   };
 
   // 检查模板是否有效

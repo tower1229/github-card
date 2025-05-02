@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import PreviewLinktree from "@/public/preview/linktree.png";
 import PreviewContribute from "@/public/preview/contribute.png";
+import PreviewFlomo from "@/public/preview/flomo.jpg";
 import { signIn } from "next-auth/react";
 
 export function TemplateShowcase() {
@@ -37,10 +38,17 @@ export function TemplateShowcase() {
       tag: "New",
       value: "contribute",
     },
+    {
+      name: "Flomo",
+      description: "A beautiful card showcasing your social links",
+      image: PreviewFlomo,
+      tag: "New",
+      value: "flomo",
+    },
   ];
 
   return (
-    <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[10px] max-w-7xl mx-auto">
       {templates.map((template, index) => (
         <BlurFade key={index} delay={200 * (index + 1)}>
           <div className="bg-gray-900 rounded-lg overflow-hidden relative group">
@@ -49,12 +57,17 @@ export function TemplateShowcase() {
                 {template.tag}
               </div>
             )}
-            <div className="relative h-60 overflow-hidden">
+            <div
+              className="relative w-full"
+              style={{
+                paddingBottom: "177.77%" /* 16:9 inverted = 9:16 = 177.77% */,
+              }}
+            >
               <Image
                 src={template.image}
                 alt={template.name}
-                className="w-full transform group-hover:scale-105 transition-transform duration-300"
-                style={{ objectFit: "cover" }}
+                fill
+                className="absolute inset-0 w-full object-contain transform group-hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="p-6">
