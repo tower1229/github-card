@@ -10,6 +10,7 @@ import { Navbar } from "@/components/auth/navbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { GitHubData } from "@/lib/types";
+import Loading from "@/components/loading";
 
 // 创建一个共享上下文
 export interface ShareContextData {
@@ -102,11 +103,7 @@ function GenerateContent() {
 
   // 显示加载状态
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-[#0d1117] text-white flex items-center justify-center">
-        <div className="animate-pulse text-xl">Loading...</div>
-      </div>
-    );
+    return <Loading />;
   }
 
   // 用户未登录，显示错误信息

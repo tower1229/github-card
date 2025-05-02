@@ -7,7 +7,7 @@ import { ProfileContributePage } from "@/components/cards/profile-contribute-pag
 import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
 import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
 import { GitHubData } from "@/lib/types";
-import LoadingSharedCard from "./loading";
+import LoadingSharedCard from "@/components/loading";
 
 interface ShareLinkData {
   cardData: GitHubData;
