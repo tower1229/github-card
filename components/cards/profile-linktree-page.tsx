@@ -92,7 +92,7 @@ export function ProfileLinktreePage({
     );
 
   return (
-    <div className="relative min-h-screen  text-white px-4 py-4 sm:py-8 bg-linear-to-b from-orange-600 via-orange-800 to-gray-900">
+    <div className="relative flex flex-col justify-center min-h-screen  text-white px-4 py-4 sm:py-8 bg-linear-to-b from-orange-600 via-orange-800 to-gray-900">
       <BingImg className="absolute left-0 top-0 w-full h-full object-cover" />
 
       <div className={`relative z-10 w-content max-w-[100%] mx-auto`}>
