@@ -38,16 +38,23 @@ export function ProfileContributePage({
     }
 
     if (!username) return;
+
+    const abortController = new AbortController();
+
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`/api/github/user/${username}`);
+        const response = await fetch(`/api/github/user/${username}`, {
+          signal: abortController.signal,
+        });
         const result = await response.json();
         if (result.success) {
           setUserData(result.data);
           // 通知父组件数据已加载
           onUserDataLoaded?.(result.data);
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        // 忽略已中止的请求错误
+        if (error instanceof Error && error.name === "AbortError") return;
         console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);
@@ -55,6 +62,11 @@ export function ProfileContributePage({
     };
 
     fetchUserData();
+
+    // 清理函数：组件卸载或 username 改变时中止请求
+    return () => {
+      abortController.abort();
+    };
   }, [username, sharedData, onUserDataLoaded]);
 
   const [isDownloading, setIsDownloading] = useState(false);

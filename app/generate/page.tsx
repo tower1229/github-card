@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, Suspense, useState } from "react";
+import { useEffect, Suspense, useState, useCallback } from "react";
 import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
 import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
 import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
@@ -29,6 +29,16 @@ function GenerateContent() {
     shareUrl: "",
     isGenerating: false,
   });
+
+  // 记忆化回调函数，防止重渲染导致的无限请求循环
+  const handleDownloadStateChange = useCallback((downloading: boolean) => {
+    setIsDownloading(downloading);
+  }, []);
+
+  // 处理加载用户数据 - 使用 useCallback 来记忆化函数，防止无限重渲染
+  const handleUserDataLoaded = useCallback((data: GitHubData) => {
+    setUserData(data);
+  }, []);
 
   // 根据模板类型选择相应的组件
   const templates = {
@@ -149,15 +159,6 @@ function GenerateContent() {
   }
 
   const Component = templates[templateType];
-
-  const handleDownloadStateChange = (downloading: boolean) => {
-    setIsDownloading(downloading);
-  };
-
-  // 处理加载用户数据
-  const handleUserDataLoaded = (data: GitHubData) => {
-    setUserData(data);
-  };
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
