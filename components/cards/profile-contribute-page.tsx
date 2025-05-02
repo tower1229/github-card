@@ -13,14 +13,12 @@ interface ProfileContributePageProps {
   username: string;
   hideMenu?: boolean;
   sharedData?: GitHubData;
-  templateType?: string;
 }
 
 export function ProfileContributePage({
   username,
   hideMenu = false,
   sharedData,
-  templateType = "contribute",
 }: ProfileContributePageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
@@ -83,7 +81,7 @@ export function ProfileContributePage({
                 <ShareButton
                   setIsDownloading={setIsDownloading}
                   userData={userData!}
-                  templateType={templateType}
+                  templateType={"contribute"}
                 />
               )}
             </div>

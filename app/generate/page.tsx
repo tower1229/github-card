@@ -96,13 +96,13 @@ function GenerateContent() {
 
   // 检查模板是否有效
   const templateType = template as keyof typeof templates;
-  const Component = templates[templateType] || templates.contribute;
+  const Component = templates[templateType];
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
       <Navbar />
 
-      <Component username={username} templateType={templateType} />
+      <Component username={username} />
     </div>
   );
 }

@@ -72,6 +72,7 @@ export function ProfileLinktreePage({ username }: { username: string }) {
               <ShareButton
                 setIsDownloading={setIsDownloading}
                 userData={userData!}
+                templateType={"linktree"}
               />
             )}
           </div>

@@ -17,14 +17,12 @@ interface ProfileFlomoPageProps {
   username: string;
   hideMenu?: boolean;
   sharedData?: GitHubData;
-  templateType?: string;
 }
 
 export function ProfileFlomoPage({
   username,
   hideMenu = false,
   sharedData,
-  templateType = "flomo",
 }: ProfileFlomoPageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
@@ -87,7 +85,7 @@ export function ProfileFlomoPage({
                 <ShareButton
                   setIsDownloading={setIsDownloading}
                   userData={userData!}
-                  templateType={templateType}
+                  templateType={"flomo"}
                 />
               )}
             </div>
