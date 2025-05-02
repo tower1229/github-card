@@ -17,12 +17,14 @@ interface ProfileFlomoPageProps {
   username: string;
   hideMenu?: boolean;
   sharedData?: GitHubData;
+  onDownloadStateChange?: (downloading: boolean) => void;
 }
 
 export function ProfileFlomoPage({
   username,
   hideMenu = false,
   sharedData,
+  onDownloadStateChange,
 }: ProfileFlomoPageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
@@ -55,6 +57,11 @@ export function ProfileFlomoPage({
 
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Forward downloading state to parent component if the prop exists
+  useEffect(() => {
+    onDownloadStateChange?.(isDownloading);
+  }, [isDownloading, onDownloadStateChange]);
+
   if (loading)
     return (
       <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
@@ -78,7 +85,7 @@ export function ProfileFlomoPage({
         } backdrop-blur-lg rounded-lg p-4 pt-8`}
       >
         {/* Settings button - only shown if hideMenu is false */}
-        {!hideMenu && (
+        {!hideMenu && !isDownloading && (
           <BlurFade delay={100}>
             <div className="relative h-10 overflow-hidden flex justify-end">
               {!isDownloading && (

@@ -35,24 +35,26 @@ export function ShareButton({
 
   const saveAsImage = () => {
     setIsDownloading(true);
-    const node = document.body;
-    if (node) {
-      toCanvas(node, {
-        canvasHeight: node.clientHeight * window.devicePixelRatio,
-        canvasWidth: node.clientWidth * window.devicePixelRatio,
-      })
-        .then(function (canvas: HTMLCanvasElement) {
-          downloadImage(canvas);
+    setTimeout(() => {
+      const node = document.body;
+      if (node) {
+        toCanvas(node, {
+          canvasHeight: node.clientHeight * window.devicePixelRatio,
+          canvasWidth: node.clientWidth * window.devicePixelRatio,
         })
-        .catch(function (error) {
-          console.error("Error saving image:", error);
-        })
-        .finally(() => {
-          setIsDownloading(false);
-        });
-    } else {
-      throw new Error("Node not found");
-    }
+          .then(function (canvas: HTMLCanvasElement) {
+            downloadImage(canvas);
+          })
+          .catch(function (error) {
+            console.error("Error saving image:", error);
+          })
+          .finally(() => {
+            setIsDownloading(false);
+          });
+      } else {
+        throw new Error("Node not found");
+      }
+    }, 50);
   };
 
   const generateAndCopyLink = async () => {

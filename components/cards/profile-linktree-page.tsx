@@ -10,7 +10,17 @@ import { ProfileTotal } from "@/components/profile-total";
 import { ShareButton } from "@/components/share-button";
 import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
 
-export function ProfileLinktreePage({ username }: { username: string }) {
+interface ProfileLinktreePageProps {
+  username: string;
+  hideMenu?: boolean;
+  onDownloadStateChange?: (downloading: boolean) => void;
+}
+
+export function ProfileLinktreePage({
+  username,
+  hideMenu = false,
+  onDownloadStateChange,
+}: ProfileLinktreePageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,6 +57,11 @@ export function ProfileLinktreePage({ username }: { username: string }) {
 
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Forward downloading state to parent component if the prop exists
+  useEffect(() => {
+    onDownloadStateChange?.(isDownloading);
+  }, [isDownloading, onDownloadStateChange]);
+
   if (loading)
     return (
       <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
@@ -66,17 +81,19 @@ export function ProfileLinktreePage({ username }: { username: string }) {
 
       <div className={`relative z-10 w-content max-w-[100%] mx-auto`}>
         {/* Settings button */}
-        <BlurFade delay={100}>
-          <div className="relative h-10 overflow-hidden flex justify-end">
-            {!isDownloading && (
-              <ShareButton
-                setIsDownloading={setIsDownloading}
-                userData={userData!}
-                templateType={"linktree"}
-              />
-            )}
-          </div>
-        </BlurFade>
+        {!isDownloading && !hideMenu && (
+          <BlurFade delay={100}>
+            <div className="relative h-10 overflow-hidden flex justify-end">
+              {!isDownloading && (
+                <ShareButton
+                  setIsDownloading={setIsDownloading}
+                  userData={userData!}
+                  templateType={"linktree"}
+                />
+              )}
+            </div>
+          </BlurFade>
+        )}
         {/* Profile section */}
         <BlurFade delay={300}>
           <ProfileTotal userData={userData} />

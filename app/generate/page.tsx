@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
 import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
 import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
@@ -16,6 +16,7 @@ function GenerateContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const template = searchParams.get("template") || "contribute";
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     // 如果用户未登录，则重定向到首页
@@ -55,11 +56,6 @@ function GenerateContent() {
     );
   }
 
-  // 用户名必须存在
-  console.log("Session object:", JSON.stringify(session, null, 2));
-  console.log("User object:", session.user);
-  console.log("Username from session:", session.user?.username);
-
   // 获取GitHub登录名 (URL中的用户名)
   const username = session.user?.username;
   // Not using displayName yet, so commenting it out to avoid linter errors
@@ -98,11 +94,18 @@ function GenerateContent() {
   const templateType = template as keyof typeof templates;
   const Component = templates[templateType];
 
+  const handleDownloadStateChange = (downloading: boolean) => {
+    setIsDownloading(downloading);
+  };
+
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
-      <Navbar />
+      {!isDownloading && <Navbar />}
 
-      <Component username={username} />
+      <Component
+        username={username}
+        onDownloadStateChange={handleDownloadStateChange}
+      />
     </div>
   );
 }

@@ -26,9 +26,15 @@ export function Footer({ showQrcode = false, showStyle = 1 }: FooterProps) {
     {
       title: "Resources",
       links: [
-        { name: "Documentation", href: "#" },
+        {
+          name: "Documentation",
+          href: "https://github.com/tower1229/github-card/blob/main/README.md",
+        },
         { name: "GitHub", href: "https://github.com/tower1229/github-card" },
-        { name: "Support", href: "#" },
+        {
+          name: "Support",
+          href: "https://github.com/tower1229/github-card/issues",
+        },
       ],
     },
     {

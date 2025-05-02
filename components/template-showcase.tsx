@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import PreviewLinktree from "@/public/preview/linktree.png";
 import PreviewContribute from "@/public/preview/contribute.png";
-import PreviewFlomo from "@/public/preview/flomo.jpg";
+import PreviewFlomo from "@/public/preview/flomo.png";
 import { signIn } from "next-auth/react";
 
 export function TemplateShowcase() {
@@ -28,14 +28,12 @@ export function TemplateShowcase() {
       name: "Linktree",
       description: "A beautiful card showcasing your social links",
       image: PreviewLinktree,
-      tag: "Popular",
       value: "linktree",
     },
     {
       name: "Contribution",
       description: "Highlight your GitHub contributions and stats",
       image: PreviewContribute,
-      tag: "New",
       value: "contribute",
     },
     {
