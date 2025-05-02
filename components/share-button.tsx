@@ -2,7 +2,6 @@ import {
   DotsThree,
   ImageSquare,
   Link as LinkIcon,
-  Check,
   House,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import {
 import { toCanvas } from "html-to-image";
 import { downloadImage } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { AnimatedSubscribeButton } from "@/components/ui/animated-subscribe-button";
 import Link from "next/link";
 import { useState } from "react";
 import { GitHubData } from "@/lib/types";
@@ -126,26 +124,14 @@ export function ShareButton({
                 Save as Image
               </Button>
             </DrawerClose>
-
-            <div onClick={generateAndCopyLink}>
-              <AnimatedSubscribeButton
-                buttonColor="#171717"
-                buttonTextColor="#ffffff"
-                subscribeStatus={false}
-                initialText={
-                  <span className="group inline-flex items-center gap-2 text-sm font-normal">
-                    <LinkIcon size={16} />
-                    {isGeneratingLink ? "Generating..." : "Copy link"}
-                  </span>
-                }
-                changeText={
-                  <span className="group inline-flex items-center gap-2 text-sm font-normal">
-                    <Check size={16} />
-                    Copied
-                  </span>
-                }
-              />
-            </div>
+            <Button
+              variant="secondary"
+              onClick={generateAndCopyLink}
+              className="w-[200px] flex items-center justify-center gap-2 h-10"
+            >
+              <LinkIcon size={16} />
+              {isGeneratingLink ? "Generating..." : "Copy link"}
+            </Button>
 
             <DrawerClose asChild>
               <Link href="/">

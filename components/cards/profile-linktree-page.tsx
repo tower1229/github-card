@@ -13,18 +13,27 @@ import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
 interface ProfileLinktreePageProps {
   username: string;
   hideMenu?: boolean;
+  sharedData?: GitHubData;
   onDownloadStateChange?: (downloading: boolean) => void;
 }
 
 export function ProfileLinktreePage({
   username,
   hideMenu = false,
+  sharedData,
   onDownloadStateChange,
 }: ProfileLinktreePageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!sharedData);
 
   useEffect(() => {
+    // If sharedData is provided, use it directly
+    if (sharedData) {
+      setUserData(sharedData);
+      setLoading(false);
+      return;
+    }
+
     if (!username) return;
 
     const abortController = new AbortController();
@@ -53,7 +62,7 @@ export function ProfileLinktreePage({
     return () => {
       abortController.abort();
     };
-  }, [username]);
+  }, [username, sharedData]);
 
   const [isDownloading, setIsDownloading] = useState(false);
 

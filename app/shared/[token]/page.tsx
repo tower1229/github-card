@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
+import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
+import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
 import { GitHubData } from "@/lib/types";
 
 interface ShareLinkData {
   cardData: GitHubData;
   expiresAt: string;
+  templateType: string;
 }
 
 export default function SharedCardPage() {
@@ -116,11 +119,27 @@ export default function SharedCardPage() {
   return (
     <div className="min-h-screen bg-[#0d1117]">
       {data.cardData.login && (
-        <ProfileContributePage
-          username={data.cardData.login}
-          hideMenu={true}
-          sharedData={data.cardData}
-        />
+        <>
+          {data.templateType === "linktree" ? (
+            <ProfileLinktreePage
+              username={data.cardData.login}
+              hideMenu={true}
+              sharedData={data.cardData}
+            />
+          ) : data.templateType === "flomo" ? (
+            <ProfileFlomoPage
+              username={data.cardData.login}
+              hideMenu={true}
+              sharedData={data.cardData}
+            />
+          ) : (
+            <ProfileContributePage
+              username={data.cardData.login}
+              hideMenu={true}
+              sharedData={data.cardData}
+            />
+          )}
+        </>
       )}
 
       <div className="fixed bottom-2 opacity-80 left-0 right-0 flex justify-center z-50">

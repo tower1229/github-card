@@ -3,7 +3,10 @@ import { db } from "@/lib/db";
 import { shareLinks, userBehaviors } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(request: NextRequest, props: { params: Promise<{ token: string }> }) {
+export async function GET(
+  request: NextRequest,
+  props: { params: Promise<{ token: string }> }
+) {
   const params = await props.params;
   try {
     const token = params.token;
@@ -55,6 +58,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
     return NextResponse.json({
       cardData: shareLink.cardData,
       expiresAt: shareLink.expiresAt,
+      templateType: shareLink.templateType,
     });
   } catch (error) {
     console.error("Error retrieving share link:", error);
