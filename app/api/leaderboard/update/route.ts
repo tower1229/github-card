@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withServerAuth } from "@/lib/server-auth";
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
 import { getGitHubContributions } from "@/lib/github/api";
 import { updateUserContribution } from "@/lib/leaderboard";
+
+// Enable Edge runtime for better performance and caching
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   return withServerAuth(async (req, userId) => {

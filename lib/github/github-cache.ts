@@ -133,6 +133,12 @@ export class CacheManager {
     this.prefix = prefix;
     this.useMemoryCache = !edgeConfig;
 
+    // Also check if edgeConfig object has the necessary methods
+    if (edgeConfig && (typeof edgeConfig.set !== 'function' || typeof edgeConfig.get !== 'function')) {
+      console.warn("Edge Config methods unavailable, falling back to memory cache");
+      this.useMemoryCache = true;
+    }
+
     if (this.useMemoryCache) {
       console.log(
         "Edge Config not available, using memory cache for GitHub data"
@@ -151,6 +157,17 @@ export class CacheManager {
 
     try {
       if (!edgeConfig) {
+        // Fallback to memory cache if Edge Config is not available
+        this.useMemoryCache = true;
+        memoryCache.set(fullKey, value, ttl);
+        return;
+      }
+
+      // Check if edgeConfig.set method exists
+      if (typeof edgeConfig.set !== 'function') {
+        console.warn("Edge Config 'set' method is not available, using memory cache");
+        this.useMemoryCache = true;
+        memoryCache.set(fullKey, value, ttl);
         return;
       }
 
@@ -177,7 +194,15 @@ export class CacheManager {
 
     try {
       if (!edgeConfig) {
-        return null;
+        this.useMemoryCache = true;
+        return memoryCache.get<T>(fullKey);
+      }
+
+      // Check if edgeConfig.get method exists
+      if (typeof edgeConfig.get !== 'function') {
+        console.warn("Edge Config 'get' method is not available, using memory cache");
+        this.useMemoryCache = true;
+        return memoryCache.get<T>(fullKey);
       }
 
       const cacheItem = await edgeConfig.get(fullKey);
@@ -192,7 +217,9 @@ export class CacheManager {
       if (item.expiry < Date.now()) {
         // Try to delete expired item
         try {
-          await edgeConfig.delete(fullKey);
+          if (typeof edgeConfig.delete === 'function') {
+            await edgeConfig.delete(fullKey);
+          }
         } catch {
           // Ignore deletion errors
         }
@@ -225,6 +252,14 @@ export class CacheManager {
 
     try {
       if (!edgeConfig) {
+        this.useMemoryCache = true;
+        return;
+      }
+
+      // Check if edge config methods exist
+      if (typeof edgeConfig.getAll !== 'function' || typeof edgeConfig.delete !== 'function') {
+        console.warn("Edge Config methods not available for cleanup, using memory cache only");
+        this.useMemoryCache = true;
         return;
       }
 
@@ -254,6 +289,7 @@ export class CacheManager {
       }
     } catch (error) {
       console.error("Edge Config cleanup error:", error);
+      this.useMemoryCache = true; // Switch to memory cache on persistent errors
     }
   }
 }

@@ -179,7 +179,6 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         shareUrl: `${baseUrl}/shared/${token}`,
-        cardData,
         expiresAt,
       });
     } catch (error) {

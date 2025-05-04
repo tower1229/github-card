@@ -46,6 +46,11 @@ const nextConfig = {
       },
     ],
   },
+  optimizeFonts: true,
+  experimental: {
+    typedRoutes: true,
+    webpackBuildWorker: true,
+  },
 };
 
 module.exports = nextConfig;
