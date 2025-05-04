@@ -10,6 +10,7 @@ import { ProfileTotal } from "@/components/profile-total";
 import { ShareButton } from "@/components/share-button";
 import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
 import { ShareContextData } from "@/app/generate/page";
+import { authFetch } from "@/lib/auth";
 
 interface ProfileLinktreePageProps {
   username: string;
@@ -45,7 +46,7 @@ export function ProfileLinktreePage({
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`/api/github/user/${username}`, {
+        const response = await authFetch(`/api/github/user/${username}`, {
           signal: abortController.signal,
         });
         const result = await response.json();

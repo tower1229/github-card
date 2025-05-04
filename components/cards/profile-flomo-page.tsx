@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { GitHubData } from "@/lib/types";
 import { ShareContextData } from "@/app/generate/page";
+import { authFetch } from "@/lib/auth";
 
 interface ProfileFlomoPageProps {
   username: string;
@@ -47,7 +48,7 @@ export function ProfileFlomoPage({
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`/api/github/user/${username}`, {
+        const response = await authFetch(`/api/github/user/${username}`, {
           signal: abortController.signal,
         });
         const result = await response.json();

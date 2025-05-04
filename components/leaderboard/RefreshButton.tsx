@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { authFetch } from "@/lib/auth";
 
 export function RefreshButton() {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -12,7 +13,7 @@ export function RefreshButton() {
 
     setIsRefreshing(true);
     try {
-      const response = await fetch("/api/leaderboard/refresh", {
+      const response = await authFetch("/api/leaderboard/refresh", {
         method: "GET",
       });
 

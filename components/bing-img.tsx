@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState, useEffect } from "react";
+import { authFetch } from "@/lib/auth";
 
 export function BingImg({ className = "" }: { className?: string }) {
   const [bgUrl, setBgUrl] = useState<string | null>(null);
@@ -10,7 +11,7 @@ export function BingImg({ className = "" }: { className?: string }) {
 
     const fetchBgUrl = async () => {
       try {
-        const response = await fetch("/api/background", {
+        const response = await authFetch("/api/background", {
           signal: controller.signal,
         });
         const blob = await response.blob();
@@ -29,12 +30,7 @@ export function BingImg({ className = "" }: { className?: string }) {
     };
   }, []);
 
-
   return bgUrl ? (
-    <img
-      src={bgUrl}
-      className={className}
-      alt="Bing daily background"
-    />
+    <img src={bgUrl} className={className} alt="Bing daily background" />
   ) : null;
 }

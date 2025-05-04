@@ -8,6 +8,7 @@ import { ProfileTotal } from "@/components/profile-total";
 import { BingImg } from "@/components/bing-img";
 import { GitHubData } from "@/lib/types";
 import { ShareContextData } from "@/app/generate/page";
+import { authFetch } from "@/lib/auth";
 
 interface ProfileContributePageProps {
   username: string;
@@ -49,7 +50,7 @@ export function ProfileContributePage({
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/github/user/${username}`, {
+        const response = await authFetch(`/api/github/user/${username}`, {
           signal: abortController.signal,
         });
 

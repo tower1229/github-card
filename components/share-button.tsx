@@ -21,6 +21,7 @@ import { useState } from "react";
 import { GitHubData } from "@/lib/types";
 import { ShareContextData } from "@/app/generate/page";
 import { useSession } from "next-auth/react";
+import { authFetch } from "@/lib/auth";
 
 export function ShareButton({
   setIsDownloading,
@@ -85,11 +86,8 @@ export function ShareButton({
       setIsGeneratingLink(true);
 
       // Call API to create share link
-      const response = await fetch("/api/share-links", {
+      const response = await authFetch("/api/share-links", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           cardData: userData,
           templateType: templateType,

@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { shareLinks } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(
@@ -27,10 +27,11 @@ export async function GET(
     }
 
     // 获取用户的所有分享链接
-    const userShareLinks = await db.query.shareLinks.findMany({
-      where: eq(shareLinks.userId, params.userId),
-      orderBy: (shareLinks, { desc }) => [desc(shareLinks.createdAt)],
-    });
+    const userShareLinks = await db
+      .select()
+      .from(shareLinks)
+      .where(eq(shareLinks.userId, params.userId))
+      .orderBy(desc(shareLinks.createdAt));
 
     return NextResponse.json(
       userShareLinks.map((link) => ({

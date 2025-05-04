@@ -32,11 +32,21 @@ export async function updateUserContribution(
       });
     }
 
-    // 更新后计算用户的新排名
-    await refreshLeaderboard();
+    try {
+      // 更新后计算用户的新排名
+      await refreshLeaderboard();
+    } catch (refreshError) {
+      console.error("刷新排行榜失败，但继续处理:", refreshError);
+    }
 
     // 返回用户的新排名
-    const rank = await getUserRank(userId);
+    let rank;
+    try {
+      rank = await getUserRank(userId);
+    } catch (rankError) {
+      console.error("获取用户排名失败:", rankError);
+      rank = null;
+    }
 
     return {
       success: true,
@@ -49,6 +59,24 @@ export async function updateUserContribution(
       success: false,
       error: "更新用户贡献数据失败",
     };
+  }
+}
+
+// 获取用户排名
+export async function getUserRank(userId: string): Promise<number | null> {
+  try {
+    const result = await db
+      .select({
+        rank: contributionLeaderboard.rank,
+      })
+      .from(contributionLeaderboard)
+      .where(eq(contributionLeaderboard.userId, userId))
+      .limit(1);
+
+    return result.length > 0 ? result[0].rank : null;
+  } catch (error) {
+    console.error("获取用户排名失败:", error);
+    return null;
   }
 }
 
@@ -106,20 +134,6 @@ export const getLeaderboard = cache(
     }
   }
 );
-
-// 获取特定用户的排名
-export async function getUserRank(userId: string) {
-  try {
-    const result = await db.query.contributionLeaderboard.findFirst({
-      where: eq(contributionLeaderboard.userId, userId),
-    });
-
-    return result?.rank;
-  } catch (error) {
-    console.error("获取用户排名失败:", error);
-    return null;
-  }
-}
 
 // 获取完整的排行榜数据，包括当前用户信息
 export async function getFullLeaderboard(
@@ -192,12 +206,27 @@ export async function refreshLeaderboard() {
       .from(contributionLeaderboard)
       .orderBy(desc(contributionLeaderboard.contributionCount));
 
-    // 批量更新每个用户的排名
-    for (let i = 0; i < rankedUsers.length; i++) {
-      await db
-        .update(contributionLeaderboard)
-        .set({ rank: i + 1 })
-        .where(eq(contributionLeaderboard.id, rankedUsers[i].id));
+    // 如果没有用户，直接返回
+    if (rankedUsers.length === 0) {
+      return {
+        success: true,
+        updatedAt: new Date().toISOString(),
+        affectedRows: 0,
+      };
+    }
+
+    // 使用批量更新而不是一个一个更新
+    try {
+      // 批量更新每个用户的排名
+      for (let i = 0; i < rankedUsers.length; i++) {
+        await db
+          .update(contributionLeaderboard)
+          .set({ rank: i + 1 })
+          .where(eq(contributionLeaderboard.id, rankedUsers[i].id));
+      }
+    } catch (updateError) {
+      console.error("更新排名失败:", updateError);
+      throw updateError;
     }
 
     return {

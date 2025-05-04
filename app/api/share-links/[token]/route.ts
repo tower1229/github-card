@@ -18,9 +18,13 @@ export async function GET(
     }
 
     // Get the share link
-    const shareLink = await db.query.shareLinks.findFirst({
-      where: eq(shareLinks.linkToken, token),
-    });
+    const shareLinkResults = await db
+      .select()
+      .from(shareLinks)
+      .where(eq(shareLinks.linkToken, token))
+      .limit(1);
+
+    const shareLink = shareLinkResults[0];
 
     if (!shareLink) {
       return NextResponse.json(

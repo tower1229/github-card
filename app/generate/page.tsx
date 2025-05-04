@@ -11,6 +11,14 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { GitHubData } from "@/lib/types";
 import Loading from "@/components/loading";
+import { authFetch } from "@/lib/auth";
+
+// Warn if environment variables are being accessed from client
+if (typeof window !== "undefined" && process.env.DATABASE_URL) {
+  console.warn(
+    "Warning: Environment variables like DATABASE_URL should not be accessed from client components"
+  );
+}
 
 // 创建一个共享上下文
 export interface ShareContextData {
@@ -74,12 +82,8 @@ function GenerateContent() {
           apiRequestStatus.current.isGeneratingLink = true;
           setShareContext((prev) => ({ ...prev, isGenerating: true }));
 
-          const response = await fetch("/api/share-links", {
+          const response = await authFetch("/api/share-links", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
             body: JSON.stringify({
               cardData: userData,
               templateType: templateType,

@@ -21,20 +21,26 @@ async function logUserBehavior(
   actionData?: Record<string, unknown>
 ) {
   try {
-    await db.insert(userBehaviors).values({
-      userId,
-      actionType,
-      actionData: actionData ? actionData : undefined,
-      performedAt: new Date(),
-    });
+    if (typeof window === "undefined") {
+      await db.insert(userBehaviors).values({
+        userId,
+        actionType,
+        actionData: actionData ? actionData : undefined,
+        performedAt: new Date(),
+      });
+    }
   } catch (error) {
     console.error("Failed to log user behavior:", error);
   }
 }
 
+// Server-side only check - prevents client-side execution errors
+const isServer = typeof window === "undefined";
+
 // 创建NextAuth配置
 export const authOptions: NextAuthOptions = {
-  adapter: DrizzleAdapter(db),
+  // Only use adapter on the server side
+  ...(isServer && { adapter: DrizzleAdapter(db) }),
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID as string,
@@ -61,39 +67,44 @@ export const authOptions: NextAuthOptions = {
       if (!profile) return false;
 
       try {
-        const githubProfile = profile as GitHubProfile;
-        const userId = user.id;
+        if (isServer) {
+          const githubProfile = profile as GitHubProfile;
+          const userId = user.id;
 
-        const existingUser = await db.query.users.findFirst({
-          where: eq(users.id, userId),
-        });
-
-        if (existingUser) {
-          await db
-            .update(users)
-            .set({
-              username: githubProfile.login || "",
-              displayName: githubProfile.name || "",
-              avatarUrl: githubProfile.avatar_url || "",
-              updatedAt: new Date(),
-            })
+          const existingUserResult = await db
+            .select()
+            .from(users)
             .where(eq(users.id, userId));
 
-          await logUserBehavior(userId, "login");
-          console.log("用户登录:", userId);
-        } else {
-          await logUserBehavior(userId, "signup");
-          console.log("新用户首次登录:", userId);
+          const existingUser = existingUserResult[0];
 
-          await db
-            .update(users)
-            .set({
-              githubId: githubProfile.id,
-              username: githubProfile.login || "",
-              displayName: githubProfile.name || "",
-              avatarUrl: githubProfile.avatar_url || "",
-            })
-            .where(eq(users.id, userId));
+          if (existingUser) {
+            await db
+              .update(users)
+              .set({
+                username: githubProfile.login || "",
+                displayName: githubProfile.name || "",
+                avatarUrl: githubProfile.avatar_url || "",
+                updatedAt: new Date(),
+              })
+              .where(eq(users.id, userId));
+
+            await logUserBehavior(userId, "login");
+            console.log("用户登录:", userId);
+          } else {
+            await logUserBehavior(userId, "signup");
+            console.log("新用户首次登录:", userId);
+
+            await db
+              .update(users)
+              .set({
+                githubId: githubProfile.id,
+                username: githubProfile.login || "",
+                displayName: githubProfile.name || "",
+                avatarUrl: githubProfile.avatar_url || "",
+              })
+              .where(eq(users.id, userId));
+          }
         }
 
         return true;
