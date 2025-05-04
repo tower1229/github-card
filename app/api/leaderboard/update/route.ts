@@ -21,10 +21,13 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // 确保贡献分数为整数以匹配数据库模式要求
+      const contributionScoreInt = Math.round(body.contributionScore);
+      
       // 更新用户贡献数据
       const result = await updateUserContribution(
         body.userId,
-        body.contributionScore
+        contributionScoreInt
       );
 
       return NextResponse.json(result);
