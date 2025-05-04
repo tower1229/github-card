@@ -22,25 +22,43 @@ export async function LeaderboardList() {
     minute: "2-digit",
   });
 
+  // 处理可能为空的排名和displayName
+  const sanitizedLeaderboard = leaderboard.map((item) => ({
+    ...item,
+    rank: item.rank ?? 0,
+    displayName: item.displayName || undefined,
+  }));
+
+  // 处理当前用户的排名和displayName
+  const sanitizedCurrentUser = currentUser
+    ? {
+        ...currentUser,
+        rank: currentUser.rank ?? 0,
+        displayName: currentUser.displayName || undefined,
+      }
+    : null;
+
   return (
     <div>
       <div className="px-4 py-3 bg-[#0d1117] border-b border-[#30363d] flex justify-between items-center">
-        <div className="text-lg font-semibold">总参与人数: {totalUsers}</div>
+        <div className="text-lg font-semibold">
+          Total participants: {totalUsers}
+        </div>
         <div className="text-sm text-[#8b949e]">
-          更新时间: {formattedLastUpdated}
+          Updated at: {formattedLastUpdated}
         </div>
       </div>
 
       <div className="divide-y divide-[#21262d]">
         <div className="grid grid-cols-12 px-4 py-3 text-[#8b949e] font-medium">
           <div className="col-span-1 text-center">#</div>
-          <div className="col-span-3">用户</div>
-          <div className="col-span-8 text-right pr-4">贡献总数</div>
+          <div className="col-span-3">User</div>
+          <div className="col-span-8 text-right pr-4">Total contributions</div>
         </div>
 
-        {leaderboard.length > 0 ? (
+        {sanitizedLeaderboard.length > 0 ? (
           <>
-            {leaderboard.map((item) => (
+            {sanitizedLeaderboard.map((item) => (
               <LeaderboardItem
                 key={item.userId}
                 item={item}
@@ -48,18 +66,20 @@ export async function LeaderboardList() {
               />
             ))}
 
-            {currentUser &&
-              !leaderboard.some((item) => item.userId === currentUserId) && (
+            {sanitizedCurrentUser &&
+              !sanitizedLeaderboard.some(
+                (item) => item.userId === currentUserId
+              ) && (
                 <>
                   <div className="py-2 px-4 text-center text-[#8b949e] italic">
                     ・・・
                   </div>
-                  <CurrentUserRank currentUser={currentUser} />
+                  <CurrentUserRank currentUser={sanitizedCurrentUser} />
                 </>
               )}
           </>
         ) : (
-          <div className="py-10 text-center text-[#8b949e]">暂无排行榜数据</div>
+          <div className="py-10 text-center text-[#8b949e]">No data yet</div>
         )}
       </div>
     </div>

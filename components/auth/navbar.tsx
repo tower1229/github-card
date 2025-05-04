@@ -15,10 +15,8 @@ interface NavbarProps {
 export function Navbar({ showLinks = false }: NavbarProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const isHomePage = pathname === "/";
   const isGeneratePage =
     pathname === "/generate" || pathname.startsWith("/generate?");
-  const isLeaderboardPage = pathname === "/leaderboard";
 
   return (
     <nav className="sticky top-0 w-full bg-[#0d1117]/95 backdrop-blur-sm z-50 border-b border-[#21262d]">
@@ -48,29 +46,19 @@ export function Navbar({ showLinks = false }: NavbarProps) {
               >
                 Examples
               </a>
+              <Link
+                href="/leaderboard"
+                className="text-[#c9d1d9] hover:text-white transition flex items-center gap-1"
+                aria-label="Leaderboard"
+              >
+                <Trophy size={16} className="text-yellow-400" />
+                <span>Leaderboard</span>
+              </Link>
             </div>
           )}
         </div>
         <div className="flex items-center space-x-4">
-          {session && !isLeaderboardPage && (
-            <Link
-              href="/leaderboard"
-              className="text-[#c9d1d9] hover:text-white transition flex items-center gap-1"
-              aria-label="贡献排行榜"
-            >
-              <Trophy size={16} className="text-yellow-400" />
-              <span>排行榜</span>
-            </Link>
-          )}
-          {session && !isHomePage && !isGeneratePage && (
-            <Link
-              href="/generate?template=contribute"
-              className="text-[#c9d1d9] hover:text-white transition"
-            >
-              Generate Card
-            </Link>
-          )}
-          {session && !isHomePage && (
+          {session && isGeneratePage && (
             <Link
               href="/#templates"
               className="text-[#c9d1d9] hover:text-white transition"
