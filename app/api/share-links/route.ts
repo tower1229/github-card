@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       // Generate a random token
       const token = uuidv4();
 
-      const result = await db
+      await db
         .insert(shareLinks)
         .values({
           userId,
