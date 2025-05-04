@@ -11,8 +11,8 @@ export function LeaderboardSkeleton() {
       <div className="divide-y divide-[#21262d]">
         <div className="grid grid-cols-12 px-4 py-3 text-[#8b949e] font-medium">
           <div className="col-span-1 text-center">#</div>
-          <div className="col-span-3">用户</div>
-          <div className="col-span-8 text-right pr-4">贡献总数</div>
+          <div className="col-span-3">User</div>
+          <div className="col-span-8 text-right pr-4">Contribution</div>
         </div>
 
         {Array.from({ length: 10 }).map((_, index) => (

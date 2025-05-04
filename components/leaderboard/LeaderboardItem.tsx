@@ -20,6 +20,10 @@ export function LeaderboardItem({ item, isCurrentUser }: LeaderboardItemProps) {
   const [prevRank, setPrevRank] = useState(item.rank);
   const [rankChange, setRankChange] = useState(0);
 
+  // Ensure contributionScore is always treated as a number
+  const score =
+    typeof item.contributionScore === "number" ? item.contributionScore : 0;
+
   useEffect(() => {
     if (prevRank !== item.rank) {
       setRankChange(prevRank - item.rank);
@@ -82,7 +86,7 @@ export function LeaderboardItem({ item, isCurrentUser }: LeaderboardItemProps) {
       </div>
 
       <div className="col-span-8 text-right pr-4 font-mono font-medium">
-        {item.contributionScore.toLocaleString()}
+        {score.toLocaleString()}
       </div>
     </motion.div>
   );

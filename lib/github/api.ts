@@ -94,7 +94,6 @@ export const getGitHubUserData = cache(
 export const getGitHubContributions = cache(
   async (username: string): Promise<GitHubContributionsData> => {
     const cacheKey = `github:contributions:${username}`;
-
     try {
       // Check cache
       const cachedData = await githubCacheManager.get<GitHubContributionsData>(
@@ -195,19 +194,28 @@ async function fetchGitHubContributions(
   username: string
 ): Promise<GitHubContributionsData> {
   try {
+    console.log(`Starting GitHub contributions fetch for user: ${username}`);
+
     const headers = {
       Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
       Accept: "application/vnd.github.v3+json",
     };
 
+    console.log("Using GitHub API headers:", {
+      hasAuthToken: !!process.env.GITHUB_ACCESS_TOKEN,
+      accept: headers.Accept,
+    });
+
     // Get user repos to calculate stars
-    const reposResponse = await fetch(
-      `https://api.github.com/users/${username}/repos?per_page=100`,
-      {
-        headers,
-        next: { revalidate: 86400 },
-      }
-    );
+    const reposUrl = `https://api.github.com/users/${username}/repos?per_page=100`;
+    console.log("Fetching repositories URL:", reposUrl);
+
+    const reposResponse = await fetch(reposUrl, {
+      headers,
+      next: { revalidate: 86400 },
+    });
+
+    console.log("Repos API response status:", reposResponse.status);
 
     if (!reposResponse.ok) {
       // If user doesn't exist, return default contribution data
@@ -226,62 +234,110 @@ async function fetchGitHubContributions(
         };
       }
 
+      const errorText = await reposResponse.text();
+      console.error("GitHub API error response:", errorText);
+
       throw new Error(
-        `GitHub API responded with status ${reposResponse.status}`
+        `GitHub API responded with status ${reposResponse.status}: ${errorText}`
       );
     }
 
     const reposData: GitHubRepoResponse[] = await reposResponse.json();
+    console.log(`Retrieved ${reposData.length} repositories`);
 
     // Get commits by user in the last year
-    const commitsResponse = await fetch(
-      `https://api.github.com/search/commits?q=author:${username}+author-date:>=${new Date(
-        Date.now() - 365 * 24 * 60 * 60 * 1000
-      ).toISOString()}`,
-      {
-        headers,
-        next: { revalidate: 86400 },
-      }
-    );
-    const commitsData: GitHubContributionsResponse =
-      await commitsResponse.json();
+    const startDate = new Date(
+      Date.now() - 365 * 24 * 60 * 60 * 1000
+    ).toISOString();
+    const commitsUrl = `https://api.github.com/search/commits?q=author:${username}+author-date:>=${startDate}`;
+    console.log("Fetching commits URL:", commitsUrl);
+
+    const commitsResponse = await fetch(commitsUrl, {
+      headers,
+      next: { revalidate: 86400 },
+    });
+    console.log("Commits API response status:", commitsResponse.status);
+
+    if (!commitsResponse.ok) {
+      console.warn(`Failed to fetch commits: ${commitsResponse.status}`);
+      console.log("Using fallback of 0 commits");
+    }
+
+    const commitsData: GitHubContributionsResponse = commitsResponse.ok
+      ? await commitsResponse.json()
+      : { total_count: 0 };
+
+    console.log("Commits count:", commitsData.total_count);
 
     // Get pull requests created by user
-    const prsResponse = await fetch(
-      `https://api.github.com/search/issues?q=author:${username}+type:pr`,
-      {
-        headers,
-        next: { revalidate: 86400 },
-      }
-    );
-    const prsData: GitHubContributionsResponse = await prsResponse.json();
+    const prsUrl = `https://api.github.com/search/issues?q=author:${username}+type:pr`;
+    console.log("Fetching PRs URL:", prsUrl);
+
+    const prsResponse = await fetch(prsUrl, {
+      headers,
+      next: { revalidate: 86400 },
+    });
+    console.log("PRs API response status:", prsResponse.status);
+
+    if (!prsResponse.ok) {
+      console.warn(`Failed to fetch PRs: ${prsResponse.status}`);
+      console.log("Using fallback of 0 PRs");
+    }
+
+    const prsData: GitHubContributionsResponse = prsResponse.ok
+      ? await prsResponse.json()
+      : { total_count: 0 };
+
+    console.log("PRs count:", prsData.total_count);
 
     // Get issues created by user
-    const issuesResponse = await fetch(
-      `https://api.github.com/search/issues?q=author:${username}+type:issue`,
-      {
-        headers,
-        next: { revalidate: 86400 },
-      }
-    );
-    const issuesData: GitHubContributionsResponse = await issuesResponse.json();
+    const issuesUrl = `https://api.github.com/search/issues?q=author:${username}+type:issue`;
+    console.log("Fetching issues URL:", issuesUrl);
+
+    const issuesResponse = await fetch(issuesUrl, {
+      headers,
+      next: { revalidate: 86400 },
+    });
+    console.log("Issues API response status:", issuesResponse.status);
+
+    if (!issuesResponse.ok) {
+      console.warn(`Failed to fetch issues: ${issuesResponse.status}`);
+      console.log("Using fallback of 0 issues");
+    }
+
+    const issuesData: GitHubContributionsResponse = issuesResponse.ok
+      ? await issuesResponse.json()
+      : { total_count: 0 };
+
+    console.log("Issues count:", issuesData.total_count);
 
     // Get PRs reviewed by user
-    const reviewsResponse = await fetch(
-      `https://api.github.com/search/issues?q=reviewed-by:${username}+type:pr`,
-      {
-        headers,
-        next: { revalidate: 86400 },
-      }
-    );
-    const reviewsData: GitHubContributionsResponse =
-      await reviewsResponse.json();
+    const reviewsUrl = `https://api.github.com/search/issues?q=reviewed-by:${username}+type:pr`;
+    console.log("Fetching PR reviews URL:", reviewsUrl);
+
+    const reviewsResponse = await fetch(reviewsUrl, {
+      headers,
+      next: { revalidate: 86400 },
+    });
+    console.log("Reviews API response status:", reviewsResponse.status);
+
+    if (!reviewsResponse.ok) {
+      console.warn(`Failed to fetch reviews: ${reviewsResponse.status}`);
+      console.log("Using fallback of 0 reviews");
+    }
+
+    const reviewsData: GitHubContributionsResponse = reviewsResponse.ok
+      ? await reviewsResponse.json()
+      : { total_count: 0 };
+
+    console.log("Reviews count:", reviewsData.total_count);
 
     // Calculate total stars from user's repos
     const totalStars = reposData.reduce(
       (sum, repo) => sum + repo.stargazers_count,
       0
     );
+    console.log("Total stars:", totalStars);
 
     // Calculate contribution score
     const contributionScore = calculateContributionScore(
@@ -291,6 +347,16 @@ async function fetchGitHubContributions(
       issuesData.total_count,
       reviewsData.total_count
     );
+
+    console.log("Final GitHub contribution data:", {
+      totalContributions: commitsData.total_count,
+      commitCount: commitsData.total_count,
+      prCount: prsData.total_count,
+      issueCount: issuesData.total_count,
+      reviewCount: reviewsData.total_count,
+      contributionScore,
+      contributionGrade: getContributionGrade(contributionScore),
+    });
 
     return {
       totalContributions: commitsData.total_count,
@@ -318,19 +384,30 @@ function calculateContributionScore(
   issues: number,
   reviews: number
 ): number {
+  console.log("Calculating contribution score with inputs:", {
+    stars,
+    commits,
+    prs,
+    issues,
+    reviews,
+  });
+
   const STAR_WEIGHT = 1;
   const COMMIT_WEIGHT = 0.1;
   const PR_WEIGHT = 5;
   const ISSUE_WEIGHT = 2;
   const REVIEW_WEIGHT = 3;
 
-  return Math.round(
+  const score = Math.round(
     stars * STAR_WEIGHT +
       commits * COMMIT_WEIGHT +
       prs * PR_WEIGHT +
       issues * ISSUE_WEIGHT +
       reviews * REVIEW_WEIGHT
   );
+
+  console.log("Calculated contribution score:", score);
+  return score;
 }
 
 function getContributionGrade(score: number): string {

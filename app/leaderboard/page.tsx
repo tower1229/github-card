@@ -28,7 +28,7 @@ export default function LeaderboardPage() {
             </div>
             <p className="text-[#8b949e] text-sm mt-4 text-center">
               The data is updated every hour, showing the top 20 users with the
-              most contributions
+              highest contribute scores
             </p>
           </div>
         </div>

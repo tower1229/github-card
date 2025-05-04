@@ -15,6 +15,12 @@ type CurrentUserRankProps = {
 };
 
 export function CurrentUserRank({ currentUser }: CurrentUserRankProps) {
+  // Ensure contributionScore is always treated as a number
+  const score =
+    typeof currentUser.contributionScore === "number"
+      ? currentUser.contributionScore
+      : 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -46,7 +52,7 @@ export function CurrentUserRank({ currentUser }: CurrentUserRankProps) {
       </div>
 
       <div className="col-span-8 text-right pr-4 font-mono font-medium">
-        {currentUser.contributionScore.toLocaleString()}
+        {score.toLocaleString()}
       </div>
     </motion.div>
   );

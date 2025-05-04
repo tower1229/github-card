@@ -9,13 +9,31 @@ export async function updateUserContribution(
   contributionScore: number
 ) {
   try {
+    console.log(
+      `Updating contribution for user ${userId} with score:`,
+      contributionScore
+    );
+
+    // Ensure contributionScore is a valid number
+    if (typeof contributionScore !== "number" || isNaN(contributionScore)) {
+      console.error("Invalid contribution score:", contributionScore);
+      contributionScore = 0;
+    }
+
     // 检查用户是否已存在于排行榜中
     const existingEntry = await db.query.contributionLeaderboard.findFirst({
       where: eq(contributionLeaderboard.userId, userId),
     });
 
+    console.log("Existing leaderboard entry:", existingEntry);
+
     if (existingEntry) {
       // 如果存在，更新贡献计数和最后更新时间
+      console.log(`Updating existing entry for user ${userId}:`, {
+        oldScore: existingEntry.contributionScore,
+        newScore: contributionScore,
+      });
+
       await db
         .update(contributionLeaderboard)
         .set({
@@ -23,17 +41,27 @@ export async function updateUserContribution(
           lastUpdated: new Date(),
         })
         .where(eq(contributionLeaderboard.userId, userId));
+
+      console.log("Entry updated successfully");
     } else {
       // 如果不存在，创建新记录
+      console.log(
+        `Creating new leaderboard entry for user ${userId} with score:`,
+        contributionScore
+      );
+
       await db.insert(contributionLeaderboard).values({
         userId,
         contributionScore,
         lastUpdated: new Date(),
       });
+
+      console.log("New entry created successfully");
     }
 
     try {
       // 更新后计算用户的新排名
+      console.log("Refreshing leaderboard ranks...");
       await refreshLeaderboard();
     } catch (refreshError) {
       console.error("刷新排行榜失败，但继续处理:", refreshError);
@@ -43,6 +71,7 @@ export async function updateUserContribution(
     let rank;
     try {
       rank = await getUserRank(userId);
+      console.log(`User ${userId} new rank:`, rank);
     } catch (rankError) {
       console.error("获取用户排名失败:", rankError);
       rank = null;
@@ -52,6 +81,7 @@ export async function updateUserContribution(
       success: true,
       rank,
       previousRank: existingEntry?.rank,
+      contributionScore,
     };
   } catch (error) {
     console.error("更新用户贡献数据失败:", error);

@@ -7,7 +7,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // Cached function to get leaderboard data
 const getCachedLeaderboardData = cache(
   async (limit: number = 20, page: number = 1, currentUserId?: string) => {
-    return await getFullLeaderboard(limit, currentUserId);
+    return await getFullLeaderboard(limit, page, currentUserId);
   }
 );
 

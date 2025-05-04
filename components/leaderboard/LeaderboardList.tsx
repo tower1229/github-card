@@ -11,7 +11,7 @@ export async function LeaderboardList() {
 
   // 获取排行榜数据
   const { leaderboard, currentUser, totalUsers, lastUpdated } =
-    await getFullLeaderboard(20, currentUserId);
+    await getFullLeaderboard(20, 1, currentUserId);
 
   // 格式化最后更新时间
   const formattedLastUpdated = new Date(lastUpdated).toLocaleString("zh-CN", {
@@ -22,19 +22,25 @@ export async function LeaderboardList() {
     minute: "2-digit",
   });
 
-  // 处理可能为空的排名和displayName
+  // 处理可能为空的排名、displayName和contributionScore
   const sanitizedLeaderboard = leaderboard.map((item) => ({
     ...item,
     rank: item.rank ?? 0,
     displayName: item.displayName || undefined,
+    contributionScore:
+      typeof item.contributionScore === "number" ? item.contributionScore : 0,
   }));
 
-  // 处理当前用户的排名和displayName
+  // 处理当前用户的排名、displayName和contributionScore
   const sanitizedCurrentUser = currentUser
     ? {
         ...currentUser,
         rank: currentUser.rank ?? 0,
         displayName: currentUser.displayName || undefined,
+        contributionScore:
+          typeof currentUser.contributionScore === "number"
+            ? currentUser.contributionScore
+            : 0,
       }
     : null;
 
@@ -53,7 +59,7 @@ export async function LeaderboardList() {
         <div className="grid grid-cols-12 px-4 py-3 text-[#8b949e] font-medium">
           <div className="col-span-1 text-center">#</div>
           <div className="col-span-3">User</div>
-          <div className="col-span-8 text-right pr-4">Total contributions</div>
+          <div className="col-span-8 text-right pr-4">Contribute score</div>
         </div>
 
         {sanitizedLeaderboard.length > 0 ? (

@@ -15,24 +15,50 @@ export function RefreshButton() {
 
     setIsRefreshing(true);
     try {
-      const response = await authFetch("/api/leaderboard/refresh", {
+      // First update the user's own contribution score
+      const updateResponse = await authFetch("/api/leaderboard/update", {
+        method: "POST",
+      });
+
+      if (!updateResponse.ok) {
+        const error = await updateResponse.json();
+        console.error("Update API error:", error);
+        throw new Error(error.error || "Failed to update contribution score");
+      }
+
+      const updateResult = await updateResponse.json();
+      console.log("Update result:", updateResult);
+
+      // Then refresh the entire leaderboard
+      const refreshResponse = await authFetch("/api/leaderboard/refresh", {
         method: "GET",
       });
 
-      if (!response.ok) {
-        const error = await response.json();
+      if (!refreshResponse.ok) {
+        const error = await refreshResponse.json();
+        console.error("Refresh API error:", error);
         throw new Error(error.error || "Refresh failed");
       }
 
-      const result = await response.json();
-      if (result.success) {
-        toast.success("The leaderboard data has been updated");
-        // 使用Next.js的router.refresh()来刷新数据而不是重载页面
+      const refreshResult = await refreshResponse.json();
+      console.log("Refresh result:", refreshResult);
+
+      if (refreshResult.success) {
+        if (updateResult.success) {
+          const score = updateResult.contributionScore || 0;
+          toast.success(
+            `Your contribution score has been updated to ${score.toLocaleString()}`
+          );
+        } else {
+          toast.success("The leaderboard data has been updated");
+        }
+        // Use Next.js router.refresh() to refresh the data without a full page reload
         router.refresh();
       } else {
-        throw new Error(result.error || "Refresh failed");
+        throw new Error(refreshResult.error || "Refresh failed");
       }
     } catch (error) {
+      console.error("Error during refresh:", error);
       toast.error(error instanceof Error ? error.message : "Refresh failed");
     } finally {
       setIsRefreshing(false);
