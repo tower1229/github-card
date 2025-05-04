@@ -8,7 +8,7 @@ dotenv.config({ path: ".env.local" });
 
 // Only create database connection on the server side
 // When importing from client components, provide a dummy handler that warns about client usage
-let db: ReturnType<typeof drizzle>;
+let db: ReturnType<typeof drizzle<typeof schema>>;
 
 // Only create a real connection on the server side
 if (typeof window === "undefined") {

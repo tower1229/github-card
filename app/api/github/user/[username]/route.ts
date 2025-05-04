@@ -165,28 +165,41 @@ export async function GET(
     );
     const contributionGrade = getContributionGrade(contributionScore);
 
+    const userProfile = {
+      login: userData.login,
+      name: userData.name || userData.login,
+      avatar_url: userData.avatar_url,
+      bio: userData.bio,
+      blog: userData.blog,
+      location: userData.location,
+      twitter_username: userData.twitter_username,
+      public_repos: userData.public_repos,
+      followers: userData.followers,
+      following: userData.following,
+      created_at: userData.created_at,
+    };
+
+    const contributionDetails = {
+      commitCount: commitsData.total_count,
+      prCount: prsData.total_count,
+      issueCount: issuesData.total_count,
+      reviewCount: reviewsData.total_count,
+    };
+
+    const userDataCombined = {
+      ...userProfile,
+      total_stars: totalStars,
+      contributionScore: contributionScore,
+      contribution_grade: contributionGrade,
+      commits: contributionDetails.commitCount,
+      pull_requests: contributionDetails.prCount,
+      issues: contributionDetails.issueCount,
+      reviews: contributionDetails.reviewCount,
+    };
+
     return NextResponse.json({
       success: true,
-      data: {
-        login: userData.login,
-        name: userData.name,
-        avatar_url: userData.avatar_url,
-        bio: userData.bio,
-        blog: userData.blog,
-        location: userData.location,
-        twitter_username: userData.twitter_username,
-        public_repos: userData.public_repos,
-        followers: userData.followers,
-        following: userData.following,
-        created_at: userData.created_at,
-        total_stars: totalStars,
-        contribution_score: contributionScore,
-        contribution_grade: contributionGrade,
-        commits: commitsData.total_count,
-        pull_requests: prsData.total_count,
-        issues: issuesData.total_count,
-        reviews: reviewsData.total_count,
-      },
+      data: userDataCombined,
     });
   } catch (error) {
     console.error("Error fetching GitHub user:", error);

@@ -45,13 +45,13 @@
 CREATE TABLE "contribution_leaderboard" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "userId" UUID NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
-  "contribution_count" INTEGER NOT NULL,
+  "contribution_score" INTEGER NOT NULL,
   "rank" INTEGER,
   "last_updated" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "contribution_leaderboard_contribution_count_idx" ON "contribution_leaderboard" ("contribution_count" DESC);
+CREATE INDEX "contribution_leaderboard_contribution_score_idx" ON "contribution_leaderboard" ("contribution_score" DESC);
 CREATE INDEX "contribution_leaderboard_userId_idx" ON "contribution_leaderboard" ("userId");
 ```
 
@@ -64,7 +64,7 @@ export const contributionLeaderboard = pgTable("contribution_leaderboard", {
   userId: uuid("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  contributionCount: integer("contribution_count").notNull(),
+  contribution_score: integer("contribution_score").notNull(),
   rank: integer("rank"),
   lastUpdated: timestamp("last_updated").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -116,11 +116,11 @@ export type NewContributionLeaderboard =
     username: string;         // GitHub用户名
     displayName?: string;     // 显示名称（如果有）
     avatarUrl: string;        // 头像URL
-    contributionCount: number; // 贡献总数
+    contribution_score: number; // 贡献总数
   }>;
   currentUser?: {
     rank: number;             // 当前用户排名
-    contributionCount: number; // 当前用户贡献总数
+    contribution_score: number; // 当前用户贡献总数
   };
   totalUsers: number;         // 排行榜总用户数
   lastUpdated: string;        // 最后更新时间
@@ -136,7 +136,7 @@ export type NewContributionLeaderboard =
 ```typescript
 {
   userId: string; // 用户ID
-  contributionCount: number; // 贡献总数
+  contribution_score: number; // 贡献总数
 }
 ```
 
@@ -176,7 +176,7 @@ export type NewContributionLeaderboard =
 #### 2. **后端服务**
 
 - 创建 `lib/leaderboard.ts` 服务文件，包含以下功能：
-  - `updateUserContribution(userId: string, contributionCount: number)`: 更新用户贡献数据
+  - `updateUserContribution(userId: string, contribution_score: number)`: 更新用户贡献数据
   - `getLeaderboard(limit: number, page: number)`: 获取排行榜数据
   - `getUserRank(userId: string)`: 获取指定用户的排名
   - `refreshLeaderboard()`: 刷新排行榜数据
@@ -253,3 +253,35 @@ export type NewContributionLeaderboard =
 - 为排行榜位置添加社交分享功能
 - 为里程碑贡献实现成就/徽章系统
 - 为组织或团队启用自定义排行榜
+
+// 排行榜项目数据结构
+interface LeaderboardItem {
+rank: number; // 排名
+userId: string; // 用户 ID
+username: string; // GitHub 用户名
+displayName?: string; // 显示名称（可选）
+avatarUrl: string; // 头像 URL
+contribution_score: number; // 贡献总数
+}
+
+// 当前用户排名数据结构
+interface CurrentUserRank {
+rank: number; // 当前用户排名
+username: string; // GitHub 用户名
+displayName?: string; // 显示名称（可选）
+avatarUrl: string; // 头像 URL
+contribution_score: number; // 当前用户贡献总数
+}
+
+// 排行榜响应数据结构
+interface LeaderboardResponse {
+leaderboard: LeaderboardItem[]; // 排行榜项目列表
+currentUser?: CurrentUserRank; // 当前用户排名信息（可选）
+totalUsers: number; // 总用户数
+lastUpdated: string; // 最后更新时间
+error?: string; // 错误信息（可选）
+}
+
+#### 后端功能
+
+- `updateUserContribution(userId: string, contribution_score: number)`: 更新用户贡献数据

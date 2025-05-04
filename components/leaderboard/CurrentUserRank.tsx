@@ -10,7 +10,7 @@ type CurrentUserRankProps = {
     username: string;
     displayName?: string;
     avatarUrl: string;
-    contributionCount: number;
+    contributionScore: number;
   };
 };
 
@@ -46,7 +46,7 @@ export function CurrentUserRank({ currentUser }: CurrentUserRankProps) {
       </div>
 
       <div className="col-span-8 text-right pr-4 font-mono font-medium">
-        {currentUser.contributionCount.toLocaleString()}
+        {currentUser.contributionScore.toLocaleString()}
       </div>
     </motion.div>
   );

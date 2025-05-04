@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { refreshLeaderboard } from "@/lib/leaderboard";
 import { revalidatePath } from "next/cache";
-import { withAuth } from "@/lib/auth";
+import { withServerAuth } from "@/lib/server-auth";
 
 export async function GET(request: NextRequest) {
-  return withAuth(async () => {
+  return withServerAuth(async () => {
     try {
       // 刷新排行榜数据
       const result = await refreshLeaderboard();

@@ -11,7 +11,7 @@ type LeaderboardItemProps = {
     username: string;
     displayName?: string;
     avatarUrl: string;
-    contributionCount: number;
+    contributionScore: number;
   };
   isCurrentUser: boolean;
 };
@@ -82,7 +82,7 @@ export function LeaderboardItem({ item, isCurrentUser }: LeaderboardItemProps) {
       </div>
 
       <div className="col-span-8 text-right pr-4 font-mono font-medium">
-        {item.contributionCount.toLocaleString()}
+        {item.contributionScore.toLocaleString()}
       </div>
     </motion.div>
   );

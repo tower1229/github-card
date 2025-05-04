@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateUserContribution } from "@/lib/leaderboard";
-import { withAuth } from "@/lib/auth";
+import { withServerAuth } from "@/lib/server-auth";
 
 export async function POST(request: NextRequest) {
-  return withAuth(async (req, userId) => {
+  return withServerAuth(async (req, userId) => {
     try {
       // 获取请求数据
       const body = await req.json();
 
       // 验证必要参数
-      if (!body.userId || typeof body.contributionCount !== "number") {
+      if (!body.userId || typeof body.contributionScore !== "number") {
         return NextResponse.json({ error: "缺少必要参数" }, { status: 400 });
       }
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       // 更新用户贡献数据
       const result = await updateUserContribution(
         body.userId,
-        body.contributionCount
+        body.contributionScore
       );
 
       return NextResponse.json(result);

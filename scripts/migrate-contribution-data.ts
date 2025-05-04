@@ -38,7 +38,7 @@ async function main() {
       }
 
       const userId = shareLink.userId;
-      const contributionCount =
+      const contributionScore =
         typeof cardData.contributions.total === "number"
           ? cardData.contributions.total
           : parseInt(cardData.contributions.total);
@@ -53,25 +53,25 @@ async function main() {
         // 如果新的贡献数更高，更新记录
         if (
           existingEntry &&
-          existingEntry.contributionCount < contributionCount
+          existingEntry.contributionScore < contributionScore
         ) {
           await db
             .update(contributionLeaderboard)
             .set({
-              contributionCount,
+              contributionScore,
               lastUpdated: new Date(),
             })
             .where(eq(contributionLeaderboard.userId, userId));
 
           console.log(
-            `更新用户 ${userId} 的贡献数: ${existingEntry.contributionCount} -> ${contributionCount}`
+            `更新用户 ${userId} 的贡献数: ${existingEntry.contributionScore} -> ${contributionScore}`
           );
         }
       } else {
         // 添加新记录
         await db.insert(contributionLeaderboard).values({
           userId,
-          contributionCount,
+          contributionScore,
           lastUpdated: new Date(),
         });
 
@@ -94,7 +94,7 @@ async function main() {
       id: contributionLeaderboard.id,
     })
     .from(contributionLeaderboard)
-    .orderBy(contributionLeaderboard.contributionCount);
+    .orderBy(contributionLeaderboard.contributionScore);
 
   for (let i = 0; i < rankedUsers.length; i++) {
     await db

@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   return withServerAuth(async (req: NextRequest, userId: string) => {
     try {
       console.log("Processing share link request for userId:", userId);
-      
+
       let body;
       try {
         body = await req.json();
@@ -18,7 +18,10 @@ export async function POST(request: NextRequest) {
       } catch (parseError) {
         console.error("Failed to parse request body:", parseError);
         return NextResponse.json(
-          { error: "Invalid request body", message: "Could not parse request JSON" },
+          {
+            error: "Invalid request body",
+            message: "Could not parse request JSON",
+          },
           { status: 400 }
         );
       }
@@ -49,28 +52,43 @@ export async function POST(request: NextRequest) {
       // 提取贡献数据并更新排行榜
       try {
         // 处理可能的不同贡献数据格式
-        let contributionCount = null;
-        
-        // 检查新格式：contribution_score
-        if (body.cardData?.contribution_score && typeof body.cardData.contribution_score === "number") {
-          contributionCount = body.cardData.contribution_score;
-          console.log("Using contribution_score:", contributionCount);
+        let contributionScore = null;
+
+        // 检查新格式：contributionScore
+        if (
+          body.cardData?.contributionScore &&
+          typeof body.cardData.contributionScore === "number"
+        ) {
+          contributionScore = body.cardData.contributionScore;
+          console.log("Using contributionScore:", contributionScore);
         }
         // 检查旧格式：contributions.total
+        else if (
+          body.cardData?.contribution_score &&
+          typeof body.cardData.contribution_score === "number"
+        ) {
+          contributionScore = body.cardData.contribution_score;
+          console.log("Using legacy contribution_score:", contributionScore);
+        }
+        // 检查最旧格式：contributions.total
         else if (body.cardData?.contributions?.total) {
-          contributionCount = typeof body.cardData.contributions.total === "number"
-            ? body.cardData.contributions.total
-            : parseInt(body.cardData.contributions.total);
-          console.log("Using contributions.total:", contributionCount);
+          contributionScore =
+            typeof body.cardData.contributions.total === "number"
+              ? body.cardData.contributions.total
+              : parseInt(body.cardData.contributions.total);
+          console.log("Using contributions.total:", contributionScore);
         }
 
-        if (contributionCount !== null) {
-          if (isNaN(contributionCount)) {
-            console.warn("贡献数据不是有效数字:", contributionCount);
+        if (contributionScore !== null) {
+          if (isNaN(contributionScore)) {
+            console.warn("贡献数据不是有效数字:", contributionScore);
           } else {
-            console.log("Updating contribution leaderboard with count:", contributionCount);
+            console.log(
+              "Updating contribution leaderboard with score:",
+              contributionScore
+            );
             // 更新贡献排行榜
-            await updateUserContribution(userId, contributionCount);
+            await updateUserContribution(userId, contributionScore);
           }
         } else {
           console.log("No contribution data found in the request");
@@ -91,16 +109,21 @@ export async function POST(request: NextRequest) {
 
       // Check for database URL before attempting insertion
       console.log("Database URL available:", !!process.env.DATABASE_URL);
-      
+
       try {
         console.log("Preparing to insert data into shareLinks table");
         console.log("Template type:", body.templateType || "contribute");
-        console.log("Data to be inserted: userId:", userId, "templateType:", body.templateType || "contribute");
-        
+        console.log(
+          "Data to be inserted: userId:",
+          userId,
+          "templateType:",
+          body.templateType || "contribute"
+        );
+
         // Log the database connection object (safely)
         console.log("Database connection exists:", !!db);
         console.log("ShareLinks table exists:", !!shareLinks);
-        
+
         const result = await db
           .insert(shareLinks)
           .values({
@@ -111,28 +134,28 @@ export async function POST(request: NextRequest) {
             templateType: body.templateType || "contribute",
           })
           .returning();
-          
+
         console.log("Database insertion successful, result:", result);
       } catch (error) {
         // Type assertion for the error object
         const dbError = error as { code?: string; stack?: string };
-        
+
         console.error("数据库插入失败 - 详细错误:", dbError);
-        
+
         if (dbError.stack) {
           console.error("错误堆栈:", dbError.stack);
         }
-        
+
         // Check for specific error types
         if (dbError.code) {
           console.error("Database error code:", dbError.code);
         }
-        
+
         return NextResponse.json(
-          { 
-            error: "Database insertion failed", 
+          {
+            error: "Database insertion failed",
             message: String(error),
-            code: dbError.code || "UNKNOWN" 
+            code: dbError.code || "UNKNOWN",
           },
           { status: 500 }
         );

@@ -6,7 +6,7 @@ import { cache } from "react";
 // 更新用户贡献数据
 export async function updateUserContribution(
   userId: string,
-  contributionCount: number
+  contributionScore: number
 ) {
   try {
     // 检查用户是否已存在于排行榜中
@@ -19,7 +19,7 @@ export async function updateUserContribution(
       await db
         .update(contributionLeaderboard)
         .set({
-          contributionCount,
+          contributionScore,
           lastUpdated: new Date(),
         })
         .where(eq(contributionLeaderboard.userId, userId));
@@ -27,7 +27,7 @@ export async function updateUserContribution(
       // 如果不存在，创建新记录
       await db.insert(contributionLeaderboard).values({
         userId,
-        contributionCount,
+        contributionScore,
         lastUpdated: new Date(),
       });
     }
@@ -95,11 +95,11 @@ export const getLeaderboard = cache(
           username: users.username,
           displayName: users.displayName,
           avatarUrl: users.avatarUrl,
-          contributionCount: contributionLeaderboard.contributionCount,
+          contributionScore: contributionLeaderboard.contributionScore,
         })
         .from(contributionLeaderboard)
         .innerJoin(users, eq(contributionLeaderboard.userId, users.id))
-        .orderBy(desc(contributionLeaderboard.contributionCount))
+        .orderBy(desc(contributionLeaderboard.contributionScore))
         .limit(limit)
         .offset(offset);
 
@@ -163,7 +163,7 @@ export async function getFullLeaderboard(
               username: users.username,
               displayName: users.displayName,
               avatarUrl: users.avatarUrl,
-              contributionCount: contributionLeaderboard.contributionCount,
+              contributionScore: contributionLeaderboard.contributionScore,
             })
             .from(contributionLeaderboard)
             .innerJoin(users, eq(contributionLeaderboard.userId, users.id))
@@ -204,7 +204,7 @@ export async function refreshLeaderboard() {
         id: contributionLeaderboard.id,
       })
       .from(contributionLeaderboard)
-      .orderBy(desc(contributionLeaderboard.contributionCount));
+      .orderBy(desc(contributionLeaderboard.contributionScore));
 
     // 如果没有用户，直接返回
     if (rankedUsers.length === 0) {

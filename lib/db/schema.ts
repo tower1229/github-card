@@ -76,7 +76,7 @@ export const contributionLeaderboard = pgTable("contribution_leaderboard", {
   userId: uuid("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  contributionCount: integer("contribution_count").notNull(),
+  contributionScore: integer("contribution_score").notNull(),
   rank: integer("rank"),
   lastUpdated: timestamp("last_updated").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
