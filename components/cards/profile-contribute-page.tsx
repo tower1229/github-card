@@ -8,7 +8,7 @@ import { ProfileTotal } from "@/components/profile-total";
 import { BingImg } from "@/components/bing-img";
 import { GitHubData } from "@/lib/types";
 import { ShareContextData } from "@/app/generate/page";
-import { authFetch } from "@/lib/auth";
+import { getUserGitHubData } from "@/lib/server-github";
 
 interface ProfileContributePageProps {
   username: string;
@@ -50,27 +50,19 @@ export function ProfileContributePage({
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await authFetch(`/api/github/user/${username}`, {
-          signal: abortController.signal,
-        });
+        // Use the server action instead of making a direct API call
+        const result = await getUserGitHubData(username);
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user data: ${response.status}`);
-        }
-
-        const result = await response.json();
-        if (result.success) {
+        if (result.success && result.data) {
           setUserData(result.data);
           // 通知父组件数据已加载
           if (onUserDataLoaded) {
             onUserDataLoaded(result.data);
           }
         } else {
-          console.error("Error in API response:", result);
+          console.error("Error in server action response:", result);
         }
       } catch (error: unknown) {
-        // 忽略已中止的请求错误
-        if (error instanceof Error && error.name === "AbortError") return;
         console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);

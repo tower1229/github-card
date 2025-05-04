@@ -88,7 +88,6 @@ function GenerateContent() {
           const response = await authFetch("/api/share-links", {
             method: "POST",
             body: JSON.stringify({
-              cardData: userData,
               templateType: templateType,
             }),
           });
@@ -120,16 +119,10 @@ function GenerateContent() {
           if (!apiLeaderboardStatus.current && session?.user?.id) {
             try {
               apiLeaderboardStatus.current = true;
-              // 从userData中提取contributionScore
-              const contributionScore = userData.contributionScore;
 
               // 调用排行榜更新API
               await authFetch("/api/leaderboard/update", {
                 method: "POST",
-                body: JSON.stringify({
-                  userId: session.user.id,
-                  contributionScore: contributionScore,
-                }),
               });
 
               console.log("Leaderboard updated successfully");

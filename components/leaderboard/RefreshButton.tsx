@@ -4,9 +4,11 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { authFetch } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export function RefreshButton() {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const router = useRouter();
 
   const handleRefresh = async () => {
     if (isRefreshing) return;
@@ -25,8 +27,8 @@ export function RefreshButton() {
       const result = await response.json();
       if (result.success) {
         toast.success("The leaderboard data has been updated");
-        // 刷新页面以获取最新数据
-        window.location.reload();
+        // 使用Next.js的router.refresh()来刷新数据而不是重载页面
+        router.refresh();
       } else {
         throw new Error(result.error || "Refresh failed");
       }

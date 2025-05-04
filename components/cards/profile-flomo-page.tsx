@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { GitHubData } from "@/lib/types";
 import { ShareContextData } from "@/app/generate/page";
-import { authFetch } from "@/lib/auth";
+import { getUserGitHubData } from "@/lib/server-github";
 
 interface ProfileFlomoPageProps {
   username: string;
@@ -39,6 +39,10 @@ export function ProfileFlomoPage({
     if (sharedData) {
       setUserData(sharedData);
       setLoading(false);
+      // Still notify parent if needed
+      if (onUserDataLoaded) {
+        onUserDataLoaded(sharedData);
+      }
       return;
     }
 
@@ -48,18 +52,21 @@ export function ProfileFlomoPage({
 
     const fetchUserData = async () => {
       try {
-        const response = await authFetch(`/api/github/user/${username}`, {
-          signal: abortController.signal,
-        });
-        const result = await response.json();
-        if (result.success) {
+        setLoading(true);
+
+        // Use the server action instead of making a direct API call
+        const result = await getUserGitHubData(username);
+
+        if (result.success && result.data) {
           setUserData(result.data);
           // 通知父组件数据已加载
-          onUserDataLoaded?.(result.data);
+          if (onUserDataLoaded) {
+            onUserDataLoaded(result.data);
+          }
+        } else {
+          console.error("Error in server action response:", result);
         }
       } catch (error: unknown) {
-        // 忽略已中止的请求错误
-        if (error instanceof Error && error.name === "AbortError") return;
         console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);
