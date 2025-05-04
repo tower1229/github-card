@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { GitHubData } from "@/lib/types";
 import { ShareContextData } from "@/app/generate/page";
+import { useSession } from "next-auth/react";
 
 export function ShareButton({
   setIsDownloading,
@@ -33,6 +34,7 @@ export function ShareButton({
   shareContext?: ShareContextData;
 }) {
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const { status } = useSession();
 
   const saveAsImage = () => {
     setIsDownloading(true);
@@ -59,7 +61,13 @@ export function ShareButton({
   };
 
   const generateAndCopyLink = async () => {
-    // 如果已有分享链接，直接复制
+    // Check if user is authenticated first
+    if (status !== "authenticated") {
+      toast.error("You need to sign in to generate a share link");
+      return;
+    }
+
+    // If we already have a share URL, just copy it
     if (shareContext?.shareUrl) {
       const fullUrl = `${window.location.origin}${shareContext.shareUrl}`;
       navigator.clipboard.writeText(fullUrl);
@@ -67,7 +75,7 @@ export function ShareButton({
       return;
     }
 
-    // 如果当前正在生成链接（全局状态或本地状态），退出
+    // If already generating, don't start again
     if (shareContext?.isGenerating || isGeneratingLink) {
       toast("Link is being generated, please wait...");
       return;
@@ -76,7 +84,7 @@ export function ShareButton({
     try {
       setIsGeneratingLink(true);
 
-      // 调用API创建分享链接
+      // Call API to create share link
       const response = await fetch("/api/share-links", {
         method: "POST",
         headers: {
@@ -88,19 +96,17 @@ export function ShareButton({
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error response:", errorData);
-        throw new Error(errorData.error || "Failed to create share link");
-      }
-
       const data = await response.json();
 
-      // 构建完整URL
-      const fullUrl = `${data.shareUrl}`;
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create share link");
+      }
 
-      // 复制生成的分享链接到剪贴板
-      navigator.clipboard.writeText(fullUrl);
+      // Build complete URL with origin
+      const fullUrl = `${window.location.origin}${data.shareUrl}`;
+
+      // Copy generated share link to clipboard
+      await navigator.clipboard.writeText(fullUrl);
 
       toast.success("Share link copied to clipboard");
     } catch (error) {
