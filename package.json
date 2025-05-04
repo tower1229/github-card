@@ -16,6 +16,7 @@
     "db:reset": "tsx scripts/reset-db.ts",
     "db:fix-oauth": "tsx scripts/fix-oauth-accounts.ts",
     "db:fix-github-id": "tsx scripts/fix-github-id.ts",
+    "db:migrate-contributions": "tsx scripts/migrate-contribution-data.ts",
     "check:auth": "node scripts/check-auth-config.js",
     "postinstall": "drizzle-kit generate"
   },

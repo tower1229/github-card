@@ -61,13 +61,17 @@ export function ShareButton({
   const generateAndCopyLink = async () => {
     // 如果已有分享链接，直接复制
     if (shareContext?.shareUrl) {
-      navigator.clipboard.writeText(shareContext.shareUrl);
+      const fullUrl = `${window.location.origin}${shareContext.shareUrl}`;
+      navigator.clipboard.writeText(fullUrl);
       toast.success("Share link copied to clipboard");
       return;
     }
 
-    // 否则通过API生成链接
-    if (isGeneratingLink) return; // 防止重复点击
+    // 如果当前正在生成链接（全局状态或本地状态），退出
+    if (shareContext?.isGenerating || isGeneratingLink) {
+      toast("Link is being generated, please wait...");
+      return;
+    }
 
     try {
       setIsGeneratingLink(true);
@@ -86,18 +90,19 @@ export function ShareButton({
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Error response:", errorData);
         throw new Error(errorData.error || "Failed to create share link");
       }
 
       const data = await response.json();
 
-      // 复制生成的分享链接到剪贴板
-      navigator.clipboard.writeText(data.shareUrl);
+      // 构建完整URL
+      const fullUrl = `${data.shareUrl}`;
 
-      const toastMessage = data.isExisting
-        ? "Existing share link copied to clipboard"
-        : "Share link copied to clipboard";
-      toast.success(toastMessage);
+      // 复制生成的分享链接到剪贴板
+      navigator.clipboard.writeText(fullUrl);
+
+      toast.success("Share link copied to clipboard");
     } catch (error) {
       console.error("Error generating share link:", error);
       toast.error(

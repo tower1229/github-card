@@ -2,117 +2,86 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db";
-import { shareLinks, userBehaviors, users } from "@/lib/db/schema";
-import { eq, and, gte } from "drizzle-orm";
-import { getExpirationDate } from "@/lib/db";
+import { shareLinks, users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { updateUserContribution } from "@/lib/leaderboard";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the authenticated user
-    const session = await getServerSession();
-    if (!session || !session.user || !session.user.email) {
+    const session = await getServerSession(authOptions);
+
+    console.log("POST session:", JSON.stringify(session, null, 2));
+
+    if (!session?.user?.id) {
+      console.log("Unauthorized: Missing session.user.id");
       return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
+        { error: "Unauthorized" },
+        {
+          status: 401,
+        }
       );
     }
 
-    // Get request body
     const body = await request.json();
+
     if (!body.cardData) {
       return NextResponse.json(
         { error: "Card data is required" },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
-    // Get template type
-    const templateType = body.templateType || "contribute"; // Default to 'contribute' if not specified
+    // 提取贡献数据并更新排行榜
+    try {
+      if (body.cardData?.contributions?.total) {
+        const contributionCount =
+          typeof body.cardData.contributions.total === "number"
+            ? body.cardData.contributions.total
+            : parseInt(body.cardData.contributions.total);
 
-    // Get the user from our database
-    const userEmail = session.user.email;
-    const user = await db.query.users.findFirst({
-      where: eq(users.email, userEmail),
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found in database" },
-        { status: 404 }
-      );
+        // 更新贡献排行榜
+        await updateUserContribution(session.user.id, contributionCount);
+      }
+    } catch (error) {
+      console.error("更新贡献排行榜失败:", error);
+      // 继续处理，不中断主流程
     }
 
-    // Check if user already has an active share link for this template
-    const now = new Date();
-    const existingShareLink = await db.query.shareLinks.findFirst({
-      where: and(
-        eq(shareLinks.userId, user.id),
-        eq(shareLinks.isActive, true),
-        gte(shareLinks.expiresAt, now),
-        eq(shareLinks.templateType, templateType)
-      ),
-      orderBy: (shareLinks, { desc }) => [desc(shareLinks.createdAt)],
-    });
+    // 计算过期时间（30天后）
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
 
-    // If an active link exists, return it
-    if (existingShareLink) {
-      return NextResponse.json({
-        linkToken: existingShareLink.linkToken,
-        expiresAt: existingShareLink.expiresAt,
-        shareUrl: `${process.env.NEXTAUTH_URL}/shared/${existingShareLink.linkToken}`,
-        isExisting: true,
-      });
-    }
+    // Generate a random token
+    const token = uuidv4();
 
-    // No active link exists, create a new one
-    // Deactivate all existing links for this user and this template
     await db
-      .update(shareLinks)
-      .set({ isActive: false })
-      .where(
-        and(
-          eq(shareLinks.userId, user.id),
-          eq(shareLinks.templateType, templateType)
-        )
-      );
-
-    // Generate a unique token for the share link
-    const linkToken = uuidv4();
-    const expiresAt = getExpirationDate(); // 3 days from now
-
-    // Create the share link record
-    const newShareLink = await db
       .insert(shareLinks)
       .values({
-        userId: user.id,
-        linkToken,
+        userId: session.user.id,
+        linkToken: token,
         cardData: body.cardData,
         expiresAt,
-        isActive: true,
-        templateType,
+        templateType: body.templateType || "contribute",
       })
       .returning();
 
-    // Log the behavior
-    await db.insert(userBehaviors).values({
-      userId: user.id,
-      actionType: "generate_link",
-      actionData: { linkId: newShareLink[0].id, templateType },
-      performedAt: new Date(),
-    });
+    // 获取baseUrl，确保它包含协议
+    const baseUrl = process.env.NEXTAUTH_URL;
 
-    // Return the share link data
     return NextResponse.json({
-      linkToken,
+      shareUrl: `${baseUrl}/shared/${token}`,
       expiresAt,
-      shareUrl: `${process.env.NEXTAUTH_URL}/shared/${linkToken}`,
-      isNew: true,
     });
   } catch (error) {
-    console.error("Error creating share link:", error);
+    console.error("创建分享链接失败:", error);
     return NextResponse.json(
-      { error: "Failed to create share link" },
-      { status: 500 }
+      { error: "Internal Server Error" },
+      {
+        status: 500,
+      }
     );
   }
 }
@@ -120,8 +89,12 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     // Get the authenticated user
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
+
+    console.log("GET session:", JSON.stringify(session, null, 2));
+
     if (!session || !session.user || !session.user.email) {
+      console.log("Unauthorized: Missing session or session.user.email");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -135,6 +108,7 @@ export async function GET() {
     });
 
     if (!user) {
+      console.log("User not found in database:", userEmail);
       return NextResponse.json(
         { error: "User not found in database" },
         { status: 404 }
@@ -147,6 +121,9 @@ export async function GET() {
       orderBy: (shareLinks, { desc }) => [desc(shareLinks.createdAt)],
     });
 
+    // 获取baseUrl
+    const baseUrl = process.env.NEXTAUTH_URL || "";
+
     // Return the share links
     return NextResponse.json(
       userShareLinks.map((link) => ({
@@ -156,7 +133,7 @@ export async function GET() {
         expiresAt: link.expiresAt,
         isActive: link.isActive,
         templateType: link.templateType,
-        shareUrl: `${process.env.NEXTAUTH_URL}/shared/${link.linkToken}`,
+        shareUrl: `${baseUrl}/shared/${link.linkToken}`,
       }))
     );
   } catch (error) {

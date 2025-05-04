@@ -33,7 +33,7 @@ async function logUserBehavior(
 }
 
 // 创建NextAuth配置
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db),
   providers: [
     GithubProvider({

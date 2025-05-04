@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, Suspense, useState, useCallback } from "react";
+import { useEffect, Suspense, useState, useCallback, useRef } from "react";
 import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
 import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
 import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
@@ -30,6 +30,11 @@ function GenerateContent() {
     shareUrl: "",
     isGenerating: false,
   });
+  // 使用 ref 来跟踪 API 请求的状态
+  const apiRequestStatus = useRef({
+    isGeneratingLink: false,
+    hasGeneratedLink: false,
+  });
 
   // 记忆化回调函数，防止重渲染导致的无限请求循环
   const handleDownloadStateChange = useCallback((downloading: boolean) => {
@@ -53,9 +58,20 @@ function GenerateContent() {
 
   // 用户数据加载完成后生成分享链接
   useEffect(() => {
-    if (userData && !shareContext.shareUrl && !shareContext.isGenerating) {
+    // 如果已经在生成链接或已经生成过，则跳过
+    if (
+      apiRequestStatus.current.isGeneratingLink ||
+      apiRequestStatus.current.hasGeneratedLink
+    ) {
+      return;
+    }
+
+    // 如果用户数据已加载，生成分享链接
+    if (userData) {
       const generateShareLink = async () => {
         try {
+          // 标记请求状态为正在进行
+          apiRequestStatus.current.isGeneratingLink = true;
           setShareContext((prev) => ({ ...prev, isGenerating: true }));
 
           const response = await fetch("/api/share-links", {
@@ -71,6 +87,7 @@ function GenerateContent() {
 
           if (!response.ok) {
             const errorData = await response.json();
+            console.error("Failed to create share link:", errorData);
             throw new Error(errorData.error || "Failed to create share link");
           }
 
@@ -79,20 +96,21 @@ function GenerateContent() {
             shareUrl: data.shareUrl,
             isGenerating: false,
           });
+
+          // 标记已完成生成分享链接
+          apiRequestStatus.current.hasGeneratedLink = true;
         } catch (error) {
           console.error("Error generating share link:", error);
           setShareContext((prev) => ({ ...prev, isGenerating: false }));
+        } finally {
+          // 无论成功还是失败，都标记请求已结束
+          apiRequestStatus.current.isGeneratingLink = false;
         }
       };
 
       generateShareLink();
     }
-  }, [
-    userData,
-    templateType,
-    shareContext.shareUrl,
-    shareContext.isGenerating,
-  ]);
+  }, [userData, templateType]);
 
   useEffect(() => {
     // 如果用户未登录，则重定向到首页

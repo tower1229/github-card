@@ -29,11 +29,16 @@ export function ProfileContributePage({
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
 
+  // Use an AbortController to handle cancelling fetch requests when component unmounts
   useEffect(() => {
     // If sharedData is provided, use it directly
     if (sharedData) {
       setUserData(sharedData);
       setLoading(false);
+      // Still notify parent if needed
+      if (onUserDataLoaded) {
+        onUserDataLoaded(sharedData);
+      }
       return;
     }
 
@@ -43,14 +48,24 @@ export function ProfileContributePage({
 
     const fetchUserData = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`/api/github/user/${username}`, {
           signal: abortController.signal,
         });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.status}`);
+        }
+
         const result = await response.json();
         if (result.success) {
           setUserData(result.data);
           // 通知父组件数据已加载
-          onUserDataLoaded?.(result.data);
+          if (onUserDataLoaded) {
+            onUserDataLoaded(result.data);
+          }
+        } else {
+          console.error("Error in API response:", result);
         }
       } catch (error: unknown) {
         // 忽略已中止的请求错误
