@@ -79,6 +79,7 @@ function GenerateContent() {
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({
               cardData: userData,
               templateType: templateType,
