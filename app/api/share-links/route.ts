@@ -5,6 +5,7 @@ import { shareLinks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { updateUserContribution } from "@/lib/leaderboard";
 import { withServerAuth } from "@/lib/server-auth";
+import { getGitHubUserData, getGitHubContributions } from "@/lib/github/api";
 
 export async function POST(request: NextRequest) {
   return withServerAuth(async (req: NextRequest, userId: string) => {
@@ -26,79 +27,103 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (!body.cardData) {
+      if (!body.templateType) {
         return NextResponse.json(
-          { error: "Card data is required" },
+          { error: "Template type is required" },
           {
             status: 400,
           }
         );
       }
 
-      // 验证 cardData 是有效的 JSON 对象
-      try {
-        // 通过序列化和反序列化来确保它是有效的 JSON
-        const validatedCardData = JSON.parse(JSON.stringify(body.cardData));
-        body.cardData = validatedCardData;
-        console.log("Validated cardData:", typeof body.cardData);
-      } catch (jsonError) {
-        console.error("无效的 cardData JSON 格式:", jsonError);
+      // Get the user from the database
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId),
+        with: {
+          accounts: true,
+        },
+      });
+
+      if (!user) {
         return NextResponse.json(
-          { error: "Invalid card data format", message: String(jsonError) },
-          { status: 400 }
+          { error: "User not found" },
+          {
+            status: 404,
+          }
         );
       }
 
-      // 提取贡献数据并更新排行榜
-      try {
-        // 处理可能的不同贡献数据格式
-        let contributionScore = null;
+      // Get GitHub username either from account or user name
+      const githubAccount = user.accounts.find(
+        (acc) => acc.provider === "github"
+      );
+      const username = githubAccount?.providerAccountId || user.name;
 
-        // 检查新格式：contributionScore
-        if (
-          body.cardData?.contributionScore &&
-          typeof body.cardData.contributionScore === "number"
-        ) {
-          contributionScore = body.cardData.contributionScore;
-          console.log("Using contributionScore:", contributionScore);
-        }
-        // 检查旧格式：contributions.total
-        else if (
-          body.cardData?.contribution_score &&
-          typeof body.cardData.contribution_score === "number"
-        ) {
-          contributionScore = body.cardData.contribution_score;
-          console.log("Using legacy contribution_score:", contributionScore);
-        }
-        // 检查最旧格式：contributions.total
-        else if (body.cardData?.contributions?.total) {
-          contributionScore =
-            typeof body.cardData.contributions.total === "number"
-              ? body.cardData.contributions.total
-              : parseInt(body.cardData.contributions.total);
-          console.log("Using contributions.total:", contributionScore);
-        }
-
-        if (contributionScore !== null) {
-          if (isNaN(contributionScore)) {
-            console.warn("贡献数据不是有效数字:", contributionScore);
-          } else {
-            console.log(
-              "Updating contribution leaderboard with score:",
-              contributionScore
-            );
-            // 更新贡献排行榜
-            await updateUserContribution(userId, contributionScore);
+      if (!username) {
+        return NextResponse.json(
+          { error: "GitHub username not found" },
+          {
+            status: 404,
           }
-        } else {
-          console.log("No contribution data found in the request");
-        }
-      } catch (error) {
-        console.error("更新贡献排行榜失败:", error);
-        // 继续处理，不中断主流程
+        );
       }
 
-      // 计算过期时间（30天后）
+      console.log("Fetching GitHub data for user:", username);
+
+      // Fetch GitHub data from our server-side API
+      let userData;
+      let contributionsData;
+
+      try {
+        userData = await getGitHubUserData(username);
+        contributionsData = await getGitHubContributions(username);
+      } catch (error) {
+        const githubError = error as { message?: string };
+        console.error(
+          `Error fetching GitHub data for ${username}:`,
+          githubError
+        );
+        return NextResponse.json(
+          {
+            error: "GitHub data fetch failed",
+            message: `Unable to fetch GitHub data: ${
+              githubError.message || String(error)
+            }`,
+            username,
+          },
+          { status: 502 }
+        );
+      }
+
+      // Create card data from fetched GitHub data
+      const cardData = {
+        login: userData.login,
+        name: userData.name,
+        avatar_url: userData.avatar_url,
+        followers: userData.followers,
+        following: userData.following,
+        public_repos: userData.public_repos,
+        totalContributions: contributionsData.totalContributions,
+        commitCount: contributionsData.commitCount,
+        prCount: contributionsData.prCount,
+        issueCount: contributionsData.issueCount,
+        reviewCount: contributionsData.reviewCount,
+        contributionScore: contributionsData.contributionScore,
+        contributionGrade: contributionsData.contributionGrade,
+      };
+
+      // Update user contribution with data from GitHub
+      try {
+        await updateUserContribution(
+          userId,
+          contributionsData.contributionScore
+        );
+      } catch (updateError) {
+        console.error("Failed to update user contribution score:", updateError);
+        // Continue with share link creation even if updating the score fails
+      }
+
+      // Calculate expiration time (30 days)
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 30);
       console.log("Expiration date set to:", expiresAt);
@@ -107,31 +132,19 @@ export async function POST(request: NextRequest) {
       const token = uuidv4();
       console.log("Generated token:", token);
 
-      // Check for database URL before attempting insertion
-      console.log("Database URL available:", !!process.env.DATABASE_URL);
-
       try {
         console.log("Preparing to insert data into shareLinks table");
-        console.log("Template type:", body.templateType || "contribute");
-        console.log(
-          "Data to be inserted: userId:",
-          userId,
-          "templateType:",
-          body.templateType || "contribute"
-        );
-
-        // Log the database connection object (safely)
-        console.log("Database connection exists:", !!db);
-        console.log("ShareLinks table exists:", !!shareLinks);
+        console.log("Template type:", body.templateType);
+        console.log("Data to be inserted: userId:", userId);
 
         const result = await db
           .insert(shareLinks)
           .values({
             userId,
             linkToken: token,
-            cardData: body.cardData,
+            cardData,
             expiresAt,
-            templateType: body.templateType || "contribute",
+            templateType: body.templateType,
           })
           .returning();
 
@@ -140,10 +153,10 @@ export async function POST(request: NextRequest) {
         // Type assertion for the error object
         const dbError = error as { code?: string; stack?: string };
 
-        console.error("数据库插入失败 - 详细错误:", dbError);
+        console.error("Database insertion failed - detailed error:", dbError);
 
         if (dbError.stack) {
-          console.error("错误堆栈:", dbError.stack);
+          console.error("Error stack:", dbError.stack);
         }
 
         // Check for specific error types
@@ -161,16 +174,17 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // 获取baseUrl，确保它包含协议
+      // Get baseUrl
       const baseUrl = process.env.NEXTAUTH_URL || "";
 
       return NextResponse.json({
         shareUrl: `${baseUrl}/shared/${token}`,
+        cardData,
         expiresAt,
       });
     } catch (error) {
-      console.error("创建分享链接失败:", error);
-      // 确保返回正确格式的错误响应
+      console.error("Creating share link failed:", error);
+      // Ensure returning a properly formatted error response
       return NextResponse.json(
         { error: "Internal Server Error", message: String(error) },
         {
@@ -191,7 +205,7 @@ export async function GET(request: NextRequest) {
         .where(eq(shareLinks.userId, userId))
         .orderBy(shareLinks.createdAt);
 
-      // 获取baseUrl
+      // Get baseUrl
       const baseUrl = process.env.NEXTAUTH_URL || "";
 
       // Return the share links

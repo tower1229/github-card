@@ -1,24 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
-import { refreshLeaderboard } from "@/lib/leaderboard";
+import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { withServerAuth } from "@/lib/server-auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { refreshLeaderboard } from "@/lib/leaderboard";
 
-export async function GET(request: NextRequest) {
-  return withServerAuth(async () => {
-    try {
-      // 刷新排行榜数据
-      const result = await refreshLeaderboard();
-
-      // 重新验证排行榜页面数据
-      revalidatePath("/leaderboard");
-
-      return NextResponse.json(result);
-    } catch (error) {
-      console.error("刷新排行榜数据出错:", error);
-      return NextResponse.json(
-        { error: "刷新排行榜数据失败" },
-        { status: 500 }
-      );
+export async function GET() {
+  try {
+    // Get user session and validate permissions
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-  }, request);
+
+    // Recalculate all user ranks
+    const result = await refreshLeaderboard();
+
+    // Clear related page caches
+    revalidatePath("/leaderboard");
+    revalidatePath("/api/leaderboard");
+
+    return NextResponse.json({
+      success: true,
+      updatedAt: new Date().toISOString(),
+      affectedRows: result.affectedRows || 0,
+      message: "Leaderboard refreshed successfully",
+    });
+  } catch (error) {
+    console.error("Error refreshing leaderboard:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to refresh leaderboard",
+        message: String(error),
+      },
+      { status: 500 }
+    );
+  }
 }

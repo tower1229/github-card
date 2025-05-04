@@ -1,40 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateUserContribution } from "@/lib/leaderboard";
 import { withServerAuth } from "@/lib/server-auth";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { getGitHubContributions } from "@/lib/github/api";
+import { updateUserContribution } from "@/lib/leaderboard";
 
 export async function POST(request: NextRequest) {
   return withServerAuth(async (req, userId) => {
     try {
-      // 获取请求数据
-      const body = await req.json();
+      // Get user information from database
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId),
+        with: {
+          accounts: true,
+        },
+      });
 
-      // 验证必要参数
-      if (!body.userId || typeof body.contributionScore !== "number") {
-        return NextResponse.json({ error: "缺少必要参数" }, { status: 400 });
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      // 验证当前用户只能更新自己的贡献数据
-      if (body.userId !== userId) {
+      // Extract GitHub username
+      const githubAccount = user.accounts.find(
+        (acc) => acc.provider === "github"
+      );
+      const username = githubAccount?.providerAccountId || user.name;
+
+      if (!username) {
         return NextResponse.json(
-          { error: "无权操作其他用户的数据" },
-          { status: 403 }
+          { error: "GitHub username not found" },
+          { status: 404 }
         );
       }
 
-      // 确保贡献分数为整数以匹配数据库模式要求
-      const contributionScoreInt = Math.round(body.contributionScore);
-      
-      // 更新用户贡献数据
-      const result = await updateUserContribution(
-        body.userId,
-        contributionScoreInt
-      );
+      // Fetch latest contribution data from server-side API
+      const contributionsData = await getGitHubContributions(username);
+      const contributionScore = contributionsData.contributionScore;
 
-      return NextResponse.json(result);
+      // Update user contribution data
+      const result = await updateUserContribution(userId, contributionScore);
+
+      return NextResponse.json({
+        success: true,
+        rank: result.rank,
+        previousRank: result.previousRank,
+        contributionScore,
+      });
     } catch (error) {
-      console.error("更新用户贡献数据出错:", error);
+      console.error("Error updating user contribution data:", error);
       return NextResponse.json(
-        { error: "更新用户贡献数据失败" },
+        { error: "Failed to update contribution data", message: String(error) },
         { status: 500 }
       );
     }

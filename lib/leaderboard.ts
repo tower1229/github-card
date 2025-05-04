@@ -138,12 +138,14 @@ export const getLeaderboard = cache(
 // 获取完整的排行榜数据，包括当前用户信息
 export async function getFullLeaderboard(
   limit: number = 20,
+  page: number = 1,
   currentUserId?: string
 ) {
   try {
     // 获取排行榜数据
     const { leaderboard, totalUsers, lastUpdated } = await getLeaderboard(
-      limit
+      limit,
+      page
     );
 
     // 如果提供了当前用户ID且该用户不在排行榜中，获取其排名
@@ -182,6 +184,8 @@ export async function getFullLeaderboard(
       currentUser,
       totalUsers,
       lastUpdated,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
     };
   } catch (error) {
     console.error("获取完整排行榜数据失败:", error);
@@ -190,6 +194,8 @@ export async function getFullLeaderboard(
       currentUser: undefined,
       totalUsers: 0,
       lastUpdated: new Date().toISOString(),
+      currentPage: page,
+      totalPages: 0,
       error: "获取完整排行榜数据失败",
     };
   }
