@@ -4,8 +4,8 @@ import { db } from "@/lib/db";
 import { getGitHubContributions } from "@/lib/github/api";
 import { updateUserContribution } from "@/lib/leaderboard";
 
-// Enable Edge runtime for better performance and caching
-export const runtime = 'edge';
+// Using Node.js runtime since we need dotenv which depends on Node.js modules
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   return withServerAuth(async (req, userId) => {
