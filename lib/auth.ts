@@ -44,14 +44,58 @@ export async function withAuth(
   handler: (req: NextRequest, userId: string) => Promise<NextResponse>,
   req: NextRequest
 ) {
-  const session = await getServerSession(authOptions);
+  try {
+    console.log("withAuth: Starting authentication check");
+    
+    // Debugging information about the request
+    console.log("withAuth: Request method:", req.method);
+    console.log("withAuth: Request URL:", req.url);
+    
+    let session;
+    try {
+      session = await getServerSession(authOptions);
+      console.log("withAuth: Session retrieved:", !!session);
+      
+      if (session?.user) {
+        console.log("withAuth: User in session:", { 
+          hasId: !!session.user.id, 
+          hasName: !!session.user.name,
+          hasEmail: !!session.user.email
+        });
+      } else {
+        console.log("withAuth: No user in session");
+      }
+    } catch (sessionError) {
+      console.error("withAuth: Error retrieving session:", sessionError);
+      return NextResponse.json({ 
+        error: "Authentication error", 
+        message: "Failed to retrieve session" 
+      }, { status: 500 });
+    }
 
-  if (!session?.user?.id) {
-    console.log("API 鉴权失败: 缺少用户 ID");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.id) {
+      console.log("API 鉴权失败: 缺少用户 ID");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+      console.log("withAuth: Proceeding to handler with userId:", session.user.id);
+      return await handler(req, session.user.id);
+    } catch (handlerError) {
+      console.error("withAuth: Error in handler execution:", handlerError);
+      return NextResponse.json({ 
+        error: "Request handler error", 
+        message: String(handlerError) 
+      }, { status: 500 });
+    }
+  } catch (error) {
+    // Catch-all for any other errors in the auth middleware
+    console.error("withAuth: Unexpected error in auth middleware:", error);
+    return NextResponse.json({ 
+      error: "Server error", 
+      message: "An unexpected error occurred in the authentication process" 
+    }, { status: 500 });
   }
-
-  return handler(req, session.user.id);
 }
 
 // 客户端 fetch 封装

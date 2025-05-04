@@ -91,9 +91,17 @@ function GenerateContent() {
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Failed to create share link:", errorData);
-            throw new Error(errorData.error || "Failed to create share link");
+            let errorMessage = "Failed to create share link";
+            try {
+              const errorData = await response.json();
+              console.error("Failed to create share link:", errorData);
+              errorMessage = errorData.error || errorMessage;
+            } catch (jsonError) {
+              // If JSON parsing fails, use the response status text
+              console.error("Error parsing error response:", jsonError);
+              errorMessage = `Server error (${response.status}): ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
           }
 
           const data = await response.json();

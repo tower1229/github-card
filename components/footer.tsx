@@ -62,13 +62,10 @@ export function Footer({
       if (!canvasElement) return;
 
       // 优先使用分享链接，如果没有则使用当前页面URL
-      const shareUrl = shareContext?.shareUrl;
-      const qrUrl = shareUrl
-        ? `${window.location.origin}${shareUrl}`
-        : window.location.href;
+      const shareUrl = shareContext?.shareUrl || window.location.href;
 
       try {
-        Qrcode.toCanvas(canvasElement, qrUrl, {
+        Qrcode.toCanvas(canvasElement, shareUrl, {
           margin: 2,
           width: 100,
         });

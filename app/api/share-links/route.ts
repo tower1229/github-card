@@ -4,12 +4,24 @@ import { db } from "@/lib/db";
 import { shareLinks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { updateUserContribution } from "@/lib/leaderboard";
-import { withAuth } from "@/lib/auth";
+import { withServerAuth } from "@/lib/server-auth";
 
 export async function POST(request: NextRequest) {
-  return withAuth(async (req, userId) => {
+  return withServerAuth(async (req: NextRequest, userId: string) => {
     try {
-      const body = await req.json();
+      console.log("Processing share link request for userId:", userId);
+      
+      let body;
+      try {
+        body = await req.json();
+        console.log("Request body received:", JSON.stringify(body));
+      } catch (parseError) {
+        console.error("Failed to parse request body:", parseError);
+        return NextResponse.json(
+          { error: "Invalid request body", message: "Could not parse request JSON" },
+          { status: 400 }
+        );
+      }
 
       if (!body.cardData) {
         return NextResponse.json(
@@ -20,16 +32,48 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // 验证 cardData 是有效的 JSON 对象
+      try {
+        // 通过序列化和反序列化来确保它是有效的 JSON
+        const validatedCardData = JSON.parse(JSON.stringify(body.cardData));
+        body.cardData = validatedCardData;
+        console.log("Validated cardData:", typeof body.cardData);
+      } catch (jsonError) {
+        console.error("无效的 cardData JSON 格式:", jsonError);
+        return NextResponse.json(
+          { error: "Invalid card data format", message: String(jsonError) },
+          { status: 400 }
+        );
+      }
+
       // 提取贡献数据并更新排行榜
       try {
-        if (body.cardData?.contributions?.total) {
-          const contributionCount =
-            typeof body.cardData.contributions.total === "number"
-              ? body.cardData.contributions.total
-              : parseInt(body.cardData.contributions.total);
+        // 处理可能的不同贡献数据格式
+        let contributionCount = null;
+        
+        // 检查新格式：contribution_score
+        if (body.cardData?.contribution_score && typeof body.cardData.contribution_score === "number") {
+          contributionCount = body.cardData.contribution_score;
+          console.log("Using contribution_score:", contributionCount);
+        }
+        // 检查旧格式：contributions.total
+        else if (body.cardData?.contributions?.total) {
+          contributionCount = typeof body.cardData.contributions.total === "number"
+            ? body.cardData.contributions.total
+            : parseInt(body.cardData.contributions.total);
+          console.log("Using contributions.total:", contributionCount);
+        }
 
-          // 更新贡献排行榜
-          await updateUserContribution(userId, contributionCount);
+        if (contributionCount !== null) {
+          if (isNaN(contributionCount)) {
+            console.warn("贡献数据不是有效数字:", contributionCount);
+          } else {
+            console.log("Updating contribution leaderboard with count:", contributionCount);
+            // 更新贡献排行榜
+            await updateUserContribution(userId, contributionCount);
+          }
+        } else {
+          console.log("No contribution data found in the request");
         }
       } catch (error) {
         console.error("更新贡献排行榜失败:", error);
@@ -39,20 +83,60 @@ export async function POST(request: NextRequest) {
       // 计算过期时间（30天后）
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 30);
+      console.log("Expiration date set to:", expiresAt);
 
       // Generate a random token
       const token = uuidv4();
+      console.log("Generated token:", token);
 
-      await db
-        .insert(shareLinks)
-        .values({
-          userId,
-          linkToken: token,
-          cardData: body.cardData,
-          expiresAt,
-          templateType: body.templateType || "contribute",
-        })
-        .returning();
+      // Check for database URL before attempting insertion
+      console.log("Database URL available:", !!process.env.DATABASE_URL);
+      
+      try {
+        console.log("Preparing to insert data into shareLinks table");
+        console.log("Template type:", body.templateType || "contribute");
+        console.log("Data to be inserted: userId:", userId, "templateType:", body.templateType || "contribute");
+        
+        // Log the database connection object (safely)
+        console.log("Database connection exists:", !!db);
+        console.log("ShareLinks table exists:", !!shareLinks);
+        
+        const result = await db
+          .insert(shareLinks)
+          .values({
+            userId,
+            linkToken: token,
+            cardData: body.cardData,
+            expiresAt,
+            templateType: body.templateType || "contribute",
+          })
+          .returning();
+          
+        console.log("Database insertion successful, result:", result);
+      } catch (error) {
+        // Type assertion for the error object
+        const dbError = error as { code?: string; stack?: string };
+        
+        console.error("数据库插入失败 - 详细错误:", dbError);
+        
+        if (dbError.stack) {
+          console.error("错误堆栈:", dbError.stack);
+        }
+        
+        // Check for specific error types
+        if (dbError.code) {
+          console.error("Database error code:", dbError.code);
+        }
+        
+        return NextResponse.json(
+          { 
+            error: "Database insertion failed", 
+            message: String(error),
+            code: dbError.code || "UNKNOWN" 
+          },
+          { status: 500 }
+        );
+      }
 
       // 获取baseUrl，确保它包含协议
       const baseUrl = process.env.NEXTAUTH_URL || "";
@@ -75,7 +159,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  return withAuth(async (req, userId) => {
+  return withServerAuth(async (req: NextRequest, userId: string) => {
     try {
       // Get all share links for the user
       const userShareLinks = await db

@@ -114,7 +114,9 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async jwt({ token, user, account, profile }) {
+      // If this is the first sign in, add all the user properties to the token
       if (account && user && profile) {
+        console.log("JWT callback with new sign-in, user:", JSON.stringify(user));
         const githubProfile = profile as {
           login?: string;
           name?: string;
@@ -123,6 +125,7 @@ export const authOptions: NextAuthOptions = {
 
         return {
           ...token,
+          id: user.id, // <-- Ensure user ID is included in the token
           accessToken: account.access_token,
           username:
             user.login || githubProfile.login || user.email?.split("@")[0],
@@ -136,11 +139,17 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback, token:", JSON.stringify(token));
       if (session.user) {
+        // Copy important properties from token to session
+        // Use 'sub' as the user ID - this is how OAuth2 works (subject = user ID)
+        session.user.id = token.sub as string;
         session.user.name =
           (token.displayName as string) || session.user.name || "user";
         session.user.accessToken = token.accessToken as string;
         session.user.username = token.username as string;
+        
+        console.log("Updated session with user ID:", session.user.id);
       }
       return session;
     },

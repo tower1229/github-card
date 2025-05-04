@@ -70,7 +70,7 @@ export function ShareButton({
 
     // If we already have a share URL, just copy it
     if (shareContext?.shareUrl) {
-      const fullUrl = `${window.location.origin}${shareContext.shareUrl}`;
+      const fullUrl = `${shareContext.shareUrl}`;
       navigator.clipboard.writeText(fullUrl);
       toast.success("Share link copied to clipboard");
       return;
@@ -101,10 +101,12 @@ export function ShareButton({
       }
 
       // Build complete URL with origin
-      const fullUrl = `${window.location.origin}${data.shareUrl}`;
+      if (!data.shareUrl) {
+        throw new Error("Share link not found");
+      }
 
       // Copy generated share link to clipboard
-      await navigator.clipboard.writeText(fullUrl);
+      await navigator.clipboard.writeText(data.shareUrl);
 
       toast.success("Share link copied to clipboard");
     } catch (error) {
