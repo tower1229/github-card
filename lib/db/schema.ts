@@ -87,28 +87,6 @@ export const contributeDataRelations = relations(contributeData, ({ one }) => ({
   }),
 }));
 
-// 添加贡献排行榜表
-export const contributionLeaderboard = pgTable("contribution_leaderboard", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  contributionScore: integer("contribution_score").notNull(),
-  rank: integer("rank"),
-  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const contributionLeaderboardRelations = relations(
-  contributionLeaderboard,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [contributionLeaderboard.userId],
-      references: [users.id],
-    }),
-  })
-);
-
 export const userBehaviors = pgTable("user_behaviors", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("userId")
@@ -160,11 +138,6 @@ export type NewShareLink = typeof shareLinks.$inferInsert;
 
 export type Account = typeof accounts.$inferSelect;
 export type NewAccount = typeof accounts.$inferInsert;
-
-export type ContributionLeaderboard =
-  typeof contributionLeaderboard.$inferSelect;
-export type NewContributionLeaderboard =
-  typeof contributionLeaderboard.$inferInsert;
 
 export type ContributeData = typeof contributeData.$inferSelect;
 export type NewContributeData = typeof contributeData.$inferInsert;

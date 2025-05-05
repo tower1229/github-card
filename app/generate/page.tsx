@@ -44,9 +44,6 @@ function GenerateContent() {
     hasGeneratedLink: false,
   });
 
-  // 新增leaderboard状态跟踪
-  const apiLeaderboardStatus = useRef(false);
-
   // 记忆化回调函数，防止重渲染导致的无限请求循环
   const handleDownloadStateChange = useCallback((downloading: boolean) => {
     setIsDownloading(downloading);
@@ -114,22 +111,6 @@ function GenerateContent() {
 
           // 标记已完成生成分享链接
           apiRequestStatus.current.hasGeneratedLink = true;
-
-          // 更新贡献排行榜数据
-          if (!apiLeaderboardStatus.current && session?.user?.id) {
-            try {
-              apiLeaderboardStatus.current = true;
-
-              // 调用排行榜更新API
-              await authFetch("/api/leaderboard/update", {
-                method: "POST",
-              });
-
-              console.log("Leaderboard updated successfully");
-            } catch (leaderboardError) {
-              console.error("Error updating leaderboard:", leaderboardError);
-            }
-          }
         } catch (error) {
           console.error("Error generating share link:", error);
           setShareContext((prev) => ({ ...prev, isGenerating: false }));

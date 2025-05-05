@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { Navbar } from "@/components/auth/navbar";
 import { LeaderboardList } from "@/components/leaderboard/LeaderboardList";
 import { LeaderboardSkeleton } from "@/components/leaderboard/LeaderboardSkeleton";
-import { RefreshButton } from "@/components/leaderboard/RefreshButton";
 
 export const metadata = {
   title: "Leaderboard | GitHub Card",
@@ -19,7 +18,6 @@ export default function LeaderboardPage() {
           <div className="w-full max-w-4xl">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold">Contribution Leaderboard</h1>
-              <RefreshButton />
             </div>
             <div className="bg-[#161b22] rounded-lg border border-[#30363d] shadow-lg overflow-hidden">
               <Suspense fallback={<LeaderboardSkeleton />}>
