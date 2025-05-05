@@ -34,18 +34,18 @@ export function Navbar({ showLinks = false }: NavbarProps) {
           </Link>
           {showLinks && (
             <div className="hidden md:flex space-x-6">
-              <a
-                href="#templates"
+              <Link
+                href="/#templates"
                 className="text-[#c9d1d9] hover:text-white transition"
               >
                 Templates
-              </a>
-              <a
-                href="#examples"
+              </Link>
+              <Link
+                href="/#examples"
                 className="text-[#c9d1d9] hover:text-white transition"
               >
                 Examples
-              </a>
+              </Link>
               <Link
                 href="/leaderboard"
                 className="text-[#c9d1d9] hover:text-white transition flex items-center gap-1"
