@@ -82,13 +82,16 @@ export function Footer({
   if (showQrcode) {
     // showStyle
     const showStyles = {
-      1: "z-10 flex min-h-40 flex-col items-center justify-center gap-4 p-4 mt-10",
-      2: "z-10 flex items-center gap-4 p-4 mt-10 flex-row-reverse",
+      1: "z-10 flex min-h-40 flex-col items-center justify-center gap-4 p-4 mt-10 relative",
+      2: "z-10 flex items-center gap-4 p-4 flex-row-reverse relative h-[100px]",
     };
 
     return (
       <div className={showStyles[showStyle]}>
-        <canvas id="footer-qr-canvas"></canvas>
+        <canvas
+          id="footer-qr-canvas"
+          className={showStyle === 2 ? "absolute top-0 right-0" : ""}
+        ></canvas>
         {shareContext?.isGenerating && (
           <TypingAnimation>Generating...</TypingAnimation>
         )}
