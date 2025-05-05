@@ -11,6 +11,7 @@ import { ShareButton } from "@/components/share-button";
 import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
 import { ShareContextData } from "@/app/generate/page";
 import { getUserGitHubData } from "@/lib/server-github";
+import LoadingSharedCard from "@/components/loading";
 
 interface ProfileLinktreePageProps {
   username: string;
@@ -87,12 +88,7 @@ export function ProfileLinktreePage({
     onDownloadStateChange?.(isDownloading);
   }, [isDownloading, onDownloadStateChange]);
 
-  if (loading)
-    return (
-      <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
+  if (loading) return <LoadingSharedCard />;
   if (!userData)
     return (
       <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">

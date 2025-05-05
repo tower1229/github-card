@@ -12,6 +12,7 @@ import Link from "next/link";
 import { GitHubData } from "@/lib/types";
 import Loading from "@/components/loading";
 import { authFetch } from "@/lib/auth";
+import { LoadingSharedCard } from "@/components/loading";
 
 // Warn if environment variables are being accessed from client
 if (typeof window !== "undefined" && process.env.DATABASE_URL) {
@@ -204,13 +205,7 @@ function GenerateContent() {
 // 主组件使用 Suspense 包装用到 useSearchParams 的组件
 export default function GeneratePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#0d1117] text-white flex items-center justify-center">
-          <div className="animate-pulse text-xl">Loading...</div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingSharedCard />}>
       <GenerateContent />
     </Suspense>
   );

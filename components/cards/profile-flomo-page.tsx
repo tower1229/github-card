@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { GitHubData } from "@/lib/types";
 import { ShareContextData } from "@/app/generate/page";
 import { getUserGitHubData } from "@/lib/server-github";
+import LoadingSharedCard from "@/components/loading";
 
 interface ProfileFlomoPageProps {
   username: string;
@@ -87,12 +88,7 @@ export function ProfileFlomoPage({
     onDownloadStateChange?.(isDownloading);
   }, [isDownloading, onDownloadStateChange]);
 
-  if (loading)
-    return (
-      <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
+  if (loading) return <LoadingSharedCard />;
   if (!userData)
     return (
       <div className="min-h-screen bg-linear-to-b from-orange-600 via-orange-800 to-gray-900 text-white flex items-center justify-center">

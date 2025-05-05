@@ -1,32 +1,20 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { BlurFade } from "./blur-fade";
 import { Button } from "./ui/button";
 import Image from "next/image";
 import PreviewLinktree from "@/public/preview/linktree.png";
 import PreviewContribute from "@/public/preview/contribute.png";
 import PreviewFlomo from "@/public/preview/flomo.png";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function TemplateShowcase() {
-  const { data: session } = useSession();
   const router = useRouter();
-  const [buttonLoading, setButtonLoading] = useState(false);
-
-  const handleTemplateAction = (templateValue: string) => {
-    if (session) {
-      setButtonLoading(true);
-      router.push(`/generate?template=${templateValue}`);
-    } else {
-      // 如果未登录，触发登录流程
-      signIn("github", { callbackUrl: "/#templates" });
-    }
-  };
+  const [loadingTemplates, setLoadingTemplates] = useState<
+    Record<string, boolean>
+  >({});
 
   const templates = [
     {
@@ -50,6 +38,13 @@ export function TemplateShowcase() {
     },
   ];
 
+  const handleTemplateClick = (templateValue: string) => {
+    if (loadingTemplates[templateValue]) return;
+
+    setLoadingTemplates((prev) => ({ ...prev, [templateValue]: true }));
+    router.push(`/generate?template=${templateValue}`);
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[10px] max-w-7xl mx-auto">
       {templates.map((template, index) => (
@@ -72,34 +67,19 @@ export function TemplateShowcase() {
                 <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
                 <p className="text-gray-300 mb-4">{template.description}</p>
                 <div className="flex space-x-3">
-                  {session ? (
-                    <Link
-                      href={`/generate?template=${template.value}`}
-                      prefetch
-                    >
-                      <Button className="bg-orange-600 hover:bg-orange-700">
-                        Use Template
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Button
-                      className="bg-orange-600 hover:bg-orange-700"
-                      onClick={() => handleTemplateAction(template.value)}
-                    >
-                      {buttonLoading && (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      )}
-                      Use Template
-                    </Button>
-                  )}
                   <Button
-                    variant="outline"
-                    onClick={() => handleTemplateAction(template.value)}
+                    className="bg-orange-600 hover:bg-orange-700 transition-all"
+                    onClick={() => handleTemplateClick(template.value)}
+                    disabled={loadingTemplates[template.value]}
                   >
-                    {buttonLoading && (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                    {loadingTemplates[template.value] ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Use Template"
                     )}
-                    Preview
                   </Button>
                 </div>
               </div>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GithubButton } from "@/components/auth/github-button";
 import { Navbar } from "@/components/auth/navbar";
+import LoadingSharedCard from "@/components/loading";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
@@ -70,13 +71,7 @@ export default function AuthError() {
       <Navbar />
 
       <div className="container mx-auto px-4 py-16">
-        <Suspense
-          fallback={
-            <div className="max-w-md mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-4">Loading...</h2>
-            </div>
-          }
-        >
+        <Suspense fallback={<LoadingSharedCard />}>
           <ErrorContent />
         </Suspense>
       </div>
