@@ -63,12 +63,10 @@ export async function POST(request: NextRequest) {
       const userShareLinks = await GET(modifiedRequest);
       if (userShareLinks.ok) {
         const userShareLinksData = await userShareLinks.json();
-        console.log("get userShareLinksData:", userShareLinksData);
         const activeLinks = userShareLinksData.filter(
           (link: ShareLink) =>
             link.isActive && new Date(link.expiresAt) > new Date()
         );
-        console.log("get activeLinks:", activeLinks);
         if (activeLinks.length > 0) {
           const baseUrl = process.env.NEXTAUTH_URL || "";
           const token = activeLinks[0].linkToken;

@@ -10,13 +10,16 @@ import PreviewContribute from "@/public/preview/contribute.png";
 import PreviewFlomo from "@/public/preview/flomo.png";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 export function TemplateShowcase() {
   const { data: session } = useSession();
   const router = useRouter();
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const handleTemplateAction = (templateValue: string) => {
     if (session) {
+      setButtonLoading(true);
       router.push(`/generate?template=${templateValue}`);
     } else {
       // 如果未登录，触发登录流程
@@ -84,6 +87,9 @@ export function TemplateShowcase() {
                     className="bg-orange-600 hover:bg-orange-700"
                     onClick={() => handleTemplateAction(template.value)}
                   >
+                    {buttonLoading && (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    )}
                     Use Template
                   </Button>
                 )}
@@ -91,6 +97,9 @@ export function TemplateShowcase() {
                   variant="outline"
                   onClick={() => handleTemplateAction(template.value)}
                 >
+                  {buttonLoading && (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  )}
                   Preview
                 </Button>
               </div>
