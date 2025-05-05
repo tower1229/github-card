@@ -14,7 +14,7 @@ export function GithubButton({ className = "" }: GithubButtonProps) {
   const isLoading = status === "loading";
 
   const handleSignIn = () => {
-    signIn("github", { callbackUrl: `${window.location.origin}/#templates` });
+    signIn("github", { callbackUrl: `${window.location.origin}` });
   };
 
   const handleSignOut = () => {
@@ -49,7 +49,7 @@ export function GithubButton({ className = "" }: GithubButtonProps) {
           className={`flex items-center px-4 py-2 bg-[#fa7b19] hover:bg-[#e76b0a] transition transform hover:scale-105 ${className}`}
         >
           <Github className="w-5 h-5 mr-2" />
-          {isLoading ? "Loading..." : "Sign in with GitHub"}
+          {isLoading ? "Loading..." : "Sign in"}
         </Button>
       )}
     </>
