@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
+    "build:debug": "next build --debug",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
@@ -13,14 +14,6 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx lib/db/seed.ts",
-    "db:fix": "tsx scripts/fix-all-columns.ts",
-    "db:reset": "tsx scripts/reset-db.ts",
-    "db:fix-oauth": "tsx scripts/fix-oauth-accounts.ts",
-    "db:fix-github-id": "tsx scripts/fix-github-id.ts",
-    "db:migrate-contributions": "tsx scripts/migrate-contribution-data.ts",
-    "db:merge-contribute-data": "tsx lib/db/migrate-02-merge-contribute-data-fields.ts",
-    "db:update-leaderboard": "tsx scripts/update-leaderboard-structure.ts",
-    "check:auth": "node scripts/check-auth-config.js",
     "postinstall": "drizzle-kit generate"
   },
   "dependencies": {

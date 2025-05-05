@@ -39,43 +39,12 @@ async function seed() {
     const linkToken = uuidv4();
     const expiresAt = getExpirationDate();
 
-    // Sample GitHub card data
-    const cardData = {
-      username: "sample-user",
-      stats: {
-        followers: 100,
-        following: 50,
-        repositories: 30,
-        stars: 500,
-      },
-      languages: {
-        JavaScript: 60,
-        TypeScript: 25,
-        HTML: 10,
-        CSS: 5,
-      },
-      repositories: [
-        {
-          name: "awesome-project",
-          description: "An awesome project",
-          stars: 250,
-          forks: 50,
-        },
-        {
-          name: "cool-app",
-          description: "A really cool app",
-          stars: 150,
-          forks: 30,
-        },
-      ],
-    };
-
     const [shareLink] = await db
       .insert(shareLinks)
       .values({
         userId: user.id,
         linkToken,
-        cardData,
+        githubUsername: user.username,
         expiresAt,
         isActive: true,
       })

@@ -113,8 +113,6 @@ export function ProfileContributePage({
               {!isDownloading && (
                 <ShareButton
                   setIsDownloading={setIsDownloading}
-                  userData={userData!}
-                  templateType={"contribute"}
                   shareContext={shareContext}
                 />
               )}

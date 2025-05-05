@@ -116,8 +116,6 @@ export function ProfileFlomoPage({
               {!isDownloading && (
                 <ShareButton
                   setIsDownloading={setIsDownloading}
-                  userData={userData!}
-                  templateType={"flomo"}
                   shareContext={shareContext}
                 />
               )}

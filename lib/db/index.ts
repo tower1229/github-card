@@ -13,10 +13,6 @@ let db: ReturnType<typeof drizzle<typeof schema>>;
 // Only create a real connection on the server side
 if (typeof window === "undefined") {
   try {
-    console.log(
-      "Loading DATABASE_URL:",
-      process.env.DATABASE_URL ? "Found" : "Not found"
-    );
     const sql = neon(process.env.DATABASE_URL!);
     db = drizzle(sql, { schema });
   } catch (error) {

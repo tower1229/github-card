@@ -4,10 +4,7 @@ import { shareLinks, userBehaviors } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getUserGitHubData } from "@/lib/server-github";
 
-export async function GET(
-  request: NextRequest,
-  props: { params: Promise<{ token: string }> }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ token: string }> }) {
   const params = await props.params;
   try {
     const token = params.token;
