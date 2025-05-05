@@ -6,9 +6,8 @@ import { getUserGitHubData } from "@/lib/server-github";
 
 export async function GET(
   request: NextRequest,
-  props: { params: Promise<{ token: string }> }
+  { params }: { params: { token: string } }
 ) {
-  const params = await props.params;
   try {
     const token = params.token;
     if (!token) {

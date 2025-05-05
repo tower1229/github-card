@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
+    "build:debug": "next build --debug",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",

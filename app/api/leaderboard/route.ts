@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cache } from "react";
 import { getFullLeaderboard } from "@/lib/leaderboard";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth-options";
 
 // Cached function to get leaderboard data
 const getCachedLeaderboardData = cache(

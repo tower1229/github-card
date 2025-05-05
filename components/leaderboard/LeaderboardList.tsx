@@ -2,7 +2,7 @@ import { getFullLeaderboard } from "@/lib/leaderboard";
 import { getServerSession } from "next-auth";
 import { LeaderboardItem } from "./LeaderboardItem";
 import { CurrentUserRank } from "./CurrentUserRank";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth-options";
 
 export async function LeaderboardList() {
   // 获取当前用户
