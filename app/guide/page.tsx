@@ -12,6 +12,7 @@ import {
   Star,
   GitCommit,
 } from "lucide-react";
+import { Footer } from "@/components/footer";
 
 export const metadata = {
   title: "User Guide | GitHub Card",
@@ -767,6 +768,8 @@ export default function GuidePage() {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 }
