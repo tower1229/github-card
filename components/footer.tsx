@@ -83,20 +83,18 @@ export function Footer({
     // showStyle
     const showStyles = {
       1: "z-10 flex min-h-40 flex-col items-center justify-center gap-4 p-4 mt-10 relative",
-      2: "z-10 flex items-center gap-4 p-4 flex-row-reverse relative h-[100px]",
+      2: "z-10 flex items-center gap-4 p-4 flex-row-reverse relative min-h-[100px]",
     };
 
     return (
       <div className={showStyles[showStyle]}>
-        <canvas
-          id="footer-qr-canvas"
-          className={showStyle === 2 ? "absolute top-0 right-0" : ""}
-        ></canvas>
+        <canvas id="footer-qr-canvas"></canvas>
         {shareContext?.isGenerating && (
-          <TypingAnimation>Generating...</TypingAnimation>
+          <TypingAnimation className="absolute top-0 right-0">
+            Generating...
+          </TypingAnimation>
         )}
-        {showStyle === 2 && <div className="flex-1"></div>}
-        <Link href="/">
+        <Link href="/" className={showStyle === 2 ? "flex-1" : ""}>
           <AnimatedGradientText className="bg-black/40 mx-0">
             <GithubLogo size={20} />
             <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
