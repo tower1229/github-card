@@ -9,6 +9,7 @@ import Image from "next/image";
 import Logo from "@/public/logo.png";
 import { BlurFade } from "./blur-fade";
 import { ShareContextData } from "@/app/generate/page";
+import { TypingAnimation } from "@/components/magicui/typing-animation";
 
 export interface FooterProps {
   showQrcode?: boolean;
@@ -58,20 +59,19 @@ export function Footer({
   useEffect(() => {
     // 仅在需要显示二维码且Canvas元素存在时生成
     if (showQrcode && !qrCodeGenerated) {
-      const canvasElement = document.getElementById("canvas");
+      const canvasElement = document.getElementById("footer-qr-canvas");
       if (!canvasElement) return;
 
-      // 优先使用分享链接，如果没有则使用当前页面URL
-      const shareUrl = shareContext?.shareUrl || window.location.href;
-
-      try {
-        Qrcode.toCanvas(canvasElement, shareUrl, {
-          margin: 2,
-          width: 100,
-        });
-        setQrCodeGenerated(true);
-      } catch (error) {
-        console.error("Failed to generate QR code:", error);
+      if (shareContext?.shareUrl) {
+        try {
+          Qrcode.toCanvas(canvasElement, shareContext.shareUrl, {
+            margin: 2,
+            width: 100,
+          });
+          setQrCodeGenerated(true);
+        } catch (error) {
+          console.error("Failed to generate QR code:", error);
+        }
       }
     }
   }, [showQrcode, shareContext?.shareUrl, qrCodeGenerated]);
@@ -85,7 +85,10 @@ export function Footer({
 
     return (
       <div className={showStyles[showStyle]}>
-        <canvas id="canvas"></canvas>
+        <canvas id="footer-qr-canvas"></canvas>
+        {shareContext?.isGenerating && (
+          <TypingAnimation>Generating...</TypingAnimation>
+        )}
         {showStyle === 2 && <div className="flex-1"></div>}
         <Link href="/">
           <AnimatedGradientText className="bg-black/40 mx-0">
