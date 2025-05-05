@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db";
-import { shareLinks, type ShareLink } from "@/lib/db/schema";
+import { shareLinks } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { withServerAuth } from "@/lib/server-auth";
 
@@ -54,19 +54,26 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Create a new request with templateType as a query parameter for GET method
-      const url = new URL(req.url);
-      url.searchParams.set("templateType", body.templateType);
-      const modifiedRequest = new NextRequest(url);
+      // Check for existing active links directly from the database instead of using GET
+      // This prevents potential infinite loops and duplicate requests
+      try {
+        const existingLinks = await db
+          .select()
+          .from(shareLinks)
+          .where(
+            and(
+              eq(shareLinks.userId, userId),
+              eq(shareLinks.templateType, body.templateType),
+              eq(shareLinks.isActive, true)
+            )
+          )
+          .orderBy(shareLinks.createdAt);
 
-      // 调用 GET 方法尝试获取用户已有的未过期链接
-      const userShareLinks = await GET(modifiedRequest);
-      if (userShareLinks.ok) {
-        const userShareLinksData = await userShareLinks.json();
-        const activeLinks = userShareLinksData.filter(
-          (link: ShareLink) =>
-            link.isActive && new Date(link.expiresAt) > new Date()
+        // Filter for non-expired links
+        const activeLinks = existingLinks.filter(
+          (link) => new Date(link.expiresAt) > new Date()
         );
+
         if (activeLinks.length > 0) {
           const baseUrl = process.env.NEXTAUTH_URL || "";
           const token = activeLinks[0].linkToken;
@@ -76,6 +83,9 @@ export async function POST(request: NextRequest) {
             expiresAt,
           });
         }
+      } catch (error) {
+        console.error("Error checking existing active links:", error);
+        // Continue with creating a new link, don't return an error yet
       }
 
       // Calculate expiration time
@@ -104,6 +114,18 @@ export async function POST(request: NextRequest) {
           .returning();
 
         console.log("Database insertion successful, result:", result);
+
+        if (!result || result.length === 0) {
+          throw new Error("Database returned empty result after insertion");
+        }
+
+        // Get baseUrl
+        const baseUrl = process.env.NEXTAUTH_URL || "";
+
+        return NextResponse.json({
+          shareUrl: `${baseUrl}/shared/${token}`,
+          expiresAt,
+        });
       } catch (error) {
         // Type assertion for the error object
         const dbError = error as { code?: string; stack?: string };
@@ -121,26 +143,18 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(
           {
-            error: "Database insertion failed",
+            error: "Failed to create share link",
             message: String(error),
             code: dbError.code || "UNKNOWN",
           },
           { status: 500 }
         );
       }
-
-      // Get baseUrl
-      const baseUrl = process.env.NEXTAUTH_URL || "";
-
-      return NextResponse.json({
-        shareUrl: `${baseUrl}/shared/${token}`,
-        expiresAt,
-      });
     } catch (error) {
       console.error("Creating share link failed:", error);
       // Ensure returning a properly formatted error response
       return NextResponse.json(
-        { error: "Internal Server Error", message: String(error) },
+        { error: "Failed to create share link", message: String(error) },
         {
           status: 500,
         }
