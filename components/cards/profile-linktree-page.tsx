@@ -56,6 +56,7 @@ export function ProfileLinktreePage({
         const result = await getUserGitHubData(username);
 
         if (result.success && result.data) {
+          console.log("fetchUserData result.data:", result.data);
           setUserData(result.data);
           // Notify parent component
           if (onUserDataLoaded) {

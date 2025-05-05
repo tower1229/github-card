@@ -343,6 +343,33 @@ async function fetchGitHubContributions(
 
     console.log("Reviews count:", reviewsData.total_count);
 
+    // Get user data to retrieve followers
+    const userUrl = `https://api.github.com/users/${username}`;
+    console.log("Fetching user data URL:", userUrl);
+
+    const userResponse = await fetch(userUrl, {
+      headers,
+      next: { revalidate: 86400 },
+    });
+    console.log("User API response status:", userResponse.status);
+
+    let followers = 0;
+    let following = 0;
+    let created_at = new Date().toISOString();
+
+    if (userResponse.ok) {
+      const userData: GitHubUserResponse = await userResponse.json();
+      followers = userData.followers;
+      following = userData.following;
+      created_at = userData.created_at;
+      console.log("Followers count:", followers);
+      console.log("Following count:", following);
+      console.log("Account created at:", created_at);
+    } else {
+      console.warn(`Failed to fetch user data: ${userResponse.status}`);
+      console.log("Using fallback of 0 followers and following");
+    }
+
     // Calculate total stars from user's repos
     const totalStars = reposData.reduce(
       (sum, repo) => sum + repo.stargazers_count,
@@ -356,15 +383,23 @@ async function fetchGitHubContributions(
       commitsData.total_count,
       prsData.total_count,
       issuesData.total_count,
-      reviewsData.total_count
+      reviewsData.total_count,
+      followers,
+      following,
+      reposData.length,
+      created_at
     );
-    // TODO
+
     console.log("Final GitHub contribution data:", {
       totalContributions: commitsData.total_count,
       commitCount: commitsData.total_count,
       prCount: prsData.total_count,
       issueCount: issuesData.total_count,
       reviewCount: reviewsData.total_count,
+      followers,
+      following,
+      public_repos: reposData.length,
+      created_at,
       contributionScore,
       contributionGrade: getContributionGrade(contributionScore),
     });
@@ -376,8 +411,8 @@ async function fetchGitHubContributions(
       contribution_grade: getContributionGrade(contributionScore),
       total_stars: totalStars,
       public_repos: reposData.length,
-      followers: 0,
-      following: 0,
+      followers,
+      following,
       issues: issuesData.total_count,
       reviews: reviewsData.total_count,
     };
@@ -396,7 +431,11 @@ function calculateContributionScore(
   commits: number,
   prs: number,
   issues: number,
-  reviews: number
+  reviews: number,
+  followers: number,
+  following: number,
+  public_repos: number,
+  created_at: string
 ): number {
   console.log("Calculating contribution score with inputs:", {
     stars,
@@ -404,20 +443,70 @@ function calculateContributionScore(
     prs,
     issues,
     reviews,
+    followers,
+    following,
+    public_repos,
+    created_at,
   });
 
-  const STAR_WEIGHT = 1;
-  const COMMIT_WEIGHT = 0.1;
-  const PR_WEIGHT = 5;
-  const ISSUE_WEIGHT = 2;
-  const REVIEW_WEIGHT = 3;
+  // Define weights for each contribution type
+  const STAR_WEIGHT = 1.5; // Stars indicate project quality and popularity
+  const COMMIT_WEIGHT = 0.2; // Regular commits show consistent activity
+  const PR_WEIGHT = 5; // PRs show collaborative work and contribution to other projects
+  const ISSUE_WEIGHT = 1.5; // Issues show community engagement and problem identification
+  const REVIEW_WEIGHT = 3; // Reviews show mentorship and quality control
+  const FOLLOWER_WEIGHT = 1; // Followers indicate influence in the community
+  const FOLLOWING_WEIGHT = 0.5; // Following shows engagement with other developers
+  const REPO_WEIGHT = 2; // Public repos show range of interests and projects
 
+  // Calculate account age in years (max 10 years for full credit)
+  const accountCreationDate = new Date(created_at);
+  const currentDate = new Date();
+  const accountAgeInYears = Math.min(
+    10,
+    (currentDate.getTime() - accountCreationDate.getTime()) /
+      (1000 * 60 * 60 * 24 * 365)
+  );
+  const ACCOUNT_AGE_WEIGHT = 20; // Experience factor
+
+  // Calculate repository quality score (stars per repository, but with diminishing returns)
+  const repoQualityScore =
+    public_repos > 0 ? Math.min(20, stars / public_repos) : 0;
+  const REPO_QUALITY_WEIGHT = 10;
+
+  // Calculate collaboration score (ratio of PRs to own repos, capped at 5)
+  const collaborationScore = Math.min(
+    5,
+    public_repos > 0 ? prs / public_repos : 0
+  );
+  const COLLABORATION_WEIGHT = 15;
+
+  // Calculate community impact (followers relative to account age, with diminishing returns)
+  const followerImpactScore =
+    accountAgeInYears > 0
+      ? Math.min(50, followers / accountAgeInYears)
+      : followers;
+  const IMPACT_WEIGHT = 2;
+
+  // Calculate activity level score (commits + PRs + issues + reviews in the last year)
+  const activityScore = commits + prs * 5 + issues * 2 + reviews * 3;
+  const ACTIVITY_WEIGHT = 0.5;
+
+  // Calculate the final comprehensive score
   const score = Math.round(
     stars * STAR_WEIGHT +
       commits * COMMIT_WEIGHT +
       prs * PR_WEIGHT +
       issues * ISSUE_WEIGHT +
-      reviews * REVIEW_WEIGHT
+      reviews * REVIEW_WEIGHT +
+      followers * FOLLOWER_WEIGHT +
+      following * FOLLOWING_WEIGHT +
+      public_repos * REPO_WEIGHT +
+      accountAgeInYears * ACCOUNT_AGE_WEIGHT +
+      repoQualityScore * REPO_QUALITY_WEIGHT +
+      collaborationScore * COLLABORATION_WEIGHT +
+      followerImpactScore * IMPACT_WEIGHT +
+      activityScore * ACTIVITY_WEIGHT
   );
 
   console.log("Calculated contribution score:", score);
@@ -425,11 +514,11 @@ function calculateContributionScore(
 }
 
 function getContributionGrade(score: number): string {
-  if (score >= 2000) return "S+";
-  if (score >= 1000) return "S";
-  if (score >= 500) return "A";
-  if (score >= 200) return "B";
-  if (score >= 100) return "C";
-  if (score >= 50) return "D";
+  if (score >= 3000) return "S+";
+  if (score >= 1500) return "S";
+  if (score >= 800) return "A";
+  if (score >= 400) return "B";
+  if (score >= 200) return "C";
+  if (score >= 100) return "D";
   return "E";
 }
