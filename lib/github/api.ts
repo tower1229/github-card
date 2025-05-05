@@ -449,76 +449,61 @@ function calculateContributionScore(
     created_at,
   });
 
-  // Define weights for each contribution type
-  const STAR_WEIGHT = 1.5; // Stars indicate project quality and popularity
-  const COMMIT_WEIGHT = 0.2; // Regular commits show consistent activity
-  const PR_WEIGHT = 5; // PRs show collaborative work and contribution to other projects
-  const ISSUE_WEIGHT = 1.5; // Issues show community engagement and problem identification
-  const REVIEW_WEIGHT = 3; // Reviews show mentorship and quality control
-  const FOLLOWER_WEIGHT = 1; // Followers indicate influence in the community
-  const FOLLOWING_WEIGHT = 0.5; // Following shows engagement with other developers
-  const REPO_WEIGHT = 2; // Public repos show range of interests and projects
+  // Define median values and weights based on the reference implementation
+  const COMMITS_MEDIAN = 250;
+  const COMMITS_WEIGHT = 2;
+  const PRS_MEDIAN = 50;
+  const PRS_WEIGHT = 3;
+  const ISSUES_MEDIAN = 25;
+  const ISSUES_WEIGHT = 1;
+  const REVIEWS_MEDIAN = 2;
+  const REVIEWS_WEIGHT = 1;
+  const STARS_MEDIAN = 50;
+  const STARS_WEIGHT = 4;
+  const FOLLOWERS_MEDIAN = 10;
+  const FOLLOWERS_WEIGHT = 1;
 
-  // Calculate account age in years (max 10 years for full credit)
-  const accountCreationDate = new Date(created_at);
-  const currentDate = new Date();
-  const accountAgeInYears = Math.min(
-    10,
-    (currentDate.getTime() - accountCreationDate.getTime()) /
-      (1000 * 60 * 60 * 24 * 365)
-  );
-  const ACCOUNT_AGE_WEIGHT = 20; // Experience factor
+  const TOTAL_WEIGHT =
+    COMMITS_WEIGHT +
+    PRS_WEIGHT +
+    ISSUES_WEIGHT +
+    REVIEWS_WEIGHT +
+    STARS_WEIGHT +
+    FOLLOWERS_WEIGHT;
 
-  // Calculate repository quality score (stars per repository, but with diminishing returns)
-  const repoQualityScore =
-    public_repos > 0 ? Math.min(20, stars / public_repos) : 0;
-  const REPO_QUALITY_WEIGHT = 10;
+  // Exponential CDF function: 1 - 2^(-x)
+  const exponential_cdf = (x: number): number => 1 - Math.pow(2, -x);
 
-  // Calculate collaboration score (ratio of PRs to own repos, capped at 5)
-  const collaborationScore = Math.min(
-    5,
-    public_repos > 0 ? prs / public_repos : 0
-  );
-  const COLLABORATION_WEIGHT = 15;
+  // Log normal CDF approximation: x / (1 + x)
+  const log_normal_cdf = (x: number): number => x / (1 + x);
 
-  // Calculate community impact (followers relative to account age, with diminishing returns)
-  const followerImpactScore =
-    accountAgeInYears > 0
-      ? Math.min(50, followers / accountAgeInYears)
-      : followers;
-  const IMPACT_WEIGHT = 2;
+  // Calculate percentile rank (higher is better)
+  const percentile =
+    1 -
+    (COMMITS_WEIGHT * exponential_cdf(commits / COMMITS_MEDIAN) +
+      PRS_WEIGHT * exponential_cdf(prs / PRS_MEDIAN) +
+      ISSUES_WEIGHT * exponential_cdf(issues / ISSUES_MEDIAN) +
+      REVIEWS_WEIGHT * exponential_cdf(reviews / REVIEWS_MEDIAN) +
+      STARS_WEIGHT * log_normal_cdf(stars / STARS_MEDIAN) +
+      FOLLOWERS_WEIGHT * log_normal_cdf(followers / FOLLOWERS_MEDIAN)) /
+      TOTAL_WEIGHT;
 
-  // Calculate activity level score (commits + PRs + issues + reviews in the last year)
-  const activityScore = commits + prs * 5 + issues * 2 + reviews * 3;
-  const ACTIVITY_WEIGHT = 0.5;
-
-  // Calculate the final comprehensive score
-  const score = Math.round(
-    stars * STAR_WEIGHT +
-      commits * COMMIT_WEIGHT +
-      prs * PR_WEIGHT +
-      issues * ISSUE_WEIGHT +
-      reviews * REVIEW_WEIGHT +
-      followers * FOLLOWER_WEIGHT +
-      following * FOLLOWING_WEIGHT +
-      public_repos * REPO_WEIGHT +
-      accountAgeInYears * ACCOUNT_AGE_WEIGHT +
-      repoQualityScore * REPO_QUALITY_WEIGHT +
-      collaborationScore * COLLABORATION_WEIGHT +
-      followerImpactScore * IMPACT_WEIGHT +
-      activityScore * ACTIVITY_WEIGHT
-  );
+  // Convert percentile to score (0-100)
+  const score = percentile * 100;
 
   console.log("Calculated contribution score:", score);
   return score;
 }
 
 function getContributionGrade(score: number): string {
-  if (score >= 3000) return "S+";
-  if (score >= 1500) return "S";
-  if (score >= 800) return "A";
-  if (score >= 400) return "B";
-  if (score >= 200) return "C";
-  if (score >= 100) return "D";
-  return "E";
+  // Thresholds based on the reference implementation
+  if (score <= 1) return "S";
+  if (score <= 12.5) return "A+";
+  if (score <= 25) return "A";
+  if (score <= 37.5) return "A-";
+  if (score <= 50) return "B+";
+  if (score <= 62.5) return "B";
+  if (score <= 75) return "B-";
+  if (score <= 87.5) return "C+";
+  return "C";
 }
