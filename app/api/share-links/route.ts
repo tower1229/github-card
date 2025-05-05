@@ -53,11 +53,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Get GitHub username either from account or user name
-      const githubAccount = user.accounts.find(
-        (acc) => acc.provider === "github"
-      );
-      const username = githubAccount?.providerAccountId || user.name;
+      const username = user.username;
 
       if (!username) {
         return NextResponse.json(
@@ -103,13 +99,13 @@ export async function POST(request: NextRequest) {
         followers: userData.followers,
         following: userData.following,
         public_repos: userData.public_repos,
-        totalContributions: contributionsData.totalContributions,
-        commitCount: contributionsData.commitCount,
-        prCount: contributionsData.prCount,
-        issueCount: contributionsData.issueCount,
-        reviewCount: contributionsData.reviewCount,
+        commits: contributionsData.commits,
+        pull_requests: contributionsData.pull_requests,
+        issues: contributionsData.issues,
+        reviews: contributionsData.reviews,
+        total_stars: contributionsData.total_stars,
         contributionScore: contributionsData.contributionScore,
-        contributionGrade: contributionsData.contributionGrade,
+        contribution_grade: contributionsData.contribution_grade,
       };
 
       // Update user contribution with data from GitHub

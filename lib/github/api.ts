@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { githubCacheManager, githubCacheMetrics } from "./github-cache";
+import { GitHubData } from "@/lib/types";
 
 // Type definitions for GitHub API responses
 interface GitHubUserResponse {
@@ -38,15 +39,19 @@ interface GitHubUserData {
   created_at: string;
 }
 
-interface GitHubContributionsData {
-  totalContributions: number;
-  commitCount: number;
-  prCount: number;
-  issueCount: number;
-  reviewCount: number;
-  contributionScore: number;
-  contributionGrade: string;
-}
+type GitHubContributionsData = Pick<
+  GitHubData,
+  | "total_stars"
+  | "contributionScore"
+  | "contribution_grade"
+  | "commits"
+  | "pull_requests"
+  | "public_repos"
+  | "followers"
+  | "following"
+  | "issues"
+  | "reviews"
+>;
 
 // Cache GitHub API requests, valid for 1 hour
 export const getGitHubUserData = cache(
@@ -117,13 +122,16 @@ export const getGitHubContributions = cache(
       console.error(`Error in getGitHubContributions for ${username}:`, error);
       // Return default data instead of throwing
       return {
-        totalContributions: 0,
-        commitCount: 0,
-        prCount: 0,
-        issueCount: 0,
-        reviewCount: 0,
+        commits: 0,
+        pull_requests: 0,
+        total_stars: 0,
         contributionScore: 0,
-        contributionGrade: "F",
+        contribution_grade: "F",
+        public_repos: 0,
+        followers: 0,
+        following: 0,
+        issues: 0,
+        reviews: 0,
       };
     }
   }
@@ -224,13 +232,16 @@ async function fetchGitHubContributions(
           `GitHub user ${username} not found, using default contribution data`
         );
         return {
-          totalContributions: 0,
-          commitCount: 0,
-          prCount: 0,
-          issueCount: 0,
-          reviewCount: 0,
+          public_repos: 0,
+          followers: 0,
+          commits: 0,
+          pull_requests: 0,
+          total_stars: 0,
           contributionScore: 0,
-          contributionGrade: "F",
+          contribution_grade: "F",
+          following: 0,
+          issues: 0,
+          reviews: 0,
         };
       }
 
@@ -347,7 +358,7 @@ async function fetchGitHubContributions(
       issuesData.total_count,
       reviewsData.total_count
     );
-
+    // TODO
     console.log("Final GitHub contribution data:", {
       totalContributions: commitsData.total_count,
       commitCount: commitsData.total_count,
@@ -359,13 +370,16 @@ async function fetchGitHubContributions(
     });
 
     return {
-      totalContributions: commitsData.total_count,
-      commitCount: commitsData.total_count,
-      prCount: prsData.total_count,
-      issueCount: issuesData.total_count,
-      reviewCount: reviewsData.total_count,
+      commits: commitsData.total_count,
+      pull_requests: prsData.total_count,
       contributionScore,
-      contributionGrade: getContributionGrade(contributionScore),
+      contribution_grade: getContributionGrade(contributionScore),
+      total_stars: totalStars,
+      public_repos: reposData.length,
+      followers: 0,
+      following: 0,
+      issues: 0,
+      reviews: 0,
     };
   } catch (error) {
     console.error(

@@ -134,8 +134,14 @@ export class CacheManager {
     this.useMemoryCache = !edgeConfig;
 
     // Also check if edgeConfig object has the necessary methods
-    if (edgeConfig && (typeof edgeConfig.set !== 'function' || typeof edgeConfig.get !== 'function')) {
-      console.warn("Edge Config methods unavailable, falling back to memory cache");
+    if (
+      edgeConfig &&
+      (typeof edgeConfig.set !== "function" ||
+        typeof edgeConfig.get !== "function")
+    ) {
+      console.warn(
+        "Edge Config methods unavailable, falling back to memory cache"
+      );
       this.useMemoryCache = true;
     }
 
@@ -164,8 +170,10 @@ export class CacheManager {
       }
 
       // Check if edgeConfig.set method exists
-      if (typeof edgeConfig.set !== 'function') {
-        console.warn("Edge Config 'set' method is not available, using memory cache");
+      if (typeof edgeConfig.set !== "function") {
+        console.warn(
+          "Edge Config 'set' method is not available, using memory cache"
+        );
         this.useMemoryCache = true;
         memoryCache.set(fullKey, value, ttl);
         return;
@@ -199,8 +207,10 @@ export class CacheManager {
       }
 
       // Check if edgeConfig.get method exists
-      if (typeof edgeConfig.get !== 'function') {
-        console.warn("Edge Config 'get' method is not available, using memory cache");
+      if (typeof edgeConfig.get !== "function") {
+        console.warn(
+          "Edge Config 'get' method is not available, using memory cache"
+        );
         this.useMemoryCache = true;
         return memoryCache.get<T>(fullKey);
       }
@@ -217,7 +227,7 @@ export class CacheManager {
       if (item.expiry < Date.now()) {
         // Try to delete expired item
         try {
-          if (typeof edgeConfig.delete === 'function') {
+          if (typeof edgeConfig.delete === "function") {
             await edgeConfig.delete(fullKey);
           }
         } catch {
@@ -257,8 +267,13 @@ export class CacheManager {
       }
 
       // Check if edge config methods exist
-      if (typeof edgeConfig.getAll !== 'function' || typeof edgeConfig.delete !== 'function') {
-        console.warn("Edge Config methods not available for cleanup, using memory cache only");
+      if (
+        typeof edgeConfig.getAll !== "function" ||
+        typeof edgeConfig.delete !== "function"
+      ) {
+        console.warn(
+          "Edge Config methods not available for cleanup, using memory cache only"
+        );
         this.useMemoryCache = true;
         return;
       }

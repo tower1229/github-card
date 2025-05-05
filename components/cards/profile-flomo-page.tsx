@@ -33,7 +33,6 @@ export function ProfileFlomoPage({
 }: ProfileFlomoPageProps) {
   const [userData, setUserData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(!sharedData);
-
   useEffect(() => {
     // If sharedData is provided, use it directly
     if (sharedData) {

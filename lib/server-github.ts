@@ -30,12 +30,11 @@ export const getUserGitHubData = cache(async (username: string) => {
         total_stars:
           contributionsData.contributionScore - userData.public_repos * 2,
         contributionScore: contributionsData.contributionScore,
-        contribution_grade: contributionsData.contributionGrade,
-        commits: contributionsData.commitCount,
-        pull_requests: contributionsData.prCount,
-        issues: contributionsData.issueCount,
-        reviews: contributionsData.reviewCount,
-        totalContributions: contributionsData.totalContributions,
+        contribution_grade: contributionsData.contribution_grade,
+        commits: contributionsData.commits,
+        pull_requests: contributionsData.pull_requests,
+        issues: contributionsData.issues,
+        reviews: contributionsData.reviews,
       },
     };
   } catch (error) {

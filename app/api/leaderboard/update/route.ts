@@ -49,15 +49,7 @@ export async function POST(request: NextRequest) {
       // Fetch latest contribution data from server-side API
       console.log("Fetching GitHub contributions data...");
       const contributionsData = await getGitHubContributions(username);
-      console.log("GitHub contribution data:", {
-        totalContributions: contributionsData.totalContributions,
-        commitCount: contributionsData.commitCount,
-        prCount: contributionsData.prCount,
-        issueCount: contributionsData.issueCount,
-        reviewCount: contributionsData.reviewCount,
-        contributionScore: contributionsData.contributionScore,
-        contributionGrade: contributionsData.contributionGrade,
-      });
+      console.log("GitHub contribution data:", contributionsData);
 
       const contributionScore = contributionsData.contributionScore;
       console.log("Final contribution score:", contributionScore);

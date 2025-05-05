@@ -30,13 +30,13 @@ export default function SharedCardPage() {
       try {
         setLoading(true);
         const response = await authFetch(`/api/share-links/${token}`);
-
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to load shared card");
         }
 
         const linkData = await response.json();
+        console.log(3333333333333, linkData);
         setData(linkData);
 
         if (linkData.expiresAt) {
