@@ -12,7 +12,7 @@ import Link from "next/link";
 import { GitHubData } from "@/lib/types";
 import Loading from "@/components/loading";
 import { authFetch } from "@/lib/auth";
-import { LoadingSharedCard } from "@/components/loading";
+import LoadingSharedCard from "@/components/loading";
 
 // Warn if environment variables are being accessed from client
 if (typeof window !== "undefined" && process.env.DATABASE_URL) {
