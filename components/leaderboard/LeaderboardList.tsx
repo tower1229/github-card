@@ -29,6 +29,7 @@ export async function LeaderboardList() {
     displayName: item.displayName || undefined,
     contributionScore:
       typeof item.contributionScore === "number" ? item.contributionScore : 0,
+    contributionGrade: item.contributionGrade || "-",
   }));
 
   // 处理当前用户的排名、displayName和contributionScore
@@ -41,6 +42,7 @@ export async function LeaderboardList() {
           typeof currentUser.contributionScore === "number"
             ? currentUser.contributionScore
             : 0,
+        contributionGrade: currentUser.contributionGrade || "-",
       }
     : null;
 
@@ -58,8 +60,9 @@ export async function LeaderboardList() {
       <div className="divide-y divide-[#21262d]">
         <div className="grid grid-cols-12 px-4 py-3 text-[#8b949e] font-medium">
           <div className="col-span-1 text-center">#</div>
-          <div className="col-span-3">User</div>
-          <div className="col-span-8 text-right pr-4">Contribute score</div>
+          <div className="col-span-5">User</div>
+          <div className="col-span-3 text-right pr-4">Thresholds</div>
+          <div className="col-span-3 text-right pr-4">Grade</div>
         </div>
 
         {sanitizedLeaderboard.length > 0 ? (

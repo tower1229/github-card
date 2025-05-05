@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { contributeData, users } from "@/lib/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { cache } from "react";
 import { GitHubData } from "@/lib/types";
 
@@ -122,7 +122,7 @@ export async function getUserRank(userId: string): Promise<number | null> {
         username: contributeData.username,
       })
       .from(contributeData)
-      .orderBy(desc(sql`(github_data->>'contributionScore')::int`));
+      .orderBy(sql`(github_data->>'contributionScore')::float`);
 
     // 找到用户的排名
     const userRankIndex = rankedUsers.findIndex(
@@ -151,11 +151,12 @@ export const getLeaderboard = cache(
           displayName: users.displayName,
           userId: users.id,
           avatarUrl: users.avatarUrl,
-          contributionScore: sql<number>`(${contributeData.githubData}->>'contributionScore')::int`,
+          contributionScore: sql<number>`(${contributeData.githubData}->>'contributionScore')::float`,
+          contributionGrade: sql<string>`(${contributeData.githubData}->>'contribution_grade')::text`,
         })
         .from(contributeData)
         .innerJoin(users, eq(contributeData.username, users.username))
-        .orderBy(desc(sql`(github_data->>'contributionScore')::int`))
+        .orderBy(sql`(github_data->>'contributionScore')::float`)
         .limit(limit)
         .offset(offset);
 
@@ -234,7 +235,8 @@ export async function getFullLeaderboard(
                 displayName: users.displayName,
                 userId: users.id,
                 avatarUrl: users.avatarUrl,
-                contributionScore: sql<number>`(${contributeData.githubData}->>'contributionScore')::int`,
+                contributionScore: sql<number>`(${contributeData.githubData}->>'contributionScore')::float`,
+                contributionGrade: sql<string>`(${contributeData.githubData}->>'contribution_grade')::text`,
               })
               .from(contributeData)
               .innerJoin(users, eq(contributeData.username, users.username))

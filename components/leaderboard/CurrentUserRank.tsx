@@ -11,6 +11,7 @@ type CurrentUserRankProps = {
     displayName?: string;
     avatarUrl: string;
     contributionScore: number;
+    contributionGrade: string;
   };
 };
 
@@ -20,6 +21,7 @@ export function CurrentUserRank({ currentUser }: CurrentUserRankProps) {
     typeof currentUser.contributionScore === "number"
       ? currentUser.contributionScore
       : 0;
+  const grade = currentUser.contributionGrade || "-";
 
   return (
     <motion.div
@@ -32,7 +34,7 @@ export function CurrentUserRank({ currentUser }: CurrentUserRankProps) {
         <span className="text-blue-400 font-bold">{currentUser.rank}</span>
       </div>
 
-      <div className="col-span-3 flex items-center gap-2">
+      <div className="col-span-5 flex items-center gap-2">
         <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-blue-500">
           <Image
             src={currentUser.avatarUrl}
@@ -51,8 +53,12 @@ export function CurrentUserRank({ currentUser }: CurrentUserRankProps) {
         </div>
       </div>
 
-      <div className="col-span-8 text-right pr-4 font-mono font-medium">
+      <div className="col-span-3 text-right pr-4 font-mono font-medium">
         {score.toLocaleString()}
+      </div>
+
+      <div className="col-span-3 text-right pr-4 font-mono font-medium">
+        {grade}
       </div>
     </motion.div>
   );
