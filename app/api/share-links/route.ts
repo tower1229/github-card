@@ -5,7 +5,7 @@ import { shareLinks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { updateUserContribution } from "@/lib/leaderboard";
 import { withServerAuth } from "@/lib/server-auth";
-import { getGitHubUserData, getGitHubContributions } from "@/lib/github/api";
+import { getGitHubContributions } from "@/lib/github/api";
 
 export async function POST(request: NextRequest) {
   return withServerAuth(async (req: NextRequest, userId: string) => {
@@ -66,57 +66,33 @@ export async function POST(request: NextRequest) {
 
       console.log("Fetching GitHub data for user:", username);
 
-      // Fetch GitHub data from our server-side API
-      let userData;
+      // Fetch contributions data to update leaderboard
       let contributionsData;
-
       try {
-        userData = await getGitHubUserData(username);
         contributionsData = await getGitHubContributions(username);
       } catch (error) {
         const githubError = error as { message?: string };
         console.error(
-          `Error fetching GitHub data for ${username}:`,
+          `Error fetching GitHub contributions for ${username}:`,
           githubError
         );
-        return NextResponse.json(
-          {
-            error: "GitHub data fetch failed",
-            message: `Unable to fetch GitHub data: ${
-              githubError.message || String(error)
-            }`,
-            username,
-          },
-          { status: 502 }
-        );
+        // We'll continue anyway and create the share link
       }
 
-      // Create card data from fetched GitHub data
-      const cardData = {
-        login: userData.login,
-        name: userData.name,
-        avatar_url: userData.avatar_url,
-        followers: userData.followers,
-        following: userData.following,
-        public_repos: userData.public_repos,
-        commits: contributionsData.commits,
-        pull_requests: contributionsData.pull_requests,
-        issues: contributionsData.issues,
-        reviews: contributionsData.reviews,
-        total_stars: contributionsData.total_stars,
-        contributionScore: contributionsData.contributionScore,
-        contribution_grade: contributionsData.contribution_grade,
-      };
-
-      // Update user contribution with data from GitHub
-      try {
-        await updateUserContribution(
-          userId,
-          contributionsData.contributionScore
-        );
-      } catch (updateError) {
-        console.error("Failed to update user contribution score:", updateError);
-        // Continue with share link creation even if updating the score fails
+      // Update user contribution with data from GitHub if we have it
+      if (contributionsData) {
+        try {
+          await updateUserContribution(
+            userId,
+            contributionsData.contributionScore
+          );
+        } catch (updateError) {
+          console.error(
+            "Failed to update user contribution score:",
+            updateError
+          );
+          // Continue with share link creation even if updating the score fails
+        }
       }
 
       // Calculate expiration time (30 days)
@@ -138,7 +114,7 @@ export async function POST(request: NextRequest) {
           .values({
             userId,
             linkToken: token,
-            cardData,
+            githubUsername: username,
             expiresAt,
             templateType: body.templateType,
           })
@@ -208,6 +184,7 @@ export async function GET(request: NextRequest) {
         userShareLinks.map((link) => ({
           id: link.id,
           linkToken: link.linkToken,
+          githubUsername: link.githubUsername,
           createdAt: link.createdAt,
           expiresAt: link.expiresAt,
           isActive: link.isActive,

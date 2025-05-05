@@ -61,12 +61,29 @@ export const userRelations = relations(users, ({ many }) => ({
   behaviors: many(userBehaviors),
   shareLinks: many(shareLinks),
   accounts: many(accounts),
+  contributeData: many(contributeData),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, {
     fields: [accounts.userId],
     references: [users.id],
+  }),
+}));
+
+// 添加GitHub贡献数据表
+export const contributeData = pgTable("contribute_data", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  username: varchar("username", { length: 255 }).notNull().unique(),
+  githubData: json("github_data").notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const contributeDataRelations = relations(contributeData, ({ one }) => ({
+  user: one(users, {
+    fields: [contributeData.username],
+    references: [users.username],
   }),
 }));
 
@@ -115,7 +132,7 @@ export const shareLinks = pgTable("share_links", {
     .notNull()
     .references(() => users.id),
   linkToken: varchar("link_token", { length: 255 }).notNull().unique(),
-  cardData: json("card_data").notNull(),
+  githubUsername: varchar("github_username", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
@@ -148,3 +165,6 @@ export type ContributionLeaderboard =
   typeof contributionLeaderboard.$inferSelect;
 export type NewContributionLeaderboard =
   typeof contributionLeaderboard.$inferInsert;
+
+export type ContributeData = typeof contributeData.$inferSelect;
+export type NewContributeData = typeof contributeData.$inferInsert;

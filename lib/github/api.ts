@@ -59,7 +59,7 @@ export const getGitHubUserData = cache(
     const cacheKey = `github:user:${username}`;
 
     try {
-      // Check cache
+      // Check in-memory cache
       const cachedData = await githubCacheManager.get<GitHubUserData>(cacheKey);
       if (cachedData) {
         githubCacheMetrics.hits += 1;
@@ -68,7 +68,7 @@ export const getGitHubUserData = cache(
 
       githubCacheMetrics.misses += 1;
 
-      // Fetch GitHub user data
+      // Fetch GitHub user data from API
       const userData = await fetchGitHubUserData(username);
 
       // Store in cache for 1 hour
@@ -100,7 +100,7 @@ export const getGitHubContributions = cache(
   async (username: string): Promise<GitHubContributionsData> => {
     const cacheKey = `github:contributions:${username}`;
     try {
-      // Check cache
+      // Check in-memory cache
       const cachedData = await githubCacheManager.get<GitHubContributionsData>(
         cacheKey
       );
@@ -111,7 +111,7 @@ export const getGitHubContributions = cache(
 
       githubCacheMetrics.misses += 1;
 
-      // Fetch contributions data
+      // Fetch contributions data from API
       const contributionsData = await fetchGitHubContributions(username);
 
       // Store in cache for 1 hour
@@ -378,8 +378,8 @@ async function fetchGitHubContributions(
       public_repos: reposData.length,
       followers: 0,
       following: 0,
-      issues: 0,
-      reviews: 0,
+      issues: issuesData.total_count,
+      reviews: reviewsData.total_count,
     };
   } catch (error) {
     console.error(

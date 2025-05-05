@@ -78,6 +78,20 @@
       "when": 1746347808638,
       "tag": "0010_curvy_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1746417589223,
+      "tag": "0011_previous_sasquatch",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1746420797874,
+      "tag": "0012_unknown_expediter",
+      "breakpoints": true
     }
   ]
 }

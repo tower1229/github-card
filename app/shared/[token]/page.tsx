@@ -36,7 +36,7 @@ export default function SharedCardPage() {
         }
 
         const linkData = await response.json();
-        console.log(3333333333333, linkData);
+        console.log("Share link data received:", linkData);
         setData(linkData);
 
         if (linkData.expiresAt) {

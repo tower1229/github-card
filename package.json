@@ -18,6 +18,7 @@
     "db:fix-oauth": "tsx scripts/fix-oauth-accounts.ts",
     "db:fix-github-id": "tsx scripts/fix-github-id.ts",
     "db:migrate-contributions": "tsx scripts/migrate-contribution-data.ts",
+    "db:merge-contribute-data": "tsx lib/db/migrate-02-merge-contribute-data-fields.ts",
     "check:auth": "node scripts/check-auth-config.js",
     "postinstall": "drizzle-kit generate"
   },
