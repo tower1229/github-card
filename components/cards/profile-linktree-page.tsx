@@ -111,8 +111,6 @@ export function ProfileLinktreePage({
               {!isDownloading && (
                 <ShareButton
                   setIsDownloading={setIsDownloading}
-                  userData={userData!}
-                  templateType={"linktree"}
                   shareContext={shareContext}
                 />
               )}
