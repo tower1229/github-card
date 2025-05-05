@@ -29,7 +29,7 @@ export function Footer({
       title: "Product",
       links: [
         { name: "Templates", href: "#templates" },
-        { name: "Examples", href: "#examples" },
+        { name: "Guide", href: "/guide" },
       ],
     },
     {

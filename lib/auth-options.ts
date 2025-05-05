@@ -116,7 +116,10 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account, profile }) {
       // If this is the first sign in, add all the user properties to the token
       if (account && user && profile) {
-        console.log("JWT callback with new sign-in, user:", JSON.stringify(user));
+        console.log(
+          "JWT callback with new sign-in, user:",
+          JSON.stringify(user)
+        );
         const githubProfile = profile as {
           login?: string;
           name?: string;
@@ -148,7 +151,7 @@ export const authOptions: NextAuthOptions = {
           (token.displayName as string) || session.user.name || "user";
         session.user.accessToken = token.accessToken as string;
         session.user.username = token.username as string;
-        
+
         console.log("Updated session with user ID:", session.user.id);
       }
       return session;
@@ -162,6 +165,6 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: 3 * 24 * 60 * 60,
   },
 };

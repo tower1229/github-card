@@ -41,10 +41,10 @@ export function Navbar({ showLinks = false }: NavbarProps) {
                 Templates
               </Link>
               <Link
-                href="/#examples"
+                href="/guide"
                 className="text-[#c9d1d9] hover:text-white transition"
               >
-                Examples
+                Guide
               </Link>
               <Link
                 href="/leaderboard"
