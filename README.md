@@ -9,6 +9,24 @@ A Next.js application that generates beautiful GitHub profile cards and enables 
 - Time-limited sharing links (3 days)
 - Database storage for users and shared links
 - Tracking of user behaviors for analytics
+- Server-side GitHub API requests with caching
+
+## Security Refactoring
+
+The application has undergone a significant security refactoring:
+
+- **Server-side GitHub API**: All GitHub API calls are now made server-side to prevent token exposure
+- **Edge Config Caching**: Uses Vercel Edge Config for persistent caching with memory fallback
+- **Cache Management**: Implemented automatic cache cleanup via cron jobs
+- **Metrics Tracking**: Added cache performance metrics to monitor effectiveness
+- **Leaderboard Security**: Refactored leaderboard data to ensure contributions are verified server-side
+
+### Caching System
+
+- Edge Config for persistent caching between deployments
+- Memory cache fallback for development and when Edge Config is unavailable
+- Automatic cache cleanup via scheduled cron jobs
+- Cache metrics for monitoring hit rates and performance
 
 ## Tech Stack
 
@@ -18,6 +36,7 @@ A Next.js application that generates beautiful GitHub profile cards and enables 
 - **ORM**: Drizzle ORM
 - **Styling**: Tailwind CSS
 - **Deployment**: Vercel
+- **Caching**: Vercel Edge Config
 
 ## Getting Started
 
@@ -96,6 +115,12 @@ The application uses the following database tables:
   - `GET /api/share-links`: List current user's share links
   - `GET /api/share-links/:token`: Get a specific share link by token
   - `GET /api/share-links/user/:userId`: Get all share links for a user
+- **Leaderboard**:
+  - `GET /api/leaderboard`: Get leaderboard data with optional pagination
+  - `POST /api/leaderboard/update`: Update a user's contribution score
+  - `GET /api/leaderboard/refresh`: Recalculate all user ranks
+- **Cron Jobs**:
+  - `GET /api/cron/cleanup-cache`: Clean up expired cache entries
 
 ## Deployment
 
@@ -118,6 +143,8 @@ Make sure to set these environment variables in your Vercel project:
 - `GITHUB_ID`: GitHub OAuth App Client ID
 - `GITHUB_SECRET`: GitHub OAuth App Client Secret
 - `DATABASE_URL`: Neon PostgreSQL connection string
+- `GITHUB_ACCESS_TOKEN`: GitHub Personal Access Token for server-side API calls
+- `EDGE_CONFIG`: Vercel Edge Config connection string
 
 ## License
 

@@ -6,6 +6,7 @@ import Logo from "@/public/logo.png";
 import { GithubButton } from "./github-button";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import { Trophy } from "lucide-react";
 
 interface NavbarProps {
   showLinks?: boolean;
@@ -14,7 +15,6 @@ interface NavbarProps {
 export function Navbar({ showLinks = false }: NavbarProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const isHomePage = pathname === "/";
   const isGeneratePage =
     pathname === "/generate" || pathname.startsWith("/generate?");
 
@@ -46,19 +46,19 @@ export function Navbar({ showLinks = false }: NavbarProps) {
               >
                 Examples
               </a>
+              <Link
+                href="/leaderboard"
+                className="text-[#c9d1d9] hover:text-white transition flex items-center gap-1"
+                aria-label="Leaderboard"
+              >
+                <Trophy size={16} className="text-yellow-400" />
+                <span>Leaderboard</span>
+              </Link>
             </div>
           )}
         </div>
         <div className="flex items-center space-x-4">
-          {session && !isHomePage && !isGeneratePage && (
-            <Link
-              href="/generate?template=contribute"
-              className="text-[#c9d1d9] hover:text-white transition"
-            >
-              Generate Card
-            </Link>
-          )}
-          {session && !isHomePage && (
+          {session && isGeneratePage && (
             <Link
               href="/#templates"
               className="text-[#c9d1d9] hover:text-white transition"

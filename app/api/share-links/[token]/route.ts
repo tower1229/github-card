@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { shareLinks, userBehaviors } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { getUserGitHubData } from "@/lib/server-github";
 
 export async function GET(
   request: NextRequest,
@@ -18,9 +19,13 @@ export async function GET(
     }
 
     // Get the share link
-    const shareLink = await db.query.shareLinks.findFirst({
-      where: eq(shareLinks.linkToken, token),
-    });
+    const shareLinkResults = await db
+      .select()
+      .from(shareLinks)
+      .where(eq(shareLinks.linkToken, token))
+      .limit(1);
+
+    const shareLink = shareLinkResults[0];
 
     if (!shareLink) {
       return NextResponse.json(
@@ -54,9 +59,23 @@ export async function GET(
       performedAt: new Date(),
     });
 
-    // Return the card data
+    // Fetch the GitHub data for the username associated with this share link
+    const githubUsername = shareLink.githubUsername;
+    const githubDataResult = await getUserGitHubData(githubUsername);
+
+    if (!githubDataResult.success || !githubDataResult.data) {
+      return NextResponse.json(
+        {
+          error: "Failed to fetch GitHub data",
+          message: githubDataResult.error || "Unknown error",
+        },
+        { status: 502 }
+      );
+    }
+
+    // Return the response with the GitHub data
     return NextResponse.json({
-      cardData: shareLink.cardData,
+      cardData: githubDataResult.data,
       expiresAt: shareLink.expiresAt,
       templateType: shareLink.templateType,
     });

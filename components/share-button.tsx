@@ -17,22 +17,21 @@ import { toCanvas } from "html-to-image";
 import { downloadImage } from "@/lib/utils";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { useState } from "react";
-import { GitHubData } from "@/lib/types";
+import { useState, useEffect } from "react";
 import { ShareContextData } from "@/app/generate/page";
+import { useSession } from "next-auth/react";
 
 export function ShareButton({
   setIsDownloading,
-  userData,
-  templateType = "contribute",
   shareContext,
 }: {
   setIsDownloading: (isDownloading: boolean) => void;
-  userData: GitHubData;
-  templateType?: string;
   shareContext?: ShareContextData;
 }) {
-  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(
+    shareContext?.isGenerating || false
+  );
+  const { status } = useSession();
 
   const saveAsImage = () => {
     setIsDownloading(true);
@@ -59,54 +58,30 @@ export function ShareButton({
   };
 
   const generateAndCopyLink = async () => {
-    // 如果已有分享链接，直接复制
+    // Check if user is authenticated first
+    if (status !== "authenticated") {
+      toast.error("You need to sign in to generate a share link");
+      return;
+    }
+
+    // If we already have a share URL, just copy it
     if (shareContext?.shareUrl) {
-      navigator.clipboard.writeText(shareContext.shareUrl);
+      const fullUrl = `${shareContext.shareUrl}`;
+      navigator.clipboard.writeText(fullUrl);
       toast.success("Share link copied to clipboard");
       return;
     }
 
-    // 否则通过API生成链接
-    if (isGeneratingLink) return; // 防止重复点击
-
-    try {
-      setIsGeneratingLink(true);
-
-      // 调用API创建分享链接
-      const response = await fetch("/api/share-links", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cardData: userData,
-          templateType: templateType,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create share link");
-      }
-
-      const data = await response.json();
-
-      // 复制生成的分享链接到剪贴板
-      navigator.clipboard.writeText(data.shareUrl);
-
-      const toastMessage = data.isExisting
-        ? "Existing share link copied to clipboard"
-        : "Share link copied to clipboard";
-      toast.success(toastMessage);
-    } catch (error) {
-      console.error("Error generating share link:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to generate share link"
-      );
-    } finally {
-      setIsGeneratingLink(false);
+    // If already generating, don't start again
+    if (shareContext?.isGenerating || isGeneratingLink) {
+      toast("Link is being generated, please wait...");
+      return;
     }
   };
+
+  useEffect(() => {
+    setIsGeneratingLink(shareContext?.isGenerating || false);
+  }, [shareContext?.isGenerating]);
 
   return (
     <Drawer>

@@ -3,7 +3,7 @@ import { GithubLogo } from "@phosphor-icons/react/dist/ssr";
 import Qrcode from "qrcode";
 import { cn } from "@/lib/utils";
 import AnimatedGradientText from "@/components/ui/animated-gradient-text";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/public/logo.png";
@@ -21,6 +21,8 @@ export function Footer({
   showStyle = 1,
   shareContext,
 }: FooterProps) {
+  const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
+
   const footerLinks = [
     {
       title: "Product",
@@ -54,15 +56,25 @@ export function Footer({
   ];
 
   useEffect(() => {
-    if (showQrcode) {
+    // 仅在需要显示二维码且Canvas元素存在时生成
+    if (showQrcode && !qrCodeGenerated) {
+      const canvasElement = document.getElementById("canvas");
+      if (!canvasElement) return;
+
       // 优先使用分享链接，如果没有则使用当前页面URL
-      const qrUrl = shareContext?.shareUrl || window.location.href;
-      Qrcode.toCanvas(document.getElementById("canvas"), qrUrl, {
-        margin: 2,
-        width: 100,
-      });
+      const shareUrl = shareContext?.shareUrl || window.location.href;
+
+      try {
+        Qrcode.toCanvas(canvasElement, shareUrl, {
+          margin: 2,
+          width: 100,
+        });
+        setQrCodeGenerated(true);
+      } catch (error) {
+        console.error("Failed to generate QR code:", error);
+      }
     }
-  }, [showQrcode, shareContext?.shareUrl]);
+  }, [showQrcode, shareContext?.shareUrl, qrCodeGenerated]);
 
   if (showQrcode) {
     // showStyle

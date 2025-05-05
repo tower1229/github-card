@@ -11,7 +11,7 @@ export interface GitHubData {
   following: number;
   created_at: string;
   total_stars: number;
-  contribution_score: number;
+  contributionScore: number;
   contribution_grade: string;
   commits: number;
   pull_requests: number;

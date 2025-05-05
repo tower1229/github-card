@@ -10,6 +10,7 @@ import { ProfileTotal } from "@/components/profile-total";
 import { ShareButton } from "@/components/share-button";
 import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
 import { ShareContextData } from "@/app/generate/page";
+import { getUserGitHubData } from "@/lib/server-github";
 
 interface ProfileLinktreePageProps {
   username: string;
@@ -36,6 +37,10 @@ export function ProfileLinktreePage({
     if (sharedData) {
       setUserData(sharedData);
       setLoading(false);
+      // Notify parent component
+      if (onUserDataLoaded) {
+        onUserDataLoaded(sharedData);
+      }
       return;
     }
 
@@ -45,18 +50,21 @@ export function ProfileLinktreePage({
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`/api/github/user/${username}`, {
-          signal: abortController.signal,
-        });
-        const result = await response.json();
-        if (result.success) {
+        setLoading(true);
+
+        // Use the server action instead of making a direct API call
+        const result = await getUserGitHubData(username);
+
+        if (result.success && result.data) {
           setUserData(result.data);
-          // 通知父组件数据已加载
-          onUserDataLoaded?.(result.data);
+          // Notify parent component
+          if (onUserDataLoaded) {
+            onUserDataLoaded(result.data);
+          }
+        } else {
+          console.error("Error in server action response:", result);
         }
       } catch (error: unknown) {
-        // 忽略已中止的请求错误
-        if (error instanceof Error && error.name === "AbortError") return;
         console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);
@@ -65,7 +73,7 @@ export function ProfileLinktreePage({
 
     fetchUserData();
 
-    // 清理函数：组件卸载或 username 改变时中止请求
+    // Clean up function
     return () => {
       abortController.abort();
     };

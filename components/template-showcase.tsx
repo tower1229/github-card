@@ -9,6 +9,7 @@ import PreviewLinktree from "@/public/preview/linktree.png";
 import PreviewContribute from "@/public/preview/contribute.png";
 import PreviewFlomo from "@/public/preview/flomo.png";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 export function TemplateShowcase() {
   const { data: session } = useSession();
@@ -72,12 +73,20 @@ export function TemplateShowcase() {
               <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
               <p className="text-gray-400 mb-4">{template.description}</p>
               <div className="flex space-x-3">
-                <Button
-                  className="bg-orange-600 hover:bg-orange-700"
-                  onClick={() => handleTemplateAction(template.value)}
-                >
-                  Use Template
-                </Button>
+                {session ? (
+                  <Link href={`/generate?template=${template.value}`} prefetch>
+                    <Button className="bg-orange-600 hover:bg-orange-700">
+                      Use Template
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    className="bg-orange-600 hover:bg-orange-700"
+                    onClick={() => handleTemplateAction(template.value)}
+                  >
+                    Use Template
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => handleTemplateAction(template.value)}

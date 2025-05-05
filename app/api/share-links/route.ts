@@ -1,169 +1,201 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db";
-import { shareLinks, userBehaviors, users } from "@/lib/db/schema";
-import { eq, and, gte } from "drizzle-orm";
-import { getExpirationDate } from "@/lib/db";
+import { shareLinks, type ShareLink } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+import { withServerAuth } from "@/lib/server-auth";
+
+// Constants
+const SHARE_LINK_EXPIRATION_DAYS = 3;
 
 export async function POST(request: NextRequest) {
-  try {
-    // Get the authenticated user
-    const session = await getServerSession();
-    if (!session || !session.user || !session.user.email) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
+  return withServerAuth(async (req: NextRequest, userId: string) => {
+    try {
+      console.log("Processing share link request for userId:", userId);
 
-    // Get request body
-    const body = await request.json();
-    if (!body.cardData) {
-      return NextResponse.json(
-        { error: "Card data is required" },
-        { status: 400 }
-      );
-    }
+      let body;
+      try {
+        body = await req.json();
+        console.log("Request body received:", JSON.stringify(body));
+      } catch (parseError) {
+        console.error("Failed to parse request body:", parseError);
+        return NextResponse.json(
+          {
+            error: "Invalid request body",
+            message: "Could not parse request JSON",
+          },
+          { status: 400 }
+        );
+      }
 
-    // Get template type
-    const templateType = body.templateType || "contribute"; // Default to 'contribute' if not specified
+      if (!body.templateType) {
+        return NextResponse.json(
+          { error: "Template type is required" },
+          {
+            status: 400,
+          }
+        );
+      }
 
-    // Get the user from our database
-    const userEmail = session.user.email;
-    const user = await db.query.users.findFirst({
-      where: eq(users.email, userEmail),
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found in database" },
-        { status: 404 }
-      );
-    }
-
-    // Check if user already has an active share link for this template
-    const now = new Date();
-    const existingShareLink = await db.query.shareLinks.findFirst({
-      where: and(
-        eq(shareLinks.userId, user.id),
-        eq(shareLinks.isActive, true),
-        gte(shareLinks.expiresAt, now),
-        eq(shareLinks.templateType, templateType)
-      ),
-      orderBy: (shareLinks, { desc }) => [desc(shareLinks.createdAt)],
-    });
-
-    // If an active link exists, return it
-    if (existingShareLink) {
-      return NextResponse.json({
-        linkToken: existingShareLink.linkToken,
-        expiresAt: existingShareLink.expiresAt,
-        shareUrl: `${process.env.NEXTAUTH_URL}/shared/${existingShareLink.linkToken}`,
-        isExisting: true,
+      // Get the user from the database
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId),
+        with: {
+          accounts: true,
+        },
       });
-    }
 
-    // No active link exists, create a new one
-    // Deactivate all existing links for this user and this template
-    await db
-      .update(shareLinks)
-      .set({ isActive: false })
-      .where(
-        and(
-          eq(shareLinks.userId, user.id),
-          eq(shareLinks.templateType, templateType)
-        )
-      );
+      if (!user || !user.username) {
+        return NextResponse.json(
+          { error: "User not found" },
+          {
+            status: 404,
+          }
+        );
+      }
 
-    // Generate a unique token for the share link
-    const linkToken = uuidv4();
-    const expiresAt = getExpirationDate(); // 3 days from now
+      // Create a new request with templateType as a query parameter for GET method
+      const url = new URL(req.url);
+      url.searchParams.set("templateType", body.templateType);
+      const modifiedRequest = new NextRequest(url);
 
-    // Create the share link record
-    const newShareLink = await db
-      .insert(shareLinks)
-      .values({
-        userId: user.id,
-        linkToken,
-        cardData: body.cardData,
+      // 调用 GET 方法尝试获取用户已有的未过期链接
+      const userShareLinks = await GET(modifiedRequest);
+      if (userShareLinks.ok) {
+        const userShareLinksData = await userShareLinks.json();
+        console.log("get userShareLinksData:", userShareLinksData);
+        const activeLinks = userShareLinksData.filter(
+          (link: ShareLink) =>
+            link.isActive && new Date(link.expiresAt) > new Date()
+        );
+        console.log("get activeLinks:", activeLinks);
+        if (activeLinks.length > 0) {
+          const baseUrl = process.env.NEXTAUTH_URL || "";
+          const token = activeLinks[0].linkToken;
+          const expiresAt = activeLinks[0].expiresAt;
+          return NextResponse.json({
+            shareUrl: `${baseUrl}/shared/${token}`,
+            expiresAt,
+          });
+        }
+      }
+
+      // Calculate expiration time
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + SHARE_LINK_EXPIRATION_DAYS);
+      console.log("Expiration date set to:", expiresAt);
+
+      // Generate a random token
+      const token = uuidv4();
+      console.log("Generated token:", token);
+
+      try {
+        console.log("Preparing to insert data into shareLinks table");
+        console.log("Template type:", body.templateType);
+        console.log("Data to be inserted: userId:", userId);
+
+        const result = await db
+          .insert(shareLinks)
+          .values({
+            userId,
+            linkToken: token,
+            githubUsername: user.username,
+            expiresAt,
+            templateType: body.templateType,
+          })
+          .returning();
+
+        console.log("Database insertion successful, result:", result);
+      } catch (error) {
+        // Type assertion for the error object
+        const dbError = error as { code?: string; stack?: string };
+
+        console.error("Database insertion failed - detailed error:", dbError);
+
+        if (dbError.stack) {
+          console.error("Error stack:", dbError.stack);
+        }
+
+        // Check for specific error types
+        if (dbError.code) {
+          console.error("Database error code:", dbError.code);
+        }
+
+        return NextResponse.json(
+          {
+            error: "Database insertion failed",
+            message: String(error),
+            code: dbError.code || "UNKNOWN",
+          },
+          { status: 500 }
+        );
+      }
+
+      // Get baseUrl
+      const baseUrl = process.env.NEXTAUTH_URL || "";
+
+      return NextResponse.json({
+        shareUrl: `${baseUrl}/shared/${token}`,
         expiresAt,
-        isActive: true,
-        templateType,
-      })
-      .returning();
-
-    // Log the behavior
-    await db.insert(userBehaviors).values({
-      userId: user.id,
-      actionType: "generate_link",
-      actionData: { linkId: newShareLink[0].id, templateType },
-      performedAt: new Date(),
-    });
-
-    // Return the share link data
-    return NextResponse.json({
-      linkToken,
-      expiresAt,
-      shareUrl: `${process.env.NEXTAUTH_URL}/shared/${linkToken}`,
-      isNew: true,
-    });
-  } catch (error) {
-    console.error("Error creating share link:", error);
-    return NextResponse.json(
-      { error: "Failed to create share link" },
-      { status: 500 }
-    );
-  }
+      });
+    } catch (error) {
+      console.error("Creating share link failed:", error);
+      // Ensure returning a properly formatted error response
+      return NextResponse.json(
+        { error: "Internal Server Error", message: String(error) },
+        {
+          status: 500,
+        }
+      );
+    }
+  }, request);
 }
 
-export async function GET() {
-  try {
-    // Get the authenticated user
-    const session = await getServerSession();
-    if (!session || !session.user || !session.user.email) {
+export async function GET(request: NextRequest) {
+  return withServerAuth(async (req: NextRequest, userId: string) => {
+    const templateType = request.nextUrl.searchParams.get("templateType");
+    try {
+      if (!templateType) {
+        return NextResponse.json(
+          { error: "Template type is required" },
+          { status: 400 }
+        );
+      }
+
+      // Get all share links for the user
+      const userShareLinks = await db
+        .select()
+        .from(shareLinks)
+        .where(
+          and(
+            eq(shareLinks.userId, userId),
+            eq(shareLinks.templateType, templateType)
+          )
+        )
+        .orderBy(shareLinks.createdAt);
+
+      // Get baseUrl
+      const baseUrl = process.env.NEXTAUTH_URL || "";
+
+      // Return the share links
       return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
+        userShareLinks.map((link) => ({
+          id: link.id,
+          linkToken: link.linkToken,
+          githubUsername: link.githubUsername,
+          createdAt: link.createdAt,
+          expiresAt: link.expiresAt,
+          isActive: link.isActive,
+          templateType: link.templateType,
+          shareUrl: `${baseUrl}/shared/${link.linkToken}`,
+        }))
+      );
+    } catch (error) {
+      console.error("Error retrieving share links:", error);
+      return NextResponse.json(
+        { error: "Failed to retrieve share links", message: String(error) },
+        { status: 500 }
       );
     }
-
-    // Get the user from our database
-    const userEmail = session.user.email;
-    const user = await db.query.users.findFirst({
-      where: eq(users.email, userEmail),
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found in database" },
-        { status: 404 }
-      );
-    }
-
-    // Get all share links for the user
-    const userShareLinks = await db.query.shareLinks.findMany({
-      where: eq(shareLinks.userId, user.id),
-      orderBy: (shareLinks, { desc }) => [desc(shareLinks.createdAt)],
-    });
-
-    // Return the share links
-    return NextResponse.json(
-      userShareLinks.map((link) => ({
-        id: link.id,
-        linkToken: link.linkToken,
-        createdAt: link.createdAt,
-        expiresAt: link.expiresAt,
-        isActive: link.isActive,
-        templateType: link.templateType,
-        shareUrl: `${process.env.NEXTAUTH_URL}/shared/${link.linkToken}`,
-      }))
-    );
-  } catch (error) {
-    console.error("Error retrieving share links:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve share links" },
-      { status: 500 }
-    );
-  }
+  }, request);
 }

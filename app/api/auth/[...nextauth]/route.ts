@@ -21,20 +21,26 @@ async function logUserBehavior(
   actionData?: Record<string, unknown>
 ) {
   try {
-    await db.insert(userBehaviors).values({
-      userId,
-      actionType,
-      actionData: actionData ? actionData : undefined,
-      performedAt: new Date(),
-    });
+    if (typeof window === "undefined") {
+      await db.insert(userBehaviors).values({
+        userId,
+        actionType,
+        actionData: actionData ? actionData : undefined,
+        performedAt: new Date(),
+      });
+    }
   } catch (error) {
     console.error("Failed to log user behavior:", error);
   }
 }
 
+// Server-side only check - prevents client-side execution errors
+const isServer = typeof window === "undefined";
+
 // 创建NextAuth配置
-const authOptions: NextAuthOptions = {
-  adapter: DrizzleAdapter(db),
+export const authOptions: NextAuthOptions = {
+  // Only use adapter on the server side
+  ...(isServer && { adapter: DrizzleAdapter(db) }),
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID as string,
@@ -61,39 +67,44 @@ const authOptions: NextAuthOptions = {
       if (!profile) return false;
 
       try {
-        const githubProfile = profile as GitHubProfile;
-        const userId = user.id;
+        if (isServer) {
+          const githubProfile = profile as GitHubProfile;
+          const userId = user.id;
 
-        const existingUser = await db.query.users.findFirst({
-          where: eq(users.id, userId),
-        });
-
-        if (existingUser) {
-          await db
-            .update(users)
-            .set({
-              username: githubProfile.login || "",
-              displayName: githubProfile.name || "",
-              avatarUrl: githubProfile.avatar_url || "",
-              updatedAt: new Date(),
-            })
+          const existingUserResult = await db
+            .select()
+            .from(users)
             .where(eq(users.id, userId));
 
-          await logUserBehavior(userId, "login");
-          console.log("用户登录:", userId);
-        } else {
-          await logUserBehavior(userId, "signup");
-          console.log("新用户首次登录:", userId);
+          const existingUser = existingUserResult[0];
 
-          await db
-            .update(users)
-            .set({
-              githubId: githubProfile.id,
-              username: githubProfile.login || "",
-              displayName: githubProfile.name || "",
-              avatarUrl: githubProfile.avatar_url || "",
-            })
-            .where(eq(users.id, userId));
+          if (existingUser) {
+            await db
+              .update(users)
+              .set({
+                username: githubProfile.login || "",
+                displayName: githubProfile.name || "",
+                avatarUrl: githubProfile.avatar_url || "",
+                updatedAt: new Date(),
+              })
+              .where(eq(users.id, userId));
+
+            await logUserBehavior(userId, "login");
+            console.log("用户登录:", userId);
+          } else {
+            await logUserBehavior(userId, "signup");
+            console.log("新用户首次登录:", userId);
+
+            await db
+              .update(users)
+              .set({
+                githubId: githubProfile.id,
+                username: githubProfile.login || "",
+                displayName: githubProfile.name || "",
+                avatarUrl: githubProfile.avatar_url || "",
+              })
+              .where(eq(users.id, userId));
+          }
         }
 
         return true;
@@ -103,7 +114,9 @@ const authOptions: NextAuthOptions = {
       }
     },
     async jwt({ token, user, account, profile }) {
+      // If this is the first sign in, add all the user properties to the token
       if (account && user && profile) {
+        console.log("JWT callback with new sign-in, user:", JSON.stringify(user));
         const githubProfile = profile as {
           login?: string;
           name?: string;
@@ -112,6 +125,7 @@ const authOptions: NextAuthOptions = {
 
         return {
           ...token,
+          id: user.id, // <-- Ensure user ID is included in the token
           accessToken: account.access_token,
           username:
             user.login || githubProfile.login || user.email?.split("@")[0],
@@ -125,11 +139,17 @@ const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback, token:", JSON.stringify(token));
       if (session.user) {
+        // Copy important properties from token to session
+        // Use 'sub' as the user ID - this is how OAuth2 works (subject = user ID)
+        session.user.id = token.sub as string;
         session.user.name =
           (token.displayName as string) || session.user.name || "user";
         session.user.accessToken = token.accessToken as string;
         session.user.username = token.username as string;
+        
+        console.log("Updated session with user ID:", session.user.id);
       }
       return session;
     },

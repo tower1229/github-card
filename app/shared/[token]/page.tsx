@@ -8,6 +8,7 @@ import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
 import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
 import { GitHubData } from "@/lib/types";
 import LoadingSharedCard from "@/components/loading";
+import { authFetch } from "@/lib/auth";
 
 interface ShareLinkData {
   cardData: GitHubData;
@@ -28,14 +29,14 @@ export default function SharedCardPage() {
     async function fetchShareLink() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/share-links/${token}`);
-
+        const response = await authFetch(`/api/share-links/${token}`);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to load shared card");
         }
 
         const linkData = await response.json();
+        console.log("Share link data received:", linkData);
         setData(linkData);
 
         if (linkData.expiresAt) {
