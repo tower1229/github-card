@@ -72,11 +72,13 @@ cp example.env .env.local
 
 Required environment variables:
 
-- `NEXTAUTH_URL`: Your app URL (e.g., http://localhost:3000 for local development)
-- `NEXTAUTH_SECRET`: Secret for NextAuth (generate using `openssl rand -base64 32`)
+- `NEXTAUTH_URL`: Your production URL
+- `NEXTAUTH_SECRET`: Secret for NextAuth
 - `GITHUB_ID`: GitHub OAuth App Client ID
 - `GITHUB_SECRET`: GitHub OAuth App Client Secret
 - `DATABASE_URL`: Neon PostgreSQL connection string
+- `GITHUB_ACCESS_TOKEN`: GitHub Personal Access Token for server-side API calls
+- `EDGE_CONFIG`: Vercel Edge Config connection string
 
 4. Set up the database:
 
@@ -98,54 +100,3 @@ yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the application.
-
-## Database Schema
-
-The application uses the following database tables:
-
-- **users**: Stores GitHub user information
-- **user_behaviors**: Tracks user actions (login, card generation, link sharing)
-- **share_links**: Stores generated share links with expiration dates
-
-## API Endpoints
-
-- **Authentication**: `/api/auth/[...nextauth]`
-- **Share Links**:
-  - `POST /api/share-links`: Create a new share link
-  - `GET /api/share-links`: List current user's share links
-  - `GET /api/share-links/:token`: Get a specific share link by token
-  - `GET /api/share-links/user/:userId`: Get all share links for a user
-- **Leaderboard**:
-  - `GET /api/leaderboard`: Get leaderboard data with optional pagination
-  - `POST /api/leaderboard/update`: Update a user's contribution score
-  - `GET /api/leaderboard/refresh`: Recalculate all user ranks
-- **Cron Jobs**:
-  - `GET /api/cron/cleanup-cache`: Clean up expired cache entries
-
-## Deployment
-
-### Deploy on Vercel
-
-1. Create a Neon PostgreSQL database
-2. Set up environment variables in Vercel
-3. Deploy the application
-
-```bash
-vercel
-```
-
-### Environment Variables for Production
-
-Make sure to set these environment variables in your Vercel project:
-
-- `NEXTAUTH_URL`: Your production URL
-- `NEXTAUTH_SECRET`: Secret for NextAuth
-- `GITHUB_ID`: GitHub OAuth App Client ID
-- `GITHUB_SECRET`: GitHub OAuth App Client Secret
-- `DATABASE_URL`: Neon PostgreSQL connection string
-- `GITHUB_ACCESS_TOKEN`: GitHub Personal Access Token for server-side API calls
-- `EDGE_CONFIG`: Vercel Edge Config connection string
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
