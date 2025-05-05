@@ -121,18 +121,30 @@ export default function SharedCardPage() {
               username={data.cardData.login}
               hideMenu={true}
               sharedData={data.cardData}
+              shareContext={{
+                shareUrl: window.location.href,
+                isGenerating: false,
+              }}
             />
           ) : data.templateType === "flomo" ? (
             <ProfileFlomoPage
               username={data.cardData.login}
               hideMenu={true}
               sharedData={data.cardData}
+              shareContext={{
+                shareUrl: window.location.href,
+                isGenerating: false,
+              }}
             />
           ) : (
             <ProfileContributePage
               username={data.cardData.login}
               hideMenu={true}
               sharedData={data.cardData}
+              shareContext={{
+                shareUrl: window.location.href,
+                isGenerating: false,
+              }}
             />
           )}
         </>

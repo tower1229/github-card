@@ -60,7 +60,10 @@ export function Footer({
     // 仅在需要显示二维码且Canvas元素存在时生成
     if (showQrcode && !qrCodeGenerated) {
       const canvasElement = document.getElementById("footer-qr-canvas");
-      if (!canvasElement) return;
+      if (!canvasElement) {
+        console.error("No canvas element found");
+        return;
+      }
 
       if (shareContext?.shareUrl) {
         try {
