@@ -17,24 +17,20 @@ import { toCanvas } from "html-to-image";
 import { downloadImage } from "@/lib/utils";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { useState } from "react";
-import { GitHubData } from "@/lib/types";
+import { useState, useEffect } from "react";
 import { ShareContextData } from "@/app/generate/page";
 import { useSession } from "next-auth/react";
-import { authFetch } from "@/lib/auth";
 
 export function ShareButton({
   setIsDownloading,
-  userData,
-  templateType = "contribute",
   shareContext,
 }: {
   setIsDownloading: (isDownloading: boolean) => void;
-  userData: GitHubData;
-  templateType?: string;
   shareContext?: ShareContextData;
 }) {
-  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(
+    shareContext?.isGenerating || false
+  );
   const { status } = useSession();
 
   const saveAsImage = () => {
@@ -81,43 +77,11 @@ export function ShareButton({
       toast("Link is being generated, please wait...");
       return;
     }
-
-    try {
-      setIsGeneratingLink(true);
-
-      // Call API to create share link
-      const response = await authFetch("/api/share-links", {
-        method: "POST",
-        body: JSON.stringify({
-          cardData: userData,
-          templateType: templateType,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create share link");
-      }
-
-      // Build complete URL with origin
-      if (!data.shareUrl) {
-        throw new Error("Share link not found");
-      }
-
-      // Copy generated share link to clipboard
-      await navigator.clipboard.writeText(data.shareUrl);
-
-      toast.success("Share link copied to clipboard");
-    } catch (error) {
-      console.error("Error generating share link:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to generate share link"
-      );
-    } finally {
-      setIsGeneratingLink(false);
-    }
   };
+
+  useEffect(() => {
+    setIsGeneratingLink(shareContext?.isGenerating || false);
+  }, [shareContext?.isGenerating]);
 
   return (
     <Drawer>

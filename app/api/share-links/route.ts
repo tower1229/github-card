@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/db";
-import { shareLinks } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { updateUserContribution } from "@/lib/leaderboard";
+import { shareLinks, type ShareLink } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import { withServerAuth } from "@/lib/server-auth";
-import { getGitHubContributions } from "@/lib/github/api";
+
+// Constants
+const SHARE_LINK_EXPIRATION_DAYS = 3;
 
 export async function POST(request: NextRequest) {
   return withServerAuth(async (req: NextRequest, userId: string) => {
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      if (!user) {
+      if (!user || !user.username) {
         return NextResponse.json(
           { error: "User not found" },
           {
@@ -53,51 +54,35 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const username = user.username;
+      // Create a new request with templateType as a query parameter for GET method
+      const url = new URL(req.url);
+      url.searchParams.set("templateType", body.templateType);
+      const modifiedRequest = new NextRequest(url);
 
-      if (!username) {
-        return NextResponse.json(
-          { error: "GitHub username not found" },
-          {
-            status: 404,
-          }
+      // 调用 GET 方法尝试获取用户已有的未过期链接
+      const userShareLinks = await GET(modifiedRequest);
+      if (userShareLinks.ok) {
+        const userShareLinksData = await userShareLinks.json();
+        console.log("get userShareLinksData:", userShareLinksData);
+        const activeLinks = userShareLinksData.filter(
+          (link: ShareLink) =>
+            link.isActive && new Date(link.expiresAt) > new Date()
         );
-      }
-
-      console.log("Fetching GitHub data for user:", username);
-
-      // Fetch contributions data to update leaderboard
-      let contributionsData;
-      try {
-        contributionsData = await getGitHubContributions(username);
-      } catch (error) {
-        const githubError = error as { message?: string };
-        console.error(
-          `Error fetching GitHub contributions for ${username}:`,
-          githubError
-        );
-        // We'll continue anyway and create the share link
-      }
-
-      // Update user contribution with data from GitHub if we have it
-      if (contributionsData) {
-        try {
-          await updateUserContribution(
-            userId,
-            contributionsData.contributionScore
-          );
-        } catch (updateError) {
-          console.error(
-            "Failed to update user contribution score:",
-            updateError
-          );
-          // Continue with share link creation even if updating the score fails
+        console.log("get activeLinks:", activeLinks);
+        if (activeLinks.length > 0) {
+          const baseUrl = process.env.NEXTAUTH_URL || "";
+          const token = activeLinks[0].linkToken;
+          const expiresAt = activeLinks[0].expiresAt;
+          return NextResponse.json({
+            shareUrl: `${baseUrl}/shared/${token}`,
+            expiresAt,
+          });
         }
       }
 
-      // Calculate expiration time (30 days)
+      // Calculate expiration time
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
+      expiresAt.setDate(expiresAt.getDate() + SHARE_LINK_EXPIRATION_DAYS);
       console.log("Expiration date set to:", expiresAt);
 
       // Generate a random token
@@ -114,7 +99,7 @@ export async function POST(request: NextRequest) {
           .values({
             userId,
             linkToken: token,
-            githubUsername: username,
+            githubUsername: user.username,
             expiresAt,
             templateType: body.templateType,
           })
@@ -168,12 +153,25 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   return withServerAuth(async (req: NextRequest, userId: string) => {
+    const templateType = request.nextUrl.searchParams.get("templateType");
     try {
+      if (!templateType) {
+        return NextResponse.json(
+          { error: "Template type is required" },
+          { status: 400 }
+        );
+      }
+
       // Get all share links for the user
       const userShareLinks = await db
         .select()
         .from(shareLinks)
-        .where(eq(shareLinks.userId, userId))
+        .where(
+          and(
+            eq(shareLinks.userId, userId),
+            eq(shareLinks.templateType, templateType)
+          )
+        )
         .orderBy(shareLinks.createdAt);
 
       // Get baseUrl
