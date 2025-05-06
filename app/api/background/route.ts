@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { kv } from "@vercel/kv";
+import kv from "../../../lib/cloudflare/kv-service";
 
 export const runtime = "edge";
 
@@ -15,6 +15,7 @@ interface CachedImage {
   imageData: string;
   contentType: string;
   timestamp: number;
+  expiry?: number;
 }
 
 export async function GET() {
@@ -62,6 +63,7 @@ async function fillCache(cachedImages: CachedImage[]) {
         imageData: Buffer.from(imageData).toString("base64"),
         contentType,
         timestamp: Date.now(),
+        expiry: Date.now() + 86400 * 1000,
       });
     } catch (error) {
       console.error("Error filling cache:", error);
@@ -69,8 +71,8 @@ async function fillCache(cachedImages: CachedImage[]) {
     }
   }
 
-  // 设置24小时过期
-  await kv.set(CACHE_KEY, cachedImages, { ex: 86400 });
+  // 设置缓存，不再使用ex选项
+  await kv.set(CACHE_KEY, cachedImages);
 }
 
 async function fetchRandomImageUrl() {

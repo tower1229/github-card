@@ -1,0 +1,30 @@
+# wrangler.toml - Cloudflare Pages 配置文件
+name = "github-card"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 用于将静态资源路由到构建输出目录
+[site]
+bucket = ".next"
+
+# KV 命名空间配置
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID" # 部署时将会由环境变量替换
+
+# 环境变量配置
+[vars]
+# 运行时需要的环境变量可以在Cloudflare Pages后台界面配置
+
+[env.production]
+# 生产环境特定配置
+workers_dev = false
+
+[env.development]
+# 开发环境特定配置
+workers_dev = true
+
+# Next.js 特定构建命令
+[build]
+command = "yarn build"
+watch_dir = "src" # 监视此目录中的更改 
