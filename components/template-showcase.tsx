@@ -46,7 +46,7 @@ export function TemplateShowcase() {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[10px] max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
       {templates.map((template, index) => (
         <BlurFade key={index} delay={200 * (index + 1)}>
           <div className="bg-gray-900 rounded-lg overflow-hidden relative group">
