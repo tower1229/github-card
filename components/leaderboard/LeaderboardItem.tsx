@@ -88,7 +88,7 @@ export function LeaderboardItem({ item, isCurrentUser }: LeaderboardItemProps) {
       </div>
 
       <div className="col-span-3 text-right pr-4 font-mono font-medium">
-        {score.toLocaleString()}
+        {score.toLocaleString()} %
       </div>
 
       <div className="col-span-3 text-right pr-4 font-mono font-medium">

@@ -61,7 +61,7 @@ export async function LeaderboardList() {
         <div className="grid grid-cols-12 px-4 py-3 text-[#8b949e] font-medium">
           <div className="col-span-1 text-center">#</div>
           <div className="col-span-5">User</div>
-          <div className="col-span-3 text-right pr-4">Thresholds</div>
+          <div className="col-span-3 text-right pr-4">Percentile</div>
           <div className="col-span-3 text-right pr-4">Grade</div>
         </div>
 
