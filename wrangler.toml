@@ -1,16 +1,19 @@
 # wrangler.toml - Cloudflare Pages 配置文件
 name = "github-card"
 compatibility_date = "2024-01-01"
-compatibility_flags = ["nodejs_compat"]
+compatibility_flags = ["nodejs_compat", "nodejs_modern"]
 
 # 用于将静态资源路由到构建输出目录
 [site]
 bucket = ".next"
 
+# Pages专用构建输出目录配置
+pages_build_output_dir = ".next"
+
 # KV 命名空间配置
 [[kv_namespaces]]
 binding = "KV"
-id = "YOUR_KV_NAMESPACE_ID" # 部署时将会由环境变量替换
+id = "39e20a24bbd44f4b9e87eba2da4684aa" # 使用您实际的KV命名空间ID
 
 # 环境变量配置
 [vars]
