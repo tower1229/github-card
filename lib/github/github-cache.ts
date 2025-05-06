@@ -1,4 +1,4 @@
-import kv from "../cloudflare/kv-service";
+import { kvClient as kv } from "../cloudflare/kv-service";
 
 // Cache metrics class for tracking performance
 export class CacheMetrics {

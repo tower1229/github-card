@@ -12,16 +12,16 @@ export interface KVClient {
 
 // 内存缓存，用于本地开发或回退时
 class MemoryKVStore implements KVClient {
-  private store: Map<string, any> = new Map();
+  private store: Map<string, unknown> = new Map();
 
   async get<T = unknown>(key: string): Promise<T | null> {
-    return this.store.has(key) ? this.store.get(key) : null;
+    return this.store.has(key) ? (this.store.get(key) as T) : null;
   }
 
   async getAll<T = unknown>(): Promise<Record<string, T>> {
     const result: Record<string, T> = {};
     this.store.forEach((value, key) => {
-      result[key] = value;
+      result[key] = value as T;
     });
     return result;
   }
@@ -40,7 +40,7 @@ class MemoryKVStore implements KVClient {
 }
 
 // Cloudflare KV 客户端
-export class CloudflareKVClient implements KVClient {
+class CloudflareKVClient implements KVClient {
   private namespace: string;
   private apiToken: string;
   private accountId: string;
@@ -99,7 +99,7 @@ export class CloudflareKVClient implements KVClient {
       }
 
       const keysData = await keysResponse.json();
-      const keys = keysData.result.map((item: any) => item.name);
+      const keys = keysData.result.map((item: { name: string }) => item.name);
 
       // 获取所有值
       const result: Record<string, T> = {};
@@ -189,5 +189,5 @@ export function createKVClient(): KVClient {
   }
 }
 
-// 默认导出一个单例
-export default createKVClient();
+// 导出客户端实例而不是默认导出
+export const kvClient = createKVClient();
