@@ -4,9 +4,7 @@ import { db } from "@/lib/db";
 import { shareLinks } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { withServerAuth } from "@/lib/server-auth";
-
-// Constants
-const SHARE_LINK_EXPIRATION_DAYS = 3;
+import { SHARE_LINK_EXPIRATION_DAYS } from "@/lib/constant";
 
 export async function POST(request: NextRequest) {
   return withServerAuth(async (req: NextRequest, userId: string) => {
