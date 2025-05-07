@@ -107,10 +107,6 @@ const nextConfig = {
 
     return config;
   },
-  output: "export",
-  distDir: ".output",
-  poweredByHeader: false,
-  reactStrictMode: true,
 };
 
 export default withBundleAnalyzer(nextConfig);
