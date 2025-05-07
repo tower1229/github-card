@@ -3,6 +3,8 @@ import { githubCacheMetrics } from "@/lib/github/github-cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 
+export const runtime = 'edge';
+
 export async function POST() {
   try {
     // Only allow admin users to reset metrics
