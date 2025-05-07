@@ -8,10 +8,12 @@ import { contributeData } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 // Helper function to check if data is fresh (less than 1 day old)
-const isDataFresh = (lastUpdated: Date): boolean => {
+const isDataFresh = (lastUpdated: Date | number): boolean => {
   const oneDayInMs = 24 * 60 * 60 * 1000; // 1 day in milliseconds
   const now = new Date();
-  const timeDiff = now.getTime() - lastUpdated.getTime();
+  const lastUpdatedTime =
+    lastUpdated instanceof Date ? lastUpdated.getTime() : lastUpdated * 1000; // 如果是Unix时间戳（秒），转换为毫秒
+  const timeDiff = now.getTime() - lastUpdatedTime;
   return timeDiff < oneDayInMs;
 };
 
@@ -73,7 +75,7 @@ export const getUserGitHubData = cache(async (username: string) => {
     };
 
     // Store the data in the database for future use
-    const now = new Date();
+    const now = Math.floor(Date.now() / 1000); // 使用Unix时间戳（秒）
     if (dbRecord) {
       // Update existing record
       await db

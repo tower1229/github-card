@@ -87,9 +87,11 @@ export async function POST(request: NextRequest) {
       }
 
       // Calculate expiration time
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + SHARE_LINK_EXPIRATION_DAYS);
-      console.log("Expiration date set to:", expiresAt);
+      const expiresAtDate = new Date();
+      expiresAtDate.setDate(expiresAtDate.getDate() + SHARE_LINK_EXPIRATION_DAYS);
+      // Convert to Unix timestamp (seconds since epoch)
+      const expiresAt = Math.floor(expiresAtDate.getTime() / 1000);
+      console.log("Expiration date set to:", new Date(expiresAt * 1000));
 
       // Generate a random token
       const token = uuidv4();

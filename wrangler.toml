@@ -16,9 +16,10 @@ bucket = ".next"
 pages_build_output_dir = ".next"
 
 # KV 命名空间配置
+
 [[kv_namespaces]]
-binding = "KV"
-id = "39e20a24bbd44f4b9e87eba2da4684aa"
+binding = "GITHUB_CARD_KV"
+id = "ee963ddf7c4d40c5bf12bb090b0c46fb"
 
 # D1 数据库配置
 [[d1_databases]]

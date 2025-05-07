@@ -2,6 +2,16 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 import * as dotenv from "dotenv";
 
+// Define type for globalThis with DB property
+interface GlobalWithDB {
+  DB: D1Database;
+}
+
+// D1Database type definition
+interface D1Database {
+  [key: string]: unknown;
+}
+
 // 确保在创建数据库连接之前加载环境变量
 dotenv.config({ path: ".env.local" });
 
@@ -15,13 +25,13 @@ if (typeof window === "undefined") {
     // 使用 Cloudflare D1 数据库
     // 在 Cloudflare Workers 环境中，DB 绑定会自动注入
     // 但在 Next.js 服务器端渲染时，我们需要处理 DB 可能不存在的情况
-    if (process.env.NODE_ENV === "development" && !(globalThis as any).DB) {
+    if (process.env.NODE_ENV === "development" && !((globalThis as unknown) as GlobalWithDB).DB) {
       console.warn("D1 database not available in development outside of Cloudflare Workers environment");
       // 在开发环境提供一个模拟 D1 对象
-      (globalThis as any).DB = {};
+      ((globalThis as unknown) as GlobalWithDB).DB = {} as D1Database;
     }
     
-    db = drizzle((globalThis as any).DB, { schema });
+    db = drizzle(((globalThis as unknown) as GlobalWithDB).DB, { schema });
   } catch (error) {
     console.error("Failed to connect to database:", error);
     throw error;
@@ -61,9 +71,10 @@ if (typeof window === "undefined") {
 export { schema };
 export { db };
 
-// Helper function to get a timestamp 3 days from now (for share links expiration)
-export function getExpirationDate(): Date {
+// Helper function to get a Unix timestamp 3 days from now (for share links expiration)
+export function getExpirationDate(): number {
   const date = new Date();
   date.setDate(date.getDate() + 3);
-  return date;
+  // 返回 Unix 时间戳（秒）
+  return Math.floor(date.getTime() / 1000);
 }
