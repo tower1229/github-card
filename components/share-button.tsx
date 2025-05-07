@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  DotsThree,
-  ImageSquare,
+  EllipsisVertical,
+  Image as ImageIcon,
   Link as LinkIcon,
   House,
-} from "@phosphor-icons/react";
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -92,7 +92,7 @@ export function ShareButton({
           className="p-2 rounded-full bg-white/40 hover:bg-white/10"
           title="Share"
         >
-          <DotsThree size={24} weight="bold" />
+          <EllipsisVertical size={24} strokeWidth={2.5} />
         </button>
       </DrawerTrigger>
 
@@ -108,7 +108,7 @@ export function ShareButton({
                 onClick={saveAsImage}
                 className="w-[200px] flex items-center justify-center gap-2 h-10"
               >
-                <ImageSquare size={20} />
+                <ImageIcon size={20} />
                 Save as Image
               </Button>
             </DrawerClose>

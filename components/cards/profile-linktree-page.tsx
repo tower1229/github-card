@@ -8,7 +8,7 @@ import NumberTicker from "@/components/ui/number-ticker";
 import HyperText from "@/components/ui/hyper-text";
 import { ProfileTotal } from "@/components/profile-total";
 import { ShareButton } from "@/components/share-button";
-import { BookBookmark, Users, Star, GitCommit } from "@phosphor-icons/react";
+import { BookOpen, Users, Star, GitBranch } from "lucide-react";
 import { ShareContextData } from "@/app/generate/page";
 import { getUserGitHubData } from "@/lib/server-github";
 import LoadingSharedCard from "@/components/loading";
@@ -125,7 +125,7 @@ export function ProfileLinktreePage({
               label: "Public Repos",
               value: userData.public_repos,
               delay: 500,
-              icon: BookBookmark,
+              icon: BookOpen,
             },
             {
               label: "Followers",
@@ -143,7 +143,7 @@ export function ProfileLinktreePage({
               label: "Total Commits",
               value: userData.commits,
               delay: 800,
-              icon: GitCommit,
+              icon: GitBranch,
             },
           ].map((item) => (
             <BlurFade key={item.label} delay={item.delay}>
