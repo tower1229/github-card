@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
+import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   // Enable output compression
   compress: true,
 
@@ -102,19 +102,29 @@ const nextConfig = {
         };
 
         // Aggressively optimize JavaScript
-        config.optimization.minimizer.forEach((minimizer) => {
-          if (minimizer.constructor.name === "TerserPlugin") {
-            minimizer.options.terserOptions = {
-              ...minimizer.options.terserOptions,
-              compress: {
-                ...minimizer.options.terserOptions.compress,
-                drop_console: true,
-                passes: 2,
-              },
-              mangle: true,
+        config.optimization.minimizer.forEach(
+          (minimizer: {
+            constructor: { name: string };
+            options: {
+              terserOptions: {
+                compress?: { drop_console?: boolean; passes?: number };
+                mangle?: boolean;
+              };
             };
+          }) => {
+            if (minimizer.constructor.name === "TerserPlugin") {
+              minimizer.options.terserOptions = {
+                ...minimizer.options.terserOptions,
+                compress: {
+                  ...minimizer.options.terserOptions.compress,
+                  drop_console: true,
+                  passes: 2,
+                },
+                mangle: true,
+              };
+            }
           }
-        });
+        );
       }
     }
 
@@ -128,3 +138,7 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
+// added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();
