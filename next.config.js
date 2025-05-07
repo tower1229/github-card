@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-import bundleAnalyzer from '@next/bundle-analyzer';
+import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -82,7 +82,7 @@ const nextConfig = {
 
     if (!dev) {
       // 移除自定义的 splitChunks 配置，使用 Next.js 默认配置
-      
+
       config.optimization.minimize = true;
 
       if (!isServer) {
@@ -107,7 +107,8 @@ const nextConfig = {
 
     return config;
   },
-  output: "standalone",
+  output: "export",
+  distDir: ".output",
   poweredByHeader: false,
   reactStrictMode: true,
 };

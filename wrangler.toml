@@ -5,12 +5,13 @@ enabled = true
 
 
 name = "github-card"
-compatibility_date = "2024-01-01"
+compatibility_date = "2023-05-18"
+main = ".cloudflare/workers-site/index.js"
 compatibility_flags = ["nodejs_compat"]
 
-# 用于将静态资源路由到构建输出目录
+# 静态资源路由配置
 [site]
-bucket = ".next"
+bucket = ".output"
 
 # Pages构建输出目录配置
 pages_build_output_dir = ".next"
@@ -35,8 +36,8 @@ migrations_dir = "drizzle/migrations"
 # 运行时需要的环境变量可以在Cloudflare Pages后台界面配置
 
 [env.production]
-# 生产环境特定配置
-workers_dev = false
+name = "github-card-production"
+route = "*"
 
 [env.development]
 # 开发环境特定配置
@@ -45,4 +46,5 @@ workers_dev = true
 # Next.js 特定构建命令
 [build]
 command = "yarn build"
+output_directory = ".output"
 watch_dir = "src" # 监视此目录中的更改

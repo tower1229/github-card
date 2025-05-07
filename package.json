@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build && mkdir -p .cloudflare/workers-site",
     "build:debug": "next build --debug",
     "start": "next start",
     "lint": "next lint",
