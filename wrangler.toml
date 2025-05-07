@@ -15,6 +15,15 @@ pages_build_output_dir = ".next"
 binding = "KV"
 id = "39e20a24bbd44f4b9e87eba2da4684aa"
 
+# D1 数据库配置
+[[d1_databases]]
+binding = "DB"
+database_name = "github-card-db"
+database_id = "86b1aef5-6719-4c86-b43d-300bda4da793"
+migrations_dir = "drizzle/migrations"
+# 注意: 需要在 Cloudflare Dashboard 中找到已创建的 D1 数据库的 ID
+# 并替换上面的占位符为真实的 database_id
+
 # 环境变量配置
 [vars]
 # 运行时需要的环境变量可以在Cloudflare Pages后台界面配置
@@ -30,4 +39,4 @@ workers_dev = true
 # Next.js 特定构建命令
 [build]
 command = "yarn build"
-watch_dir = "src" # 监视此目录中的更改 
+watch_dir = "src" # 监视此目录中的更改
