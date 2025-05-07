@@ -3,7 +3,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "github-card",
-  "compatibility_date": "2025-03-25",
+  "compatibility_date": "2025-04-02",
   "main": "worker.js",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
