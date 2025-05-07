@@ -1,6 +1,7 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+// import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   // Enable output compression
   compress: true,
 
@@ -12,6 +13,9 @@ const nextConfig: NextConfig = {
 
   // Enable SWC minification
   swcMinify: true,
+
+  // 添加Cloudflare支持
+  output: "standalone",
 
   // Image optimization settings
   images: {
@@ -102,29 +106,19 @@ const nextConfig: NextConfig = {
         };
 
         // Aggressively optimize JavaScript
-        config.optimization.minimizer.forEach(
-          (minimizer: {
-            constructor: { name: string };
-            options: {
-              terserOptions: {
-                compress?: { drop_console?: boolean; passes?: number };
-                mangle?: boolean;
-              };
+        config.optimization.minimizer.forEach((minimizer) => {
+          if (minimizer.constructor.name === "TerserPlugin") {
+            minimizer.options.terserOptions = {
+              ...minimizer.options.terserOptions,
+              compress: {
+                ...minimizer.options.terserOptions.compress,
+                drop_console: true,
+                passes: 2,
+              },
+              mangle: true,
             };
-          }) => {
-            if (minimizer.constructor.name === "TerserPlugin") {
-              minimizer.options.terserOptions = {
-                ...minimizer.options.terserOptions,
-                compress: {
-                  ...minimizer.options.terserOptions.compress,
-                  drop_console: true,
-                  passes: 2,
-                },
-                mangle: true,
-              };
-            }
           }
-        );
+        });
       }
     }
 
@@ -137,8 +131,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// 移除 OpenNext 初始化
+// initOpenNextCloudflareForDev();
 
-// added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
-initOpenNextCloudflareForDev();
+export default nextConfig;
