@@ -4,7 +4,7 @@ import { getFullLeaderboard } from "@/lib/leaderboard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // Cached function to get leaderboard data
 const getCachedLeaderboardData = cache(

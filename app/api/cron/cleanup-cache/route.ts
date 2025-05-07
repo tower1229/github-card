@@ -4,7 +4,7 @@ import {
   githubCacheMetrics,
 } from "@/lib/github/github-cache";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // This endpoint will be triggered by a cron job to clean up expired cache entries
 export async function GET() {
