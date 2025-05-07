@@ -26,7 +26,7 @@ async function logUserBehavior(
         userId,
         actionType,
         actionData: actionData ? actionData : undefined,
-        performedAt: new Date(),
+        performedAt: Math.floor(Date.now() / 1000), // Convert to Unix timestamp (seconds)
       });
     }
   } catch (error) {
@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
                 username: githubProfile.login || "",
                 displayName: githubProfile.name || "",
                 avatarUrl: githubProfile.avatar_url || "",
-                updatedAt: new Date(),
+                updatedAt: Math.floor(Date.now() / 1000), // Convert to Unix timestamp (seconds)
               })
               .where(eq(users.id, userId));
 

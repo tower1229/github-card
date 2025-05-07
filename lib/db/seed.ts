@@ -32,7 +32,7 @@ async function seed() {
     await db.insert(userBehaviors).values({
       userId: user.id,
       actionType: "signup",
-      performedAt: new Date(),
+      performedAt: Math.floor(Date.now() / 1000), // 转换为 Unix 时间戳（秒）
     });
 
     // Create sample share link

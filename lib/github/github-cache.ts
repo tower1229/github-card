@@ -1,9 +1,4 @@
-import { createClient } from "@vercel/edge-config";
-
-// Create Edge Config client
-const edgeConfig = process.env.EDGE_CONFIG
-  ? createClient(process.env.EDGE_CONFIG)
-  : null;
+import { kvClient as kv } from "../cloudflare/kv-service";
 
 // Cache metrics class for tracking performance
 export class CacheMetrics {
@@ -124,30 +119,24 @@ export class MemoryCacheManager {
 // Create global memory cache instance
 export const memoryCache = new MemoryCacheManager();
 
-// Main cache manager that abstracts Edge Config and memory cache
+// Main cache manager that abstracts KV and memory cache
 export class CacheManager {
   private prefix: string;
   private useMemoryCache: boolean;
 
   constructor(prefix = "github-cache:") {
     this.prefix = prefix;
-    this.useMemoryCache = !edgeConfig;
+    this.useMemoryCache = false; // 默认使用KV服务
 
-    // Also check if edgeConfig object has the necessary methods
-    if (
-      edgeConfig &&
-      (typeof edgeConfig.set !== "function" ||
-        typeof edgeConfig.get !== "function")
-    ) {
-      console.warn(
-        "Edge Config methods unavailable, falling back to memory cache"
-      );
+    // 检查KV客户端是否可用
+    if (!kv || typeof kv.set !== "function" || typeof kv.get !== "function") {
+      console.warn("KV methods unavailable, falling back to memory cache");
       this.useMemoryCache = true;
     }
 
     if (this.useMemoryCache) {
       console.log(
-        "Edge Config not available, using memory cache for GitHub data"
+        "KV service not available, using memory cache for GitHub data"
       );
     }
   }
@@ -162,31 +151,14 @@ export class CacheManager {
     }
 
     try {
-      if (!edgeConfig) {
-        // Fallback to memory cache if Edge Config is not available
-        this.useMemoryCache = true;
-        memoryCache.set(fullKey, value, ttl);
-        return;
-      }
-
-      // Check if edgeConfig.set method exists
-      if (typeof edgeConfig.set !== "function") {
-        console.warn(
-          "Edge Config 'set' method is not available, using memory cache"
-        );
-        this.useMemoryCache = true;
-        memoryCache.set(fullKey, value, ttl);
-        return;
-      }
-
-      // Set cache value in Edge Config
-      await edgeConfig.set(fullKey, {
+      // 设置KV缓存值，带过期时间
+      await kv.set(fullKey, {
         value,
         expiry: Date.now() + ttl,
       });
-      console.log(`Cache set in Edge Config: ${fullKey}`);
+      console.log(`Cache set in KV: ${fullKey}`);
     } catch (error) {
-      console.error("Edge Config set error:", error);
+      console.error("KV set error:", error);
       // Fallback to memory cache on error
       memoryCache.set(fullKey, value, ttl);
     }
@@ -201,21 +173,7 @@ export class CacheManager {
     }
 
     try {
-      if (!edgeConfig) {
-        this.useMemoryCache = true;
-        return memoryCache.get<T>(fullKey);
-      }
-
-      // Check if edgeConfig.get method exists
-      if (typeof edgeConfig.get !== "function") {
-        console.warn(
-          "Edge Config 'get' method is not available, using memory cache"
-        );
-        this.useMemoryCache = true;
-        return memoryCache.get<T>(fullKey);
-      }
-
-      const cacheItem = await edgeConfig.get(fullKey);
+      const cacheItem = await kv.get(fullKey);
 
       if (!cacheItem) {
         githubCacheMetrics.misses += 1;
@@ -227,9 +185,7 @@ export class CacheManager {
       if (item.expiry < Date.now()) {
         // Try to delete expired item
         try {
-          if (typeof edgeConfig.delete === "function") {
-            await edgeConfig.delete(fullKey);
-          }
+          await kv.delete(fullKey);
         } catch {
           // Ignore deletion errors
         }
@@ -240,7 +196,7 @@ export class CacheManager {
       githubCacheMetrics.hits += 1;
       return item.value;
     } catch (error) {
-      console.error("Edge Config get error:", error);
+      console.error("KV get error:", error);
       // Try memory cache as fallback
       return memoryCache.get<T>(fullKey);
     }
@@ -261,25 +217,8 @@ export class CacheManager {
     }
 
     try {
-      if (!edgeConfig) {
-        this.useMemoryCache = true;
-        return;
-      }
-
-      // Check if edge config methods exist
-      if (
-        typeof edgeConfig.getAll !== "function" ||
-        typeof edgeConfig.delete !== "function"
-      ) {
-        console.warn(
-          "Edge Config methods not available for cleanup, using memory cache only"
-        );
-        this.useMemoryCache = true;
-        return;
-      }
-
-      // Get all keys from Edge Config
-      const items = await edgeConfig.getAll();
+      // 获取所有KV缓存并清理过期项
+      const items = await kv.getAll();
       const now = Date.now();
       const expiredKeys = [];
 
@@ -296,14 +235,14 @@ export class CacheManager {
       // Delete expired items
       if (expiredKeys.length > 0) {
         for (const key of expiredKeys) {
-          await edgeConfig.delete(key);
+          await kv.delete(key);
         }
         console.log(
-          `Cleaned up ${expiredKeys.length} expired items from Edge Config`
+          `Cleaned up ${expiredKeys.length} expired items from KV storage`
         );
       }
     } catch (error) {
-      console.error("Edge Config cleanup error:", error);
+      console.error("KV cleanup error:", error);
       this.useMemoryCache = true; // Switch to memory cache on persistent errors
     }
   }

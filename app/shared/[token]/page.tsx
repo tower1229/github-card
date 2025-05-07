@@ -3,12 +3,35 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
-import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
-import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
+import dynamic from "next/dynamic";
 import { GitHubData } from "@/lib/types";
 import LoadingSharedCard from "@/components/loading";
 import { authFetch } from "@/lib/auth";
+
+// Dynamic imports with loading fallbacks
+const ProfileContributePage = dynamic(
+  () =>
+    import("@/components/cards/profile-contribute-page").then((mod) => ({
+      default: mod.ProfileContributePage,
+    })),
+  { loading: () => <LoadingSharedCard /> }
+);
+
+const ProfileLinktreePage = dynamic(
+  () =>
+    import("@/components/cards/profile-linktree-page").then((mod) => ({
+      default: mod.ProfileLinktreePage,
+    })),
+  { loading: () => <LoadingSharedCard /> }
+);
+
+const ProfileFlomoPage = dynamic(
+  () =>
+    import("@/components/cards/profile-flomo-page").then((mod) => ({
+      default: mod.ProfileFlomoPage,
+    })),
+  { loading: () => <LoadingSharedCard /> }
+);
 
 interface ShareLinkData {
   cardData: GitHubData;

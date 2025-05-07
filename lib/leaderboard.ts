@@ -63,7 +63,7 @@ export async function updateUserContribution(
         .update(contributeData)
         .set({
           githubData: updatedGithubData,
-          lastUpdated: new Date(),
+          lastUpdated: Math.floor(Date.now() / 1000), // 转换为 Unix 时间戳（秒）
         })
         .where(eq(contributeData.username, username));
 

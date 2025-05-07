@@ -3,9 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback, useRef } from "react";
-import { ProfileContributePage } from "@/components/cards/profile-contribute-page";
-import { ProfileLinktreePage } from "@/components/cards/profile-linktree-page";
-import { ProfileFlomoPage } from "@/components/cards/profile-flomo-page";
+import dynamic from "next/dynamic";
 import { Navbar } from "@/components/auth/navbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -13,6 +11,31 @@ import { GitHubData } from "@/lib/types";
 import Loading from "@/components/loading";
 import { authFetch } from "@/lib/auth";
 import LoadingSharedCard from "@/components/loading";
+
+// Dynamic imports with loading fallbacks
+const ProfileContributePage = dynamic(
+  () =>
+    import("@/components/cards/profile-contribute-page").then((mod) => ({
+      default: mod.ProfileContributePage,
+    })),
+  { loading: () => <LoadingSharedCard /> }
+);
+
+const ProfileLinktreePage = dynamic(
+  () =>
+    import("@/components/cards/profile-linktree-page").then((mod) => ({
+      default: mod.ProfileLinktreePage,
+    })),
+  { loading: () => <LoadingSharedCard /> }
+);
+
+const ProfileFlomoPage = dynamic(
+  () =>
+    import("@/components/cards/profile-flomo-page").then((mod) => ({
+      default: mod.ProfileFlomoPage,
+    })),
+  { loading: () => <LoadingSharedCard /> }
+);
 
 // Warn if environment variables are being accessed from client
 if (typeof window !== "undefined" && process.env.DATABASE_URL) {

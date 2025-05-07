@@ -33,9 +33,10 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
 
     // Check if link is active and not expired
     const now = new Date();
-    if (!shareLink.isActive || now > shareLink.expiresAt) {
+    const expiresAtDate = new Date(shareLink.expiresAt * 1000); // Convert timestamp to Date object
+    if (!shareLink.isActive || now > expiresAtDate) {
       // Update the link to inactive if it's expired
-      if (shareLink.isActive && now > shareLink.expiresAt) {
+      if (shareLink.isActive && now > expiresAtDate) {
         await db
           .update(shareLinks)
           .set({ isActive: false })
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ token
       userId: shareLink.userId,
       actionType: "view_shared_link",
       actionData: { linkId: shareLink.id },
-      performedAt: new Date(),
+      performedAt: Math.floor(Date.now() / 1000), // Convert to Unix timestamp (seconds)
     });
 
     // Fetch the GitHub data for the username associated with this share link
