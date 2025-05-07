@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 
 export const runtime = "nodejs";
+// 标记为动态路由，不进行静态生成
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {

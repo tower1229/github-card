@@ -1,9 +1,5 @@
 // 测试Cloudflare KV连接脚本
-import * as dotenv from "dotenv";
 import { kvClient as kv } from "../lib/cloudflare/kv-service";
-
-// 加载环境变量
-dotenv.config({ path: ".env.local" });
 
 async function testKVConnection() {
   console.log("测试Cloudflare KV连接...");

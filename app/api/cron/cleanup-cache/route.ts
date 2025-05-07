@@ -5,6 +5,8 @@ import {
 } from "@/lib/github/github-cache";
 
 export const runtime = "nodejs";
+// 标记为动态路由，不进行静态生成
+export const dynamic = "force-dynamic";
 
 // This endpoint will be triggered by a cron job to clean up expired cache entries
 export async function GET() {

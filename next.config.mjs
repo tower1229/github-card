@@ -1,11 +1,23 @@
 /** @type {import('next').NextConfig} */
-import bundleAnalyzer from '@next/bundle-analyzer';
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
+// import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig = {
+  // Enable output compression
+  compress: true,
+
+  // Reduce output size with production settings
+  productionBrowserSourceMaps: false,
+
+  // Disable static optimization if not needed
+  reactStrictMode: true,
+
+  // Enable SWC minification
+  swcMinify: true,
+
+  // 添加Cloudflare支持
+  output: "standalone",
+
+  // Image optimization settings
   images: {
     remotePatterns: [
       {
@@ -58,7 +70,6 @@ const nextConfig = {
     webpackBuildWorker: true,
     optimizeCss: true,
   },
-  compress: true,
   webpack: (config, { dev, isServer }) => {
     // Fix 'self is not defined' error in server bundle
     if (isServer) {
@@ -81,16 +92,20 @@ const nextConfig = {
     }
 
     if (!dev) {
-      // 移除自定义的 splitChunks 配置，使用 Next.js 默认配置
-      
+      // Production optimizations
       config.optimization.minimize = true;
 
+      // Clean cache during build to reduce disk usage
+      config.cache = false;
+
       if (!isServer) {
+        // Bundle optimization
         config.resolve.alias = {
           ...(config.resolve.alias || {}),
           moment$: "moment/moment.js",
         };
 
+        // Aggressively optimize JavaScript
         config.optimization.minimizer.forEach((minimizer) => {
           if (minimizer.constructor.name === "TerserPlugin") {
             minimizer.options.terserOptions = {
@@ -98,7 +113,9 @@ const nextConfig = {
               compress: {
                 ...minimizer.options.terserOptions.compress,
                 drop_console: true,
+                passes: 2,
               },
+              mangle: true,
             };
           }
         });
@@ -107,9 +124,14 @@ const nextConfig = {
 
     return config;
   },
-  output: "standalone",
-  poweredByHeader: false,
-  reactStrictMode: true,
+  // Purge temporary files during build
+  onDemandEntries: {
+    maxInactiveAge: 15 * 1000,
+    pagesBufferLength: 2,
+  },
 };
 
-export default withBundleAnalyzer(nextConfig);
+// 移除 OpenNext 初始化
+// initOpenNextCloudflareForDev();
+
+export default nextConfig;

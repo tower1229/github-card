@@ -1,0 +1,45 @@
+// wrangler.jsonc - Cloudflare Pages 配置文件
+// wrangler.jsonc (wrangler v3.88.0^)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "github-card",
+  "compatibility_date": "2025-04-02",
+  "main": "worker.js",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // 静态资源路由配置
+  "assets": {
+    "directory": ".next/static",
+    "binding": "ASSETS"
+  },
+
+  // KV 命名空间配置
+  "kv_namespaces": [
+    {
+      "binding": "GITHUB_CARD_KV",
+      "id": "ee963ddf7c4d40c5bf12bb090b0c46fb"
+    }
+  ],
+
+  // D1 数据库配置
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "github-card-db",
+      "database_id": "86b1aef5-6719-4c86-b43d-300bda4da793",
+      "migrations_dir": "drizzle/migrations"
+    }
+  ],
+
+  // 指定构建输出目录
+  "build": {
+    "command": "yarn build",
+    "watch_dir": "src"
+  },
+
+  "build_upload": {
+    "format": "service-worker"
+  }
+}

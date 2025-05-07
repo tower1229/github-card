@@ -1,5 +1,5 @@
 "use client";
-import { GithubLogo } from "@phosphor-icons/react/dist/ssr";
+import { Github } from "lucide-react";
 import Qrcode from "qrcode";
 import { cn } from "@/lib/utils";
 import AnimatedGradientText from "@/components/ui/animated-gradient-text";
@@ -96,7 +96,7 @@ export function Footer({
         )}
         <Link href="/" className={showStyle === 2 ? "flex-1" : ""}>
           <AnimatedGradientText className="bg-black/40 mx-0">
-            <GithubLogo size={20} />
+            <Github size={20} />
             <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
             <span
               className={cn(
@@ -141,7 +141,7 @@ export function Footer({
                   href="https://github.com/tower1229/github-card"
                   className="text-[#8b949e] hover:text-white"
                 >
-                  <GithubLogo size={20} />
+                  <Github size={20} />
                 </a>
               </div>
             </div>

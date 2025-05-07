@@ -1,6 +1,5 @@
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
-import * as dotenv from "dotenv";
 
 // Define type for globalThis with DB property
 interface GlobalWithDB {
@@ -12,9 +11,6 @@ interface D1Database {
   [key: string]: unknown;
 }
 
-// 确保在创建数据库连接之前加载环境变量
-dotenv.config({ path: ".env.local" });
-
 // Only create database connection on the server side
 // When importing from client components, provide a dummy handler that warns about client usage
 let db: ReturnType<typeof drizzle<typeof schema>>;
@@ -25,13 +21,18 @@ if (typeof window === "undefined") {
     // 使用 Cloudflare D1 数据库
     // 在 Cloudflare Workers 环境中，DB 绑定会自动注入
     // 但在 Next.js 服务器端渲染时，我们需要处理 DB 可能不存在的情况
-    if (process.env.NODE_ENV === "development" && !((globalThis as unknown) as GlobalWithDB).DB) {
-      console.warn("D1 database not available in development outside of Cloudflare Workers environment");
+    if (
+      process.env.NODE_ENV === "development" &&
+      !(globalThis as unknown as GlobalWithDB).DB
+    ) {
+      console.warn(
+        "D1 database not available in development outside of Cloudflare Workers environment"
+      );
       // 在开发环境提供一个模拟 D1 对象
-      ((globalThis as unknown) as GlobalWithDB).DB = {} as D1Database;
+      (globalThis as unknown as GlobalWithDB).DB = {} as D1Database;
     }
-    
-    db = drizzle(((globalThis as unknown) as GlobalWithDB).DB, { schema });
+
+    db = drizzle((globalThis as unknown as GlobalWithDB).DB, { schema });
   } catch (error) {
     console.error("Failed to connect to database:", error);
     throw error;
