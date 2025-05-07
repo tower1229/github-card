@@ -39,11 +39,6 @@
     "watch_dir": "src"
   },
 
-  // 静态资源配置
-  "site": {
-    "bucket": ".next/static"
-  },
-
   "build_upload": {
     "format": "service-worker"
   }
