@@ -1,10 +1,7 @@
 import { db } from "./index";
 import { users, userBehaviors, shareLinks } from "./schema";
 import { v4 as uuidv4 } from "uuid";
-import * as dotenv from "dotenv";
 import { getExpirationDate } from "./index";
-
-dotenv.config({ path: ".env.local" });
 
 async function seed() {
   console.log("DATABASE_URL:", process.env.DATABASE_URL);
