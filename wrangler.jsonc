@@ -37,9 +37,10 @@
   "build": {
     "command": "yarn build",
     "watch_dir": "src"
-  },
-
-  "build_upload": {
-    "format": "service-worker"
   }
+
+  // 删除不支持的字段
+  // "build_upload": {
+  //   "format": "service-worker"
+  // }
 }

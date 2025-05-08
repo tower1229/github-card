@@ -14,8 +14,8 @@ const nextConfig = {
   // Enable SWC minification
   swcMinify: true,
 
-  // 添加Cloudflare支持
-  output: "standalone",
+  // 更改为标准输出模式，更适合Cloudflare Worker
+  // output: "standalone",
 
   // Image optimization settings
   images: {

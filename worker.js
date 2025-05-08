@@ -12,10 +12,9 @@ export default {
       // 获取URL和路径信息
       const url = new URL(request.url);
       const { pathname } = url;
-      // 获取当前域名作为默认值
       const currentOrigin = url.origin;
 
-      // 静态资源处理
+      // 处理静态资源请求 - 更新匹配模式
       if (
         pathname.startsWith("/_next/static/") ||
         pathname.startsWith("/static/") ||
@@ -23,114 +22,60 @@ export default {
         pathname.endsWith(".png") ||
         pathname.endsWith(".svg") ||
         pathname.endsWith(".jpg") ||
-        pathname.endsWith(".jpeg") ||
-        pathname.endsWith(".webp")
+        pathname.endsWith(".jpeg")
       ) {
         try {
+          console.log(`处理静态资源: ${pathname}`);
           return await getAssetFromKV(
             {
               request,
               waitUntil: ctx.waitUntil.bind(ctx),
             },
             {
-              ASSET_NAMESPACE: env.__STATIC_CONTENT,
-              ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST,
-              // 添加缓存策略
-              cacheControl: {
-                browserTTL: 60 * 60 * 24 * 30, // 30天浏览器缓存
-                edgeTTL: 60 * 60 * 24 * 2, // 2天边缘缓存
-                bypassCache: false, // 不跳过缓存
-              },
+              ASSET_NAMESPACE: env.ASSETS,
+              ASSET_MANIFEST: env.ASSETS.manifest,
             }
           );
         } catch (error) {
-          console.error("静态资源错误:", error);
-          return new Response("Static asset not found", {
-            status: 404,
-            headers: { "Content-Type": "text/plain" },
-          });
+          console.error("Static asset error:", error);
+          return new Response("Static asset not found", { status: 404 });
         }
       }
 
-      // 从环境变量获取API和应用URL，如果未设置则使用当前请求的域名
-      const apiUrl = env.NEXTAUTH_URL || currentOrigin;
-      const appUrl = env.NEXTAUTH_URL || currentOrigin;
-
-      // API请求处理
+      // 检查是否为API请求
       if (pathname.startsWith("/api/")) {
-        // 创建新的Request对象，保留原始请求的所有属性
-        const apiRequest = new Request(`${apiUrl}${pathname}${url.search}`, {
-          method: request.method,
-          headers: request.headers,
-          body: request.body,
-          redirect: request.redirect,
+        return new Response("API endpoint not implemented", {
+          status: 501,
+          headers: { "Content-Type": "text/plain" },
         });
+      }
 
-        const apiResponse = await fetch(apiRequest);
-
-        // 克隆响应以添加CORS和缓存控制头
-        return new Response(apiResponse.body, {
-          status: apiResponse.status,
-          statusText: apiResponse.statusText,
+      // 返回默认HTML页面 (测试用)
+      return new Response(
+        `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Test Page</title>
+            <meta charset="UTF-8">
+          </head>
+          <body>
+            <h1>Worker is running!</h1>
+            <p>Requested path: ${pathname}</p>
+            <p>Current time: ${new Date().toISOString()}</p>
+            <p>Try accessing: <a href="/_next/static/chunks/pages/_app.js">Static resource test</a></p>
+          </body>
+        </html>
+      `,
+        {
           headers: {
-            ...Object.fromEntries(apiResponse.headers),
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
+            "Content-Type": "text/html;charset=UTF-8",
           },
-        });
-      }
-
-      // 处理预检请求
-      if (request.method === "OPTIONS") {
-        return new Response(null, {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Max-Age": "86400",
-          },
-        });
-      }
-
-      // 其他请求转发到Next.js应用
-      const appRequest = new Request(`${appUrl}${pathname}${url.search}`, {
-        method: request.method,
-        headers: request.headers,
-        body: request.body,
-        redirect: request.redirect,
-      });
-
-      const response = await fetch(appRequest);
-
-      // 如果是HTML响应，可以考虑添加缓存控制
-      const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("text/html")) {
-        const newHeaders = new Headers(response.headers);
-        newHeaders.set("Cache-Control", "public, max-age=0, s-maxage=3600");
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: newHeaders,
-        });
-      }
-
-      return response;
+        }
+      );
     } catch (error) {
-      console.error("Worker错误:", error);
-
-      // 更详细的错误处理
-      if (
-        error instanceof TypeError &&
-        error.message.includes("fetch failed")
-      ) {
-        return new Response("Service unavailable. Please try again later.", {
-          status: 503,
-          headers: { "Content-Type": "text/plain", "Retry-After": "30" },
-        });
-      }
-
-      return new Response(`Internal Server Error: ${error.message}`, {
+      console.error("Worker error:", error);
+      return new Response(`Error: ${error.message}`, {
         status: 500,
         headers: { "Content-Type": "text/plain" },
       });
