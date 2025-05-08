@@ -36,6 +36,46 @@ export default {
         }
       }
 
+      // 在处理静态资源后，添加根路径处理逻辑
+      if (pathname === "/") {
+        try {
+          // 尝试获取根页面（通常是 index.html 或特定的 Next.js 路由文件）
+          const indexRequest = new Request(`${url.origin}/index.html`, request);
+
+          try {
+            return await getAssetFromKV(
+              {
+                request: indexRequest,
+                waitUntil: ctx.waitUntil.bind(ctx),
+              },
+              {
+                ASSET_NAMESPACE: env.ASSETS,
+                ASSET_MANIFEST: env.ASSETS.manifest,
+              }
+            );
+          } catch (error) {
+            // 如果找不到 index.html，尝试获取 app 目录下的首页
+            console.log("尝试获取 app 目录下的首页");
+            const appIndexRequest = new Request(
+              `${url.origin}/.next/server/app/index.html`,
+              request
+            );
+            return await getAssetFromKV(
+              {
+                request: appIndexRequest,
+                waitUntil: ctx.waitUntil.bind(ctx),
+              },
+              {
+                ASSET_NAMESPACE: env.ASSETS,
+                ASSET_MANIFEST: env.ASSETS.manifest,
+              }
+            );
+          }
+        } catch (error) {
+          console.error("根路径处理错误:", error);
+        }
+      }
+
       // 2. 处理API路由
       if (pathname.startsWith("/api/")) {
         // 调用Next.js API路由处理函数
