@@ -11,7 +11,7 @@
   },
   // 静态资源路由配置
   "assets": {
-    "directory": ".next/static",
+    "directory": ".next",
     "binding": "ASSETS"
   },
 
@@ -38,9 +38,4 @@
     "command": "yarn build",
     "watch_dir": "src"
   }
-
-  // 删除不支持的字段
-  // "build_upload": {
-  //   "format": "service-worker"
-  // }
 }

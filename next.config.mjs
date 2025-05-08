@@ -14,8 +14,8 @@ const nextConfig = {
   // Enable SWC minification
   swcMinify: true,
 
-  // 更改为标准输出模式，更适合Cloudflare Worker
-  // output: "standalone",
+  // 启用独立输出模式，适合Cloudflare Worker
+  output: "standalone",
 
   // Image optimization settings
   images: {
@@ -69,6 +69,7 @@ const nextConfig = {
     typedRoutes: true,
     webpackBuildWorker: true,
     optimizeCss: true,
+    serverComponentsExternalPackages: ['next-cloudflare-edge-adapter']
   },
   webpack: (config, { dev, isServer }) => {
     // Fix 'self is not defined' error in server bundle

@@ -9,32 +9,19 @@ import { getAssetFromKV } from "@cloudflare/kv-asset-handler";
 export default {
   async fetch(request, env, ctx) {
     try {
-      // 基本请求信息
       const url = new URL(request.url);
       const { pathname } = url;
-      const currentOrigin = url.origin;
 
-      // 输出调试信息
       console.log(`处理请求: ${request.method} ${pathname}`);
-      console.log(`当前源: ${currentOrigin}`);
 
-      // 处理静态资源请求
+      // 1. 优先处理静态资源
       if (
-        pathname.startsWith("/_next/static/") ||
+        pathname.startsWith("/_next/") ||
         pathname.startsWith("/static/") ||
-        pathname.endsWith(".ico") ||
-        pathname.endsWith(".png") ||
-        pathname.endsWith(".svg") ||
-        pathname.endsWith(".jpg") ||
-        pathname.endsWith(".jpeg") ||
-        pathname.endsWith(".webp") ||
-        pathname.endsWith(".js") ||
-        pathname.endsWith(".css") ||
-        (pathname.endsWith(".json") && !pathname.startsWith("/api/"))
+        pathname.match(/\.(ico|png|svg|jpe?g|webp|js|css|json|txt)$/)
       ) {
-        console.log(`尝试从KV获取静态资源: ${pathname}`);
         try {
-          const asset = await getAssetFromKV(
+          return await getAssetFromKV(
             {
               request,
               waitUntil: ctx.waitUntil.bind(ctx),
@@ -44,169 +31,100 @@ export default {
               ASSET_MANIFEST: env.ASSETS.manifest,
             }
           );
-          console.log(`KV静态资源获取成功: ${pathname}`);
-          return asset;
         } catch (error) {
           console.error(`静态资源错误 [${pathname}]:`, error);
-          return new Response(
-            `Static asset error: ${error.message} for path: ${pathname}`,
+        }
+      }
+
+      // 2. 处理API路由
+      if (pathname.startsWith("/api/")) {
+        // 调用Next.js API路由处理函数
+        try {
+          // 查找匹配的API路由处理程序
+          const apiRoutePath = `./.next/server/pages${pathname}.js`;
+          const apiModule = await import(apiRoutePath);
+
+          if (apiModule.default) {
+            const apiHandler = apiModule.default;
+            const response = await apiHandler(request, env, ctx);
+            return response;
+          }
+        } catch (error) {
+          console.error(`API路由错误 [${pathname}]:`, error);
+          return new Response(JSON.stringify({ error: "API处理错误" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      // 3. 处理预渲染页面 (ISR/SSG)
+      const prerenderRoute = false; // 或尝试动态加载manifest
+      if (prerenderRoute) {
+        try {
+          // 构造预渲染页面的路径
+          const htmlPath = `./.next/server/pages${pathname}.html`;
+          return await getAssetFromKV(
             {
-              status: 404,
-              headers: { "Content-Type": "text/plain" },
+              request: new Request(htmlPath, request),
+              waitUntil: ctx.waitUntil.bind(ctx),
+            },
+            {
+              ASSET_NAMESPACE: env.ASSETS,
+              ASSET_MANIFEST: env.ASSETS.manifest,
             }
           );
+        } catch (error) {
+          console.error(`预渲染页面错误 [${pathname}]:`, error);
         }
       }
 
-      // 如果是根路径，返回一个简单页面用于测试
-      if (pathname === "/") {
-        console.log("返回首页测试页面");
-        return new Response(
-          `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Root Page</title>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body {
-                  font-family: system-ui, sans-serif;
-                  max-width: 800px;
-                  margin: 0 auto;
-                  padding: 2rem;
-                }
-                pre {
-                  background: #f1f1f1;
-                  padding: 1rem;
-                  overflow: auto;
-                  border-radius: 4px;
-                }
-              </style>
-            </head>
-            <body>
-              <h1>Worker is running!</h1>
-              <p>This is a temporary test page to verify worker functionality.</p>
-
-              <h2>Request Information:</h2>
-              <pre>
-              URL: ${url}
-              Path: ${pathname}
-              Method: ${request.method}
-              User-Agent: ${request.headers.get("user-agent")}
-              </pre>
-
-              <h2>Binding Information:</h2>
-              <pre>
-              ASSETS binding exists: ${Boolean(env.ASSETS)}
-              GITHUB_CARD_KV binding exists: ${Boolean(env.GITHUB_CARD_KV)}
-              DB binding exists: ${Boolean(env.DB)}
-              </pre>
-
-              <p>If this page displays correctly, the worker is functioning. The Next.js app routing needs configuration.</p>
-
-              <p>Try accessing: <a href="/static/test.txt">Static resource test</a></p>
-            </body>
-          </html>
-        `,
-          {
-            headers: {
-              "Content-Type": "text/html;charset=UTF-8",
-            },
-          }
-        );
-      }
-
-      // 其他路径尝试直接转发到同源
-      console.log(`转发请求到同源: ${pathname}`);
+      // 4. 处理动态路由 (SSR)
       try {
-        const appRequest = new Request(
-          `${currentOrigin}${pathname}${url.search}`,
-          {
-            method: request.method,
-            headers: request.headers,
-            body: request.body,
-            redirect: request.redirect,
-          }
-        );
+        // 查找匹配的页面处理程序
+        const pagePath = `./.next/server/pages${pathname}.js`;
+        const pageModule = await import(pagePath);
 
-        console.log(`请求转发目标: ${currentOrigin}${pathname}${url.search}`);
-        const response = await fetch(appRequest);
-        console.log(`响应状态: ${response.status}`);
+        if (pageModule.default) {
+          const { renderToHTML } = await import("./.next/server/ssr-module.js");
+          const html = await renderToHTML(request, {
+            env,
+            ctx,
+            params: {}, // 解析路由参数
+          });
 
-        return response;
+          return new Response(html, {
+            headers: { "Content-Type": "text/html; charset=utf-8" },
+          });
+        }
       } catch (error) {
-        console.error(`请求转发错误:`, error);
-
-        // 返回诊断页面
-        return new Response(
-          `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Request Error</title>
-              <meta charset="UTF-8">
-              <style>
-                body { font-family: system-ui, sans-serif; padding: 2rem; }
-                .error { color: #e53e3e; }
-                pre { background: #f1f1f1; padding: 1rem; }
-              </style>
-            </head>
-            <body>
-              <h1 class="error">Request Error</h1>
-              <p>An error occurred while processing your request.</p>
-
-              <h2>Error Details:</h2>
-              <pre>${error.message}</pre>
-
-              <h2>Request Information:</h2>
-              <pre>
-              Path: ${pathname}
-              Method: ${request.method}
-              </pre>
-
-              <p>This is a diagnostic page. Please contact support with these details.</p>
-            </body>
-          </html>
-        `,
-          {
-            status: 500,
-            headers: { "Content-Type": "text/html;charset=UTF-8" },
-          }
-        );
+        console.error(`SSR页面错误 [${pathname}]:`, error);
       }
-    } catch (error) {
-      console.error("Worker核心错误:", error);
 
+      // 5. 如果所有尝试都失败，返回404错误
       return new Response(
-        `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Worker Error</title>
-            <meta charset="UTF-8">
-            <style>
-              body { font-family: system-ui, sans-serif; padding: 2rem; }
-              .error { color: #e53e3e; }
-              pre { background: #f1f1f1; padding: 1rem; }
-            </style>
-          </head>
-          <body>
-            <h1 class="error">Worker Error</h1>
-            <p>A critical error occurred in the worker.</p>
-
-            <h2>Error Details:</h2>
-            <pre>${error.message}</pre>
-
-            <p>This is a diagnostic page. Please contact support with these details.</p>
-          </body>
-        </html>
-      `,
+        `<!DOCTYPE html>
+         <html>
+           <head>
+             <title>Page Not Found</title>
+             <meta charset="UTF-8">
+           </head>
+           <body>
+             <h1>404 - Page Not Found</h1>
+             <p>The requested page "${pathname}" could not be found.</p>
+           </body>
+         </html>`,
         {
-          status: 500,
-          headers: { "Content-Type": "text/html;charset=UTF-8" },
+          status: 404,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
         }
       );
+    } catch (error) {
+      console.error("Worker核心错误:", error);
+      return new Response(`服务器错误: ${error.message}`, {
+        status: 500,
+        headers: { "Content-Type": "text/plain" },
+      });
     }
   },
 };
