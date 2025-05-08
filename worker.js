@@ -12,6 +12,8 @@ export default {
       // 获取URL和路径信息
       const url = new URL(request.url);
       const { pathname } = url;
+      // 获取当前域名作为默认值
+      const currentOrigin = url.origin;
 
       // 静态资源处理
       if (
@@ -50,9 +52,9 @@ export default {
         }
       }
 
-      // 从环境变量获取API和应用URL
-      const apiUrl = env.NEXTAUTH_URL || "";
-      const appUrl = env.NEXTAUTH_URL || "";
+      // 从环境变量获取API和应用URL，如果未设置则使用当前请求的域名
+      const apiUrl = env.NEXTAUTH_URL || currentOrigin;
+      const appUrl = env.NEXTAUTH_URL || currentOrigin;
 
       // API请求处理
       if (pathname.startsWith("/api/")) {
