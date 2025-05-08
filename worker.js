@@ -33,34 +33,105 @@ export default {
             {
               ASSET_NAMESPACE: env.__STATIC_CONTENT,
               ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST,
+              // 添加缓存策略
+              cacheControl: {
+                browserTTL: 60 * 60 * 24 * 30, // 30天浏览器缓存
+                edgeTTL: 60 * 60 * 24 * 2, // 2天边缘缓存
+                bypassCache: false, // 不跳过缓存
+              },
             }
           );
         } catch (error) {
-          // 静态资源未找到，返回404
-          return new Response("Static asset not found", { status: 404 });
+          console.error("静态资源错误:", error);
+          return new Response("Static asset not found", {
+            status: 404,
+            headers: { "Content-Type": "text/plain" },
+          });
         }
       }
 
+      // 从环境变量获取API和应用URL
+      const apiUrl = env.NEXTAUTH_URL || "";
+      const appUrl = env.NEXTAUTH_URL || "";
+
       // API请求处理
       if (pathname.startsWith("/api/")) {
-        // 这里应该实现API路由处理逻辑
-        // 示例: 将请求转发到Next.js API路由
-        const apiResponse = await fetch(
-          `https://your-next-app-url${pathname}`,
-          request
-        );
-        return apiResponse;
+        // 创建新的Request对象，保留原始请求的所有属性
+        const apiRequest = new Request(`${apiUrl}${pathname}${url.search}`, {
+          method: request.method,
+          headers: request.headers,
+          body: request.body,
+          redirect: request.redirect,
+        });
+
+        const apiResponse = await fetch(apiRequest);
+
+        // 克隆响应以添加CORS和缓存控制头
+        return new Response(apiResponse.body, {
+          status: apiResponse.status,
+          statusText: apiResponse.statusText,
+          headers: {
+            ...Object.fromEntries(apiResponse.headers),
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
+
+      // 处理预检请求
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Max-Age": "86400",
+          },
+        });
       }
 
       // 其他请求转发到Next.js应用
-      // 注意: 这里需要根据部署情况调整转发目标
-      return await fetch(
-        `https://your-next-app-url${pathname}${url.search}`,
-        request
-      );
+      const appRequest = new Request(`${appUrl}${pathname}${url.search}`, {
+        method: request.method,
+        headers: request.headers,
+        body: request.body,
+        redirect: request.redirect,
+      });
+
+      const response = await fetch(appRequest);
+
+      // 如果是HTML响应，可以考虑添加缓存控制
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("text/html")) {
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set("Cache-Control", "public, max-age=0, s-maxage=3600");
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders,
+        });
+      }
+
+      return response;
     } catch (error) {
-      // 捕获并处理错误
-      return new Response(`Error: ${error.message}`, { status: 500 });
+      console.error("Worker错误:", error);
+
+      // 更详细的错误处理
+      if (
+        error instanceof TypeError &&
+        error.message.includes("fetch failed")
+      ) {
+        return new Response("Service unavailable. Please try again later.", {
+          status: 503,
+          headers: { "Content-Type": "text/plain", "Retry-After": "30" },
+        });
+      }
+
+      return new Response(`Internal Server Error: ${error.message}`, {
+        status: 500,
+        headers: { "Content-Type": "text/plain" },
+      });
     }
   },
 };
