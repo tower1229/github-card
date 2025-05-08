@@ -4,16 +4,24 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "github-card",
   "compatibility_date": "2025-04-02",
-  "main": "worker.js",
-  "compatibility_flags": ["nodejs_compat"],
+  "main": ".open-next/worker.js",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "observability": {
     "enabled": true
   },
   // 静态资源路由配置
   "assets": {
-    "directory": ".next",
+    "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+
+  // 添加 OpenNext 所需的服务引用
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "github-card"
+    }
+  ],
 
   // KV 命名空间配置
   "kv_namespaces": [
@@ -31,11 +39,11 @@
       "database_id": "86b1aef5-6719-4c86-b43d-300bda4da793",
       "migrations_dir": "drizzle/migrations"
     }
-  ],
+  ]
 
-  // 指定构建输出目录
-  "build": {
-    "command": "yarn build",
-    "watch_dir": "src"
-  }
+  // 移除构建命令，让 OpenNext 处理构建过程
+  // "build": {
+  //   "command": "yarn build",
+  //   "watch_dir": "src"
+  // }
 }

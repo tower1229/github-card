@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { kvClient as kv } from "../../../lib/cloudflare/kv-service";
 
-export const runtime = "edge";
-
 const CACHE_KEY = "background_images";
 const MAX_CACHE_SIZE = 10;
 const CACHE_TTL = 86400 * 1000; // 1 day in milliseconds

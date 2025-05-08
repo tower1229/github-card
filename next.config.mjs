@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-// import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig = {
   // Enable output compression
@@ -14,7 +14,7 @@ const nextConfig = {
   // Enable SWC minification
   swcMinify: true,
 
-  // 启用独立输出模式，适合Cloudflare Worker
+  // 输出模式改为 standalone，更好地兼容 OpenNext
   output: "standalone",
 
   // Image optimization settings
@@ -132,7 +132,7 @@ const nextConfig = {
   },
 };
 
-// 移除 OpenNext 初始化
-// initOpenNextCloudflareForDev();
+// 初始化 OpenNext Cloudflare 开发环境
+initOpenNextCloudflareForDev();
 
 export default nextConfig;
