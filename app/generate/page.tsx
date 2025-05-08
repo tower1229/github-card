@@ -37,13 +37,6 @@ const ProfileFlomoPage = dynamic(
   { loading: () => <LoadingSharedCard /> }
 );
 
-// Warn if environment variables are being accessed from client
-if (typeof window !== "undefined" && process.env.DATABASE_URL) {
-  console.warn(
-    "Warning: Environment variables like DATABASE_URL should not be accessed from client components"
-  );
-}
-
 // 创建一个共享上下文
 export interface ShareContextData {
   shareUrl: string;
@@ -165,10 +158,10 @@ function GenerateContent() {
     return (
       <div className="min-h-screen bg-[#0d1117] text-white">
         <Navbar />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-md mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Login Required</h2>
-            <p className="text-[#c9d1d9] mb-8">
+        <div className="container mx-auto py-16 px-4">
+          <div className="mx-auto max-w-md text-center">
+            <h2 className="font-bold mb-4 text-3xl">Login Required</h2>
+            <p className="mb-8 text-[#c9d1d9]">
               You need to sign in with GitHub to access this page.
             </p>
             <Link href="/">
@@ -191,10 +184,10 @@ function GenerateContent() {
     return (
       <div className="min-h-screen bg-[#0d1117] text-white">
         <Navbar />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-md mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">User Profile Error</h2>
-            <p className="text-[#c9d1d9] mb-8">
+        <div className="container mx-auto py-16 px-4">
+          <div className="mx-auto max-w-md text-center">
+            <h2 className="font-bold mb-4 text-3xl">User Profile Error</h2>
+            <p className="mb-8 text-[#c9d1d9]">
               Unable to retrieve your GitHub username. Please try signing in
               again.
             </p>

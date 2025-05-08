@@ -1,5 +1,28 @@
 // Cloudflare KV service client
-// This replaces @vercel/edge-config functionality
+// Supports both direct bindings (in Workers) and API access (in other environments)
+
+// KVNamespace 类型定义，适用于 Cloudflare Worker 环境
+interface KVNamespace {
+  get(
+    key: string,
+    options?: { type: "text" | "json" | "arrayBuffer" | "stream" }
+  ): Promise<any>;
+  get<T>(key: string, options: { type: "json" }): Promise<T | null>;
+  put(
+    key: string,
+    value: string | ReadableStream | ArrayBuffer | FormData
+  ): Promise<void>;
+  delete(key: string): Promise<void>;
+  list(options?: {
+    prefix?: string;
+    limit?: number;
+    cursor?: string;
+  }): Promise<{
+    keys: { name: string }[];
+    list_complete: boolean;
+    cursor?: string;
+  }>;
+}
 
 // KV 客户端接口定义
 export interface KVClient {
@@ -39,50 +62,17 @@ class MemoryKVStore implements KVClient {
   }
 }
 
-// Cloudflare KV 客户端
-class CloudflareKVClient implements KVClient {
-  private namespace: string;
-  private apiToken: string;
-  private accountId: string;
-  private baseUrl: string;
+// 直接使用 Cloudflare KV 绑定的客户端 (在 Worker 环境中使用)
+class CloudflareKVBindingClient implements KVClient {
+  private namespace: KVNamespace;
 
-  constructor(namespace: string, apiToken: string, accountId: string) {
+  constructor(namespace: KVNamespace) {
     this.namespace = namespace;
-    this.apiToken = apiToken;
-    this.accountId = accountId;
-    this.baseUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespace}`;
-  }
-
-  private async fetchWithAuth(
-    path: string,
-    options: RequestInit = {}
-  ): Promise<Response> {
-    const headers = {
-      Authorization: `Bearer ${this.apiToken}`,
-      "Content-Type": "application/json",
-      ...options.headers,
-    };
-
-    return fetch(`${this.baseUrl}${path}`, {
-      ...options,
-      headers,
-    });
   }
 
   async get<T = unknown>(key: string): Promise<T | null> {
     try {
-      const response = await this.fetchWithAuth(
-        `/values/${encodeURIComponent(key)}`
-      );
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          return null;
-        }
-        throw new Error(`Failed to get value: ${response.statusText}`);
-      }
-
-      return (await response.json()) as T;
+      return await this.namespace.get<T>(key, { type: "json" });
     } catch (error) {
       console.error(`Error getting key ${key}:`, error);
       return null;
@@ -91,22 +81,15 @@ class CloudflareKVClient implements KVClient {
 
   async getAll<T = unknown>(): Promise<Record<string, T>> {
     try {
-      // 获取所有键
-      const keysResponse = await this.fetchWithAuth(`/keys`);
-
-      if (!keysResponse.ok) {
-        throw new Error(`Failed to get keys: ${keysResponse.statusText}`);
-      }
-
-      const keysData = await keysResponse.json();
-      const keys = keysData.result.map((item: { name: string }) => item.name);
-
-      // 获取所有值
       const result: Record<string, T> = {};
-      for (const key of keys) {
-        const value = await this.get<T>(key);
+      // 使用 list 获取所有键
+      const keys = await this.namespace.list();
+
+      // 批量获取值 (可以优化为分组批量获取)
+      for (const key of keys.keys) {
+        const value = await this.get<T>(key.name);
         if (value !== null) {
-          result[key] = value;
+          result[key.name] = value;
         }
       }
 
@@ -119,10 +102,8 @@ class CloudflareKVClient implements KVClient {
 
   async has(key: string): Promise<boolean> {
     try {
-      const response = await this.fetchWithAuth(
-        `/values/${encodeURIComponent(key)}`
-      );
-      return response.status === 200;
+      const value = await this.namespace.get(key, { type: "text" });
+      return value !== null;
     } catch (error) {
       console.error(`Error checking key existence ${key}:`, error);
       return false;
@@ -131,17 +112,7 @@ class CloudflareKVClient implements KVClient {
 
   async set<T>(key: string, value: T): Promise<void> {
     try {
-      const response = await this.fetchWithAuth(
-        `/values/${encodeURIComponent(key)}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(value),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to set value: ${response.statusText}`);
-      }
+      await this.namespace.put(key, JSON.stringify(value));
     } catch (error) {
       console.error(`Error setting key ${key}:`, error);
       throw error;
@@ -150,16 +121,7 @@ class CloudflareKVClient implements KVClient {
 
   async delete(key: string): Promise<void> {
     try {
-      const response = await this.fetchWithAuth(
-        `/values/${encodeURIComponent(key)}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete value: ${response.statusText}`);
-      }
+      await this.namespace.delete(key);
     } catch (error) {
       console.error(`Error deleting key ${key}:`, error);
       throw error;
@@ -167,27 +129,31 @@ class CloudflareKVClient implements KVClient {
   }
 }
 
+// 检测是否在 Worker 环境中
+const isWorkerEnvironment = (): boolean => {
+  return (
+    typeof self !== "undefined" &&
+    typeof self.caches !== "undefined" &&
+    "KVNamespace" in globalThis
+  );
+};
+
 // 导出创建客户端的工厂函数
-export function createKVClient(): KVClient {
-  if (
-    process.env.CLOUDFLARE_KV_NAMESPACE &&
-    process.env.CLOUDFLARE_API_TOKEN &&
-    process.env.CLOUDFLARE_ACCOUNT_ID
-  ) {
-    // 使用Cloudflare KV
-    return new CloudflareKVClient(
-      process.env.CLOUDFLARE_KV_NAMESPACE,
-      process.env.CLOUDFLARE_API_TOKEN,
-      process.env.CLOUDFLARE_ACCOUNT_ID
-    );
-  } else {
-    // 回退到内存存储
-    console.warn(
-      "Cloudflare KV credentials not found, using memory store instead"
-    );
-    return new MemoryKVStore();
+export function createKVClient(kvBinding?: KVNamespace): KVClient {
+  // 如果在 Worker 环境并且提供了 KV 绑定，使用直接绑定方式
+  if (isWorkerEnvironment() && kvBinding) {
+    return new CloudflareKVBindingClient(kvBinding);
   }
+
+  // 回退到内存存储
+  console.warn("! 未在 Cloudflare Worker 环境中运行, 使用内存存储代替");
+  return new MemoryKVStore();
 }
 
 // 导出客户端实例而不是默认导出
+// 在 Worker 环境中，需要从绑定传入 KV 命名空间
+// 例如: export default { fetch: (request, env) => {
+//   const kv = createKVClient(env.MY_KV);
+//   ...
+// }}
 export const kvClient = createKVClient();
